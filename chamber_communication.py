@@ -301,10 +301,14 @@ class ChamberCommunication(object):
         with open(project_file) as fh:
 
             self.log.info(
-                "\n"
-                "# =========================================\n"
-                "# WRITE PROFILE\n"
-                "# ========================================="
+                (
+                    "\n"
+                    "# =========================================\n"
+                    "# WRITE PROFILE: {}\n"
+                    "# ========================================="
+                ).format(
+                    project_file
+                )
             )
 
             register_start = 200  # First Register Address 0x00c8
@@ -325,7 +329,7 @@ class ChamberCommunication(object):
 
                 # Convert comma separated text to array of int
                 data_int_array = []
-                for index, val in enumerate(profile_line.split(',')):
+                for index, val in enumerate(profile_line.split(',')[:15]):
                     # Convert string to int, floats are multiplied by 10
                     val = int_or_float(val)
 
