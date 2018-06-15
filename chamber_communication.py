@@ -87,7 +87,7 @@ class ChamberCommunication(object):
         # In addition, the EZT’s timeout period must be added to that, in order to properly time the send and
         # receive messages between the host computer and multiple EZT’s on the serial link. With a
         # default timeout period in the EZT-570i of 200ms, it makes a total pause of 203ms minimum.
-        self.comm_wait_time = 0.5
+        self.comm_wait_time = 0.203
 
     def main(self):
         """Use mode bus to read and write registers"""

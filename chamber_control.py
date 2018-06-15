@@ -5,6 +5,9 @@ import binascii
 import logging
 
 import ctypes
+import sys
+import time
+
 import os
 import struct
 from copy import copy
@@ -69,8 +72,7 @@ def main():
     log.addHandler(ch)
     log.setLevel(logging.INFO)  # DEBUG,INFO,WARNING,ERROR,CRITICAL
     log.debug("Initialized Logger")
-    #comm_type="network"
-    comm_type="dummy"
+    comm_type="network"
     chamber = Chamber(log, comm_type)
 
     # ----------------------------------
@@ -81,17 +83,14 @@ def main():
     # ----------------------------------
     # Load Profile file
     # ----------------------------------
-    project_file = os.path.join('.', 'GALAXY.txt') #'/home/jstile/chamber/our_files/Profiles_09-01-2017-09-53-40/GALILEO.txt'
-    #project_file = os.path.join('.', 'GALILEO.txt') #'/home/jstile/chamber/our_files/Profiles_09-01-2017-09-53-40/GALILEO.txt'
     #project_file = '/home/jstile/chamber/our_files/Profiles_09-01-2017-09-53-40/GALILEO.txt'
-    chamber.ccomm.load_profile(project_file)
+    #chamber.ccomm.load_profile(project_file)
 
     #----------------------------------
     # Write Value
     #-----------------------------------
     register, code = chamber.creg.encode_set_value('CHAMBER_LIGHT_CONTROL', 'on')
     chamber.ccomm.write_register(register, code)
-    # ======================================================
 
     start_reg = chamber.creg.name_to_reg('CHAMBER_LIGHT_CONTROL')
     quantity_of_reg = 1
@@ -99,23 +98,31 @@ def main():
     log.info("Modbus Response:{}".format(values))
     print_read_registers(chamber, log, start_reg, values)
 
-    # ======================================================
     register, code = chamber.creg.encode_set_value('CHAMBER_LIGHT_CONTROL', 'off')
     chamber.ccomm.write_register(register, code)
+
+    start_reg = chamber.creg.name_to_reg('CHAMBER_LIGHT_CONTROL')
+    quantity_of_reg = 1
+    values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
+    log.info("Modbus Response:{}".format(values))
+    print_read_registers(chamber, log, start_reg, values)
 
     #----------------------------------
     # Read x registers
     # #----------------------------------
     start_reg = chamber.creg.name_to_reg('OPERATIONAL_MODE')
-    quantity_of_reg = 5
+    quantity_of_reg = 3
     values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
     log.info("Modbus Response:{}".format(values))
 
     print_read_registers(chamber, log, start_reg, values)
 
-
 def print_read_registers(chamber, log, start_reg, values):
     # this is the most promising
+
+    log.info("\n\nRead: start_reg:{}, values:{}".format(start_reg, values))
+    log.info("data:{}".format(values.data[:]))
+    log.info("quantity:{}".format(len(values.data)))
     reg = copy(start_reg)
     for value in values.data[:]:
         reg_name, value_human = chamber.creg.decode_read_value(reg, value)

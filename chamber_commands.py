@@ -23,8 +23,8 @@ class ChamberCommandRegisters(object):
         'POWER_RECOVERY_MODE': 5,  # r/w, Power Recovery Mode
         'POWER_OUT_TIME': 6,  # r/w,
         'DEFROST_OPERATING_MODE': 7,  # r/w,
-        'AUTO_DEFROST_TEMPERATUR_SETPOINT': 8,  # r/w,
-        'AUTO_DEFROST_TIME_INTERVAL': 9,  # r/w,
+        'AUTO_DEFROST_TEMPERATURE_SETPOINT': 8,  # r/w
+        'AUTO_DEFROST_TIME_INTERVAL': 9,  # r/w
         'DEFROST_STATUS': 10,  # r,
         'TIME_REMAINING_UNTIL_NEXT_DEFROST': 11,  # r,
         'PRODUCT_CONTROL': 12,  # r/w
@@ -227,7 +227,7 @@ class ChamberCommandRegisters(object):
     def decode_read_value(self, reg, value):
         name = self.reg_value_to_name(reg)
         response = None
-        int_to_two_bytes = struct.Struct('!H').pack
+        int_to_two_bytes = struct.Struct('!h').pack
 
         if name is not None:
             if name == 'OPERATIONAL_MODE':
@@ -270,17 +270,159 @@ class ChamberCommandRegisters(object):
                 """
                 2 bytes: seconds: 0 to 59
                 """
-                _, b_seconds = int_to_two_bytes(value & 0xFFFF)
-                seconds = struct.unpack('B', b_seconds)[0]
-                return name, "Seconds:{}".format(seconds)
+                _, b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('B', b)[0]
+                return name, "Seconds:{}".format(i)
+
+            elif name == 'POWER_RECOVERY_MODE':
+                """
+                0 Continue
+                1 Hold
+                2 Terminate
+                4 Reset
+                8 Resume
+                """
+                mode = {
+                    0: 'Continue',
+                    1: 'Hold',
+                    2: 'Terminate',
+                    4: 'Reset',
+                    8: 'Resume'
+                }
+                _, b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('B', b)[0]
+                s = mode[i]
+                return name, "Mode:{}".format(s)
+
+            elif name == 'POWER_OUT_TIME':
+                """
+                0 - 32767 seconds
+                """
+                _, b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('B', b)[0]
+                return name, "Seconds:{}".format(i)
+
+            elif name == 'DEFROST_OPERATING_MODE':
+                """
+                0 Disabled
+                1 Manual Mode Selected
+                2 Auto Mode Selected
+                """
+                mode = {
+                    0: 'Disabled',
+                    1: 'Manual Mode Selected',
+                    3: 'Auto Mode Selected'
+                }
+                _, b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('B', b)[0]
+                s = mode[i]
+                return name, "mode:{}".format(s)
+
+            elif name == 'AUTO_DEFROST_TEMPERATURE_SETPOINT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('!h', b)[0]
+                return name, "degrees:{}".format(i)
+
+            elif name == 'AUTO_DEFROST_TIME_INTERVAL':
+                """
+                0 - 32767 minutes
+                """
+                b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('!h', b)[0]
+                return name, "minutes:{}".format(i)
+
+            elif name == 'DEFROST STATUS':
+                """
+                0 Not in Defrost
+                1 In Defrost
+                2 In Prechill
+                """
+                mode = {
+                    0: 'Not in Defrost',
+                    1: 'In Defrost',
+                    3: 'In Prechill'
+                }
+                _, b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('B', b)[0]
+                s = mode[i]
+                return name, "mode:{}".format(s)
+
+            elif name == 'TIME_REMAINING_UNTIL_NEXT_DEFROST':
+                """
+                0 - 32767 minutes
+                """
+                b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('!h', b)[0]
+                return name, "minutes:{}".format(i)
+
+            elif name == 'PRODUCT_CONTROL':
+                """
+                0 Off
+                1 Deviation
+                2 Process
+                4 Off
+                5 Deviation using Event for enable
+                6 Process using Event for enable
+                """
+                mode = {
+                    0: 'Off',
+                    1: 'Deviation',
+                    2: 'Process',
+                    4: 'Off',
+                    5: 'Deviation using Event for enable',
+                    6: 'Process using Event for enable'
+                }
+                _, b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('B', b)[0]
+                s = mode[i]
+                return name, "mode:{}".format(s)
+
+            elif name == 'PRODUCT_CONTROL_UPPER_SETPOINT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('!h', b)[0]
+                return name, "degrees:{}".format(i)
+
+            elif name == 'PRODUCT_CONTROL_LOWER_SETPOINT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('!h', b)[0]
+                return name, "degrees:{}".format(i)
+
+            elif name == 'CONDENSATION_CONTROL':
+                """
+                0 off
+                1 on
+                """
+                mode = {
+                    0: "Off",
+                    1: "On"
+                }
+                _, b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('B', b)[0]
+                s = mode[i]
+                return name, "Status:{}".format(s)
 
             elif name == 'CHAMBER_LIGHT_CONTROL':
-                if value == 0:
-                    response = 'off'
-                elif value == 1:
-                    response = 'on'
-
-        return name, response
+                """
+                0 off
+                1 on
+                """
+                mode = {
+                    0: "Off",
+                    1: "On"
+                }
+                _, b = int_to_two_bytes(value & 0xFFFF)
+                i = struct.unpack('B', b)[0]
+                s = mode[i]
+                return name, "Status:{}".format(s)
 
 class ChamberProfileRegisters(object):
     """Write Registers used in,

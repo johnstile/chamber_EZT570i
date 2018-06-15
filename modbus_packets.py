@@ -322,7 +322,7 @@ def read_response_factory(quantity):
             ("address",  ctypes.c_uint8),  # Address
             ("command",  ctypes.c_uint8),  # Command
             ("number",   ctypes.c_uint8),  # Number of values
-            ("data",     ctypes.c_uint16 * quantity),  # Dynamic
+            ("data",     ctypes.c_int16 * quantity),  # Dynamic
             ("crc",      ctypes.c_uint16),  # 16bit crc
         ]
 

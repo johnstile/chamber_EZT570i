@@ -1,110 +1,169 @@
- ./chamber_control.py 
-INFO    : 
+INFO	: 
 # =========================================
 # Write Register
 # =========================================
 
-INFO    : ['0x1', '0x6', '0x15', '0x1']                                                   :packed header
-INFO    : 01060015000159ce    :message + crc
-INFO    : Modbus Request: 
-        Address: 01
-        Command: 06
-        Register:0015
-        Value:   0001
-        CRC:     59CE
+INFO	: ['0x1', '0x6', '0x15', '0x1']                                                   :packed header
+INFO	: 01060015000159ce    :message + crc
+INFO	: Modbus Request: 
+	Address: 01
+	Command: 06
+	Register:0015
+	Value:   0001
+	CRC:     59CE
 
-INFO    : Send request
-INFO    : Read response
-INFO    : string_read_response hexlify: 01060015000159ce
-INFO    : Modbus Request: 
-        Address: 01
-        Command: 06
-        Register:0015
-        Value:   0001
-        CRC:     59CE
+INFO	: Send request
+INFO	: Read response
+INFO	: string_read_response hexlify: 01060015000159ce
+INFO	: Modbus Request: 
+	Address: 01
+	Command: 06
+	Register:0015
+	Value:   0001
+	CRC:     59CE
 
-INFO    : 
+INFO	: 
 # =========================================
 # Read Registers: reg:21, quanity:1
 # =========================================
-INFO    : ['0x1', '0x3', '0x15', '0x1']                                                   :packed header
-INFO    : 01030015000195ce    :message + crc
-INFO    : Modbus Request:
-        Address: 01
-        Command: 03
-        Register:0015
-        Quantity:0001
-        CRC:     95CE
-INFO    : Send request
-INFO    : Read response
-INFO    : 01030200017984       : response msg
-INFO    : Modbus Response:
-        Address:01
-        Command:03
-        Number: 02
-        Data:   0001
-        CRC:    7984
-INFO    : Modbus Response:
-        Address:01
-        Command:03
-        Number: 02
-        Data:   0001
-        CRC:    7984
-INFO    : register:0015, reg_name:CHAMBER_LIGHT_CONTROL, value:0001, value_human:on
-INFO    : 
+INFO	: ['0x1', '0x3', '0x15', '0x1']                                                   :packed header
+INFO	: 01030015000195ce    :message + crc
+INFO	: Modbus Request:
+	Address: 01
+	Command: 03
+	Register:0015
+	Quantity:0001
+	CRC:     95CE
+INFO	: Send request
+INFO	: Read response
+INFO	: 01030200017984       : response msg
+INFO	: Modbus Response:
+	Address:01
+	Command:03
+	Number: 02
+	Data:   0001
+	CRC:    7984
+INFO	: Modbus Response:
+	Address:01
+	Command:03
+	Number: 02
+	Data:   0001
+	CRC:    7984
+INFO	: 
+
+Read: start_reg:21, values:
+	Address:01
+	Command:03
+	Number: 02
+	Data:   0001
+	CRC:    7984
+INFO	: data:[1]
+INFO	: quantity:1
+INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL, value:0001, value_human:Status:On
+INFO	: 
 # =========================================
 # Write Register
 # =========================================
 
-INFO    : ['0x1', '0x6', '0x15', '0x0']                                                   :packed header
-INFO    : 010600150000980e    :message + crc
-INFO    : Modbus Request: 
-        Address: 01
-        Command: 06
-        Register:0015
-        Value:   0000
-        CRC:     980E
+INFO	: ['0x1', '0x6', '0x15', '0x0']                                                   :packed header
+INFO	: 010600150000980e    :message + crc
+INFO	: Modbus Request: 
+	Address: 01
+	Command: 06
+	Register:0015
+	Value:   0000
+	CRC:     980E
 
-INFO    : Send request
-INFO    : Read response
-INFO    : string_read_response hexlify: 010600150000980e
-INFO    : Modbus Request: 
-        Address: 01
-        Command: 06
-        Register:0015
-        Value:   0000
-        CRC:     980E
+INFO	: Send request
+INFO	: Read response
+INFO	: string_read_response hexlify: 010600150000980e
+INFO	: Modbus Request: 
+	Address: 01
+	Command: 06
+	Register:0015
+	Value:   0000
+	CRC:     980E
 
-INFO    : 
+INFO	: 
 # =========================================
-# Read Registers: reg:0, quanity:5
+# Read Registers: reg:21, quanity:1
 # =========================================
-INFO    : ['0x1', '0x3', '0x0', '0x5']                                                    :packed header
-INFO    : 01030000000585c9    :message + crc
-INFO    : Modbus Request:
-        Address: 01
-        Command: 03
-        Register:0000
-        Quantity:0005
-        CRC:     85C9
-INFO    : Send request
-INFO    : Read response
-INFO    : 01030a000112060e040c010031ac59 : response msg
-INFO    : Modbus Response:
-        Address:01
-        Command:03
-        Number: 0A
-        Data:   000112060e040c010031
-        CRC:    AC59
-INFO    : Modbus Response:
-        Address:01
-        Command:03
-        Number: 0A
-        Data:   000112060e040c010031
-        CRC:    AC59
-INFO    : register:0000, reg_name:OPERATIONAL_MODE, value:0001, value_human:on
-INFO    : register:0001, reg_name:CLOCK_YY_MM, value:1206, value_human:year: 2018, month:6
-INFO    : register:0002, reg_name:CLOCK_DAY_DOW, value:0e04, value_human:DayOfMonth:14, DayOfWeek:4
-INFO    : register:0003, reg_name:CLOCK_HH_MM, value:0c01, value_human:Hour:12, Minute:1
-INFO    : register:0004, reg_name:CLOCK_SEC, value:0031, value_human:Seconds:49
+INFO	: ['0x1', '0x3', '0x15', '0x1']                                                   :packed header
+INFO	: 01030015000195ce    :message + crc
+INFO	: Modbus Request:
+	Address: 01
+	Command: 03
+	Register:0015
+	Quantity:0001
+	CRC:     95CE
+INFO	: Send request
+INFO	: Read response
+INFO	: 01030200017984       : response msg
+INFO	: Modbus Response:
+	Address:01
+	Command:03
+	Number: 02
+	Data:   0001
+	CRC:    7984
+INFO	: Modbus Response:
+	Address:01
+	Command:03
+	Number: 02
+	Data:   0001
+	CRC:    7984
+INFO	: 
 
+Read: start_reg:21, values:
+	Address:01
+	Command:03
+	Number: 02
+	Data:   0001
+	CRC:    7984
+INFO	: data:[1]
+INFO	: quantity:1
+INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL, value:0001, value_human:Status:On
+INFO	: 
+# =========================================
+# Read Registers: reg:0, quanity:3
+# =========================================
+INFO	: ['0x1', '0x3', '0x0', '0x3']                                                    :packed header
+INFO	: 01030000000305cb    :message + crc
+INFO	: Modbus Request:
+	Address: 01
+	Command: 03
+	Register:0000
+	Quantity:0003
+	CRC:     05CB
+INFO	: Send request
+INFO	: Read response
+INFO	: 010306000112060f053c3f : response msg
+INFO	: Modbus Response:
+	Address:01
+	Command:03
+	Number: 06
+	Data:   000112060f05
+	CRC:    3C3F
+INFO	: Modbus Response:
+	Address:01
+	Command:03
+	Number: 06
+	Data:   000112060f05
+	CRC:    3C3F
+INFO	: 
+
+Read: start_reg:0, values:
+	Address:01
+	Command:03
+	Number: 06
+	Data:   000112060f05
+	CRC:    3C3F
+INFO	: data:[1, 4614, 3845]
+INFO	: quantity:3
+Traceback (most recent call last):
+  File "./chamber_control.py", line 143, in <module>
+    main()
+  File "./chamber_control.py", line 118, in main
+    print_read_registers(chamber, log, start_reg, values)
+  File "./chamber_control.py", line 128, in print_read_registers
+    reg_name, value_human = chamber.creg.decode_read_value(reg, value)
+TypeError: 'NoneType' object is not iterable
