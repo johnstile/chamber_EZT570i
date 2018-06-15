@@ -292,18 +292,6 @@ class ChamberCommunication(object):
         )
         return modbus_read_response
 
-    def twos_comp_bin_to_int(self, val, bits):
-        if val >= (1 << bits)/2:
-            # This catches when someone tries to give a value that is out of range
-            raise ValueError("Value: {} out of range of {}-bit value.".format(val, bits))
-        else:
-            return val - int((val << 1) & 1 << bits)
-
-    def twos_comp_int_to_bin(self, val, bits):
-        if val < 0:
-            val = (1 << bits) + val
-        return val
-
     def load_profile(self, project_file):
         """
         Load a CSZ Profile file into the chamber.
@@ -340,8 +328,7 @@ class ChamberCommunication(object):
                 for index, val in enumerate(profile_line.split(',')):
                     # Convert string to int, floats are multiplied by 10
                     val = int_or_float(val)
-                    # All negative numbers converted to twos complement
-                    val = self.twos_comp_int_to_bin(val, 16)
+
                     # Finally add to the array
                     data_int_array.append(val)
 
@@ -368,7 +355,7 @@ class ChamberCommunication(object):
                 # Convert array of int to packed data
                 data_bytearray = bytearray()
                 for i in data_int_array:
-                    s = struct.pack('!H', i)
+                    s = struct.pack('!h', i)
                     data_bytearray += s
 
                 data_hexstring = binascii.hexlify(data_bytearray)

@@ -42,7 +42,7 @@ def write_profile_factory(register_count):
             ("reg",      ctypes.c_uint16),  # Register
             ("quantity", ctypes.c_uint16),  # Quanity of registers (15)
             ("dsize",    ctypes.c_uint8),   # Data size in bytes (30)
-            ("data",     ctypes.c_uint16 * register_count),  # Dynamic
+            ("data",     ctypes.c_int16 * register_count),  # Dynamic
             ("crc",      ctypes.c_uint16),  # 16bit crc
         ]
 
