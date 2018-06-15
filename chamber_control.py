@@ -69,7 +69,8 @@ def main():
     log.addHandler(ch)
     log.setLevel(logging.INFO)  # DEBUG,INFO,WARNING,ERROR,CRITICAL
     log.debug("Initialized Logger")
-    comm_type="network"
+    #comm_type="network"
+    comm_type="dummy"
     chamber = Chamber(log, comm_type)
 
     # ----------------------------------
@@ -80,8 +81,10 @@ def main():
     # ----------------------------------
     # Load Profile file
     # ----------------------------------
+    project_file = os.path.join('.', 'GALAXY.txt') #'/home/jstile/chamber/our_files/Profiles_09-01-2017-09-53-40/GALILEO.txt'
+    #project_file = os.path.join('.', 'GALILEO.txt') #'/home/jstile/chamber/our_files/Profiles_09-01-2017-09-53-40/GALILEO.txt'
     #project_file = '/home/jstile/chamber/our_files/Profiles_09-01-2017-09-53-40/GALILEO.txt'
-    #chamber.ccomm.load_profile(project_file)
+    chamber.ccomm.load_profile(project_file)
 
     #----------------------------------
     # Write Value

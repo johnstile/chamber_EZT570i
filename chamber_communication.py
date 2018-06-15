@@ -47,11 +47,6 @@ class ChamberCommunication(object):
     """Communication with EZT570i"""
 
     def __init__(self, comm_type='dummy', log=None):
-        """
-
-        :param log:
-        :param str comm: network|serial|dummy
-        """
         self.log = log
         self.comm = None
         self.crc = None
@@ -297,6 +292,18 @@ class ChamberCommunication(object):
         )
         return modbus_read_response
 
+    def twos_comp_bin_to_int(self, val, bits):
+        if val >= (1 << bits)/2:
+            # This catches when someone tries to give a value that is out of range
+            raise ValueError("Value: {} out of range of {}-bit value.".format(val, bits))
+        else:
+            return val - int((val << 1) & 1 << bits)
+
+    def twos_comp_int_to_bin(self, val, bits):
+        if val < 0:
+            val = (1 << bits) + val
+        return val
+
     def load_profile(self, project_file):
         """
         Load a CSZ Profile file into the chamber.
@@ -317,8 +324,12 @@ class ChamberCommunication(object):
             steps_tot = 0  # Steps in profile, read from first line
             step_counter = 0  # Track when to stop reading file
 
+            line_counter = 0
             # Read file one line at a time
             for profile_line in fh:
+                # Only used for log
+                line_counter += 1
+                self.log.info("--------------Line:{} --------------".format(line_counter))
 
                 # --------------------------------------
                 # LINE PARSER CODE:
@@ -326,16 +337,29 @@ class ChamberCommunication(object):
 
                 # Convert comma separated text to array of int
                 data_int_array = []
-                for a in profile_line.split(','):
-                    data_int_array.append(int_or_float(a))
+                for index, val in enumerate(profile_line.split(',')):
+                    # Convert string to int, floats are multiplied by 10
+                    val = int_or_float(val)
+                    # All negative numbers converted to twos complement
+                    val = self.twos_comp_int_to_bin(val, 16)
+                    # Finally add to the array
+                    data_int_array.append(val)
+
+                self.log.info("data_int_array:{}".format(data_int_array))
 
                 # First line of file, harvest number of steps in profile
                 if not steps_tot:
                     steps_tot = data_int_array[9]
 
                 # Stop reading file after steps are completes
-                # The file has 100 lines, but have fewer steps
+                # The file has 100 lines, but upload only wants steps_tot.
                 if step_counter > steps_tot:
+                    self.log.info(
+                        "Break: step_counter:{} > steps_tot:{}".format(
+                            step_counter,
+                            steps_tot
+                        )
+                    )
                     break
 
                 # Handle counter management close to evaluation
