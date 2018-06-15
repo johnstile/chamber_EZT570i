@@ -35,6 +35,11 @@ import modbus_packets
 
 
 def int_or_float(s):
+    """
+    Modbus can't handle decimals, so we multiply any float by 10.
+    :param s: string representation of a numeric value.
+    :return: int
+    """
     try:
         return int(s)
     except ValueError:
@@ -74,6 +79,15 @@ class ChamberCommunication(object):
         }
         # Get crc class
         self.crc = CRC16()
+        # Messages are sent in packets that must be delimited by a pause at least as long as the time it
+        # takes to send 28 bits (3.5 characters). To determine this time in seconds, divide 28 by the baud
+        # rate. In the case of EZT-570i communications at 9600 baud, this calculates to a minimum period
+        # of 3ms.
+        #
+        # In addition, the EZT’s timeout period must be added to that, in order to properly time the send and
+        # receive messages between the host computer and multiple EZT’s on the serial link. With a
+        # default timeout period in the EZT-570i of 200ms, it makes a total pause of 203ms minimum.
+        self.comm_wait_time = 0.5
 
     def main(self):
         """Use mode bus to read and write registers"""
@@ -508,15 +522,18 @@ class ChamberCommunication(object):
         if not (self.comm and self.comm.is_open):
             self.comm.open()
         self.comm.write(buffer)
+        time.sleep(self.comm_wait_time)
 
     def write_com_network(self, buffer):
         """Send request over Ethernet"""
         self.log.info("Send request")
         self.comm.sendall(buffer)
+        time.sleep(self.comm_wait_time)
 
     def write_com_dummy(self,buffer):
         """Send request over Ethernet"""
         self.log.info("Send request")
+        time.sleep(self.comm_wait_time)
 
     def read_com_serial(self, size_read_response):
         """Read serial port, return stuff"""
