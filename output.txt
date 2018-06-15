@@ -59,6 +59,7 @@ Read: start_reg:21, values:
 	CRC:    7984
 INFO	: data:[1]
 INFO	: quantity:1
+INFO	: foo:('CHAMBER_LIGHT_CONTROL', 'Status:On')
 INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL, value:0001, value_human:Status:On
 INFO	: 
 # =========================================
@@ -98,72 +99,105 @@ INFO	: Modbus Request:
 	CRC:     95CE
 INFO	: Send request
 INFO	: Read response
-INFO	: 01030200017984       : response msg
+INFO	: 0103020000b844       : response msg
 INFO	: Modbus Response:
 	Address:01
 	Command:03
 	Number: 02
-	Data:   0001
-	CRC:    7984
+	Data:   0000
+	CRC:    B844
 INFO	: Modbus Response:
 	Address:01
 	Command:03
 	Number: 02
-	Data:   0001
-	CRC:    7984
+	Data:   0000
+	CRC:    B844
 INFO	: 
 
 Read: start_reg:21, values:
 	Address:01
 	Command:03
 	Number: 02
-	Data:   0001
-	CRC:    7984
-INFO	: data:[1]
+	Data:   0000
+	CRC:    B844
+INFO	: data:[0]
 INFO	: quantity:1
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL, value:0001, value_human:Status:On
+INFO	: foo:('CHAMBER_LIGHT_CONTROL', 'Status:Off')
+INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL, value:0000, value_human:Status:Off
 INFO	: 
 # =========================================
-# Read Registers: reg:0, quanity:3
+# Read Registers: reg:0, quanity:20
 # =========================================
-INFO	: ['0x1', '0x3', '0x0', '0x3']                                                    :packed header
-INFO	: 01030000000305cb    :message + crc
+INFO	: ['0x1', '0x3', '0x0', '0x14']                                                   :packed header
+INFO	: 01030000001445c5    :message + crc
 INFO	: Modbus Request:
 	Address: 01
 	Command: 03
 	Register:0000
-	Quantity:0003
-	CRC:     05CB
+	Quantity:0014
+	CRC:     45C5
 INFO	: Send request
 INFO	: Read response
-INFO	: 010306000112060f053c3f : response msg
+INFO	: 010328000112060f050e1700190008003c0000003202d00000000000000258ffce000000000000000a0000c103 : response msg
 INFO	: Modbus Response:
 	Address:01
 	Command:03
-	Number: 06
-	Data:   000112060f05
-	CRC:    3C3F
+	Number: 28
+	Data:   000112060f050e1700190008003c0000003202d00000000000000258ffce000000000000000a0000
+	CRC:    C103
 INFO	: Modbus Response:
 	Address:01
 	Command:03
-	Number: 06
-	Data:   000112060f05
-	CRC:    3C3F
+	Number: 28
+	Data:   000112060f050e1700190008003c0000003202d00000000000000258ffce000000000000000a0000
+	CRC:    C103
 INFO	: 
 
 Read: start_reg:0, values:
 	Address:01
 	Command:03
-	Number: 06
-	Data:   000112060f05
-	CRC:    3C3F
-INFO	: data:[1, 4614, 3845]
-INFO	: quantity:3
-Traceback (most recent call last):
-  File "./chamber_control.py", line 143, in <module>
-    main()
-  File "./chamber_control.py", line 118, in main
-    print_read_registers(chamber, log, start_reg, values)
-  File "./chamber_control.py", line 128, in print_read_registers
-    reg_name, value_human = chamber.creg.decode_read_value(reg, value)
-TypeError: 'NoneType' object is not iterable
+	Number: 28
+	Data:   000112060f050e1700190008003c0000003202d00000000000000258ffce000000000000000a0000
+	CRC:    C103
+INFO	: data:[1, 4614, 3845, 3607, 25, 8, 60, 0, 50, 720, 0, 0, 0, 600, -50, 0, 0, 0, 10, 0]
+INFO	: quantity:20
+INFO	: foo:('OPERATIONAL_MODE', 'mode:on')
+INFO	: register:0000, reg_name:OPERATIONAL_MODE, value:0001, value_human:mode:on
+INFO	: foo:('CLOCK_YY_MM', 'year: 2018, month:6')
+INFO	: register:0001, reg_name:CLOCK_YY_MM, value:1206, value_human:year: 2018, month:6
+INFO	: foo:('CLOCK_DAY_DOW', 'DayOfMonth:15, DayOfWeek:5')
+INFO	: register:0002, reg_name:CLOCK_DAY_DOW, value:0f05, value_human:DayOfMonth:15, DayOfWeek:5
+INFO	: foo:('CLOCK_HH_MM', 'Hour:14, Minute:23')
+INFO	: register:0003, reg_name:CLOCK_HH_MM, value:0e17, value_human:Hour:14, Minute:23
+INFO	: foo:('CLOCK_SEC', 'Seconds:25')
+INFO	: register:0004, reg_name:CLOCK_SEC, value:0019, value_human:Seconds:25
+INFO	: foo:('POWER_RECOVERY_MODE', 'Mode:Resume')
+INFO	: register:0005, reg_name:POWER_RECOVERY_MODE, value:0008, value_human:Mode:Resume
+INFO	: foo:('POWER_OUT_TIME', 'Seconds:60')
+INFO	: register:0006, reg_name:POWER_OUT_TIME, value:003c, value_human:Seconds:60
+INFO	: foo:('DEFROST_OPERATING_MODE', 'mode:Disabled')
+INFO	: register:0007, reg_name:DEFROST_OPERATING_MODE, value:0000, value_human:mode:Disabled
+INFO	: foo:('AUTO_DEFROST_TEMPERATURE_SETPOINT', 'degrees:50')
+INFO	: register:0008, reg_name:AUTO_DEFROST_TEMPERATURE_SETPOINT, value:0032, value_human:degrees:50
+INFO	: foo:('AUTO_DEFROST_TIME_INTERVAL', 'minutes:720')
+INFO	: register:0009, reg_name:AUTO_DEFROST_TIME_INTERVAL, value:02d0, value_human:minutes:720
+INFO	: foo:('DEFROST_STATUS', 'NO MATCH')
+INFO	: register:000a, reg_name:DEFROST_STATUS, value:0000, value_human:NO MATCH
+INFO	: foo:('TIME_REMAINING_UNTIL_NEXT_DEFROST', 'minutes:0')
+INFO	: register:000b, reg_name:TIME_REMAINING_UNTIL_NEXT_DEFROST, value:0000, value_human:minutes:0
+INFO	: foo:('PRODUCT_CONTROL', 'mode:Off')
+INFO	: register:000c, reg_name:PRODUCT_CONTROL, value:0000, value_human:mode:Off
+INFO	: foo:('PRODUCT_CONTROL_UPPER_SETPOINT', 'degrees:600')
+INFO	: register:000d, reg_name:PRODUCT_CONTROL_UPPER_SETPOINT, value:0258, value_human:degrees:600
+INFO	: foo:('PRODUCT_CONTROL_LOWER_SETPOINT', 'degrees:-50')
+INFO	: register:000e, reg_name:PRODUCT_CONTROL_LOWER_SETPOINT, value:-032, value_human:degrees:-50
+INFO	: foo:('CONDENSATION_CONTROL', 'Status:Off')
+INFO	: register:000f, reg_name:CONDENSATION_CONTROL, value:0000, value_human:Status:Off
+INFO	: foo:('CONDENSATION_CONTROL_MONITOR_MODE', 'NO MATCH')
+INFO	: register:0010, reg_name:CONDENSATION_CONTROL_MONITOR_MODE, value:0000, value_human:NO MATCH
+INFO	: foo:('CONDENSATION_CONTROL_INPUT_SELECTION', 'NO MATCH')
+INFO	: register:0011, reg_name:CONDENSATION_CONTROL_INPUT_SELECTION, value:0000, value_human:NO MATCH
+INFO	: foo:('CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT', 'NO MATCH')
+INFO	: register:0012, reg_name:CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT, value:000a, value_human:NO MATCH
+INFO	: foo:('CONDENSATION_CONTROL_DEUPOINT_LIMIT', 'NO MATCH')
+INFO	: register:0013, reg_name:CONDENSATION_CONTROL_DEUPOINT_LIMIT, value:0000, value_human:NO MATCH
