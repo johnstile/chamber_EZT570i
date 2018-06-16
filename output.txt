@@ -36,31 +36,30 @@ INFO	: Modbus Request:
 	CRC:     95CE
 INFO	: Send request
 INFO	: Read response
-INFO	: 0103020000b844       : response msg
+INFO	: 01030200017984       : response msg
 INFO	: Modbus Response:
 	Address:01
 	Command:03
 	Number: 02
-	Data:   0000
-	CRC:    B844
+	Data:   0001
+	CRC:    7984
 INFO	: Modbus Response:
 	Address:01
 	Command:03
 	Number: 02
-	Data:   0000
-	CRC:    B844
+	Data:   0001
+	CRC:    7984
 INFO	: 
 
 Read: start_reg:21, values:
 	Address:01
 	Command:03
 	Number: 02
-	Data:   0000
-	CRC:    B844
-INFO	: data:[0]
+	Data:   0001
+	CRC:    7984
+INFO	: data:[1]
 INFO	: quantity:1
-INFO	: foo:('CHAMBER_LIGHT_CONTROL', 'Status:Off')
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL, value:0000, value_human:Status:Off
+INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0001, value_human:Status:On
 INFO	: 
 # =========================================
 # Write Register
@@ -99,159 +98,124 @@ INFO	: Modbus Request:
 	CRC:     95CE
 INFO	: Send request
 INFO	: Read response
-INFO	: 0103020000b844       : response msg
+INFO	: 01030200017984       : response msg
 INFO	: Modbus Response:
 	Address:01
 	Command:03
 	Number: 02
-	Data:   0000
-	CRC:    B844
+	Data:   0001
+	CRC:    7984
 INFO	: Modbus Response:
 	Address:01
 	Command:03
 	Number: 02
-	Data:   0000
-	CRC:    B844
+	Data:   0001
+	CRC:    7984
 INFO	: 
 
 Read: start_reg:21, values:
 	Address:01
 	Command:03
 	Number: 02
-	Data:   0000
-	CRC:    B844
-INFO	: data:[0]
+	Data:   0001
+	CRC:    7984
+INFO	: data:[1]
 INFO	: quantity:1
-INFO	: foo:('CHAMBER_LIGHT_CONTROL', 'Status:Off')
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL, value:0000, value_human:Status:Off
+INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0001, value_human:Status:On
 INFO	: 
 # =========================================
-# Read Registers: reg:0, quanity:47
+# Read Registers: reg:0, quanity:60
 # =========================================
-INFO	: ['0x1', '0x3', '0x0', '0x2f']                                                   :packed header
-INFO	: 01030000002f0416    :message + crc
+INFO	: ['0x1', '0x3', '0x0', '0x3c']                                                   :packed header
+INFO	: 01030000003c45db    :message + crc
 INFO	: Modbus Request:
 	Address: 01
 	Command: 03
 	Register:0000
-	Quantity:002F
-	CRC:     0416
+	Quantity:003C
+	CRC:     45DB
 INFO	: Send request
 INFO	: Read response
-INFO	: 01035e000112060f05100700140008003c0000003202d00000000000000258ffce000000000000000a0000013e000000010000004000004147414c59582020202012060f050d1e12061006033700010004000a00002039000000000001000001f4d582 : response msg
+INFO	: 010378000112060f05101700060008003c0000003202d00000000000000258ffce000000000000000a0000011f000100010000004000004147414c59582020202012060f050d1e12061006033700010004000a0000110b000000000001000001f40000000000000000000000000000000000000000000000000000d100 : response msg
 INFO	: Modbus Response:
 	Address:01
 	Command:03
-	Number: 5E
-	Data:   000112060f05100700140008003c0000003202d00000000000000258ffce000000000000000a0000013e000000010000004000004147414c59582020202012060f050d1e12061006033700010004000a00002039000000000001000001f4
-	CRC:    D582
+	Number: 78
+	Data:   000112060f05101700060008003c0000003202d00000000000000258ffce000000000000000a0000011f000100010000004000004147414c59582020202012060f050d1e12061006033700010004000a0000110b000000000001000001f40000000000000000000000000000000000000000000000000000
+	CRC:    D100
 INFO	: Modbus Response:
 	Address:01
 	Command:03
-	Number: 5E
-	Data:   000112060f05100700140008003c0000003202d00000000000000258ffce000000000000000a0000013e000000010000004000004147414c59582020202012060f050d1e12061006033700010004000a00002039000000000001000001f4
-	CRC:    D582
+	Number: 78
+	Data:   000112060f05101700060008003c0000003202d00000000000000258ffce000000000000000a0000011f000100010000004000004147414c59582020202012060f050d1e12061006033700010004000a0000110b000000000001000001f40000000000000000000000000000000000000000000000000000
+	CRC:    D100
 INFO	: 
 
 Read: start_reg:0, values:
 	Address:01
 	Command:03
-	Number: 5E
-	Data:   000112060f05100700140008003c0000003202d00000000000000258ffce000000000000000a0000013e000000010000004000004147414c59582020202012060f050d1e12061006033700010004000a00002039000000000001000001f4
-	CRC:    D582
-INFO	: data:[1, 4614, 3845, 4103, 20, 8, 60, 0, 50, 720, 0, 0, 0, 600, -50, 0, 0, 0, 10, 0, 318, 0, 1, 0, 64, 0, 16711, 16716, 22872, 8224, 8224, 4614, 3845, 3358, 4614, 4102, 823, 1, 4, 10, 0, 8249, 0, 0, 1, 0, 500]
-INFO	: quantity:47
-INFO	: foo:('OPERATIONAL_MODE', 'mode:On')
-INFO	: register:0000, reg_name:OPERATIONAL_MODE, value:0001, value_human:mode:On
-INFO	: foo:('CLOCK_YY_MM', 'year: 2018, month:6')
-INFO	: register:0001, reg_name:CLOCK_YY_MM, value:1206, value_human:year: 2018, month:6
-INFO	: foo:('CLOCK_DAY_DOW', 'DayOfMonth:15, DayOfWeek:5')
-INFO	: register:0002, reg_name:CLOCK_DAY_DOW, value:0f05, value_human:DayOfMonth:15, DayOfWeek:5
-INFO	: foo:('CLOCK_HH_MM', 'Hour:16, Minute:7')
-INFO	: register:0003, reg_name:CLOCK_HH_MM, value:1007, value_human:Hour:16, Minute:7
-INFO	: foo:('CLOCK_SEC', 'Seconds:20')
-INFO	: register:0004, reg_name:CLOCK_SEC, value:0014, value_human:Seconds:20
-INFO	: foo:('POWER_RECOVERY_MODE', 'Mode:Resume')
-INFO	: register:0005, reg_name:POWER_RECOVERY_MODE, value:0008, value_human:Mode:Resume
-INFO	: foo:('POWER_OUT_TIME', 'Seconds:60')
-INFO	: register:0006, reg_name:POWER_OUT_TIME, value:003c, value_human:Seconds:60
-INFO	: foo:('DEFROST_OPERATING_MODE', 'mode:Disabled')
-INFO	: register:0007, reg_name:DEFROST_OPERATING_MODE, value:0000, value_human:mode:Disabled
-INFO	: foo:('AUTO_DEFROST_TEMPERATURE_SETPOINT', 'degrees:50')
-INFO	: register:0008, reg_name:AUTO_DEFROST_TEMPERATURE_SETPOINT, value:0032, value_human:degrees:50
-INFO	: foo:('AUTO_DEFROST_TIME_INTERVAL', 'minutes:720')
-INFO	: register:0009, reg_name:AUTO_DEFROST_TIME_INTERVAL, value:02d0, value_human:minutes:720
-INFO	: foo:('DEFROST_STATUS', 'NO MATCH')
-INFO	: register:000a, reg_name:DEFROST_STATUS, value:0000, value_human:NO MATCH
-INFO	: foo:('TIME_REMAINING_UNTIL_NEXT_DEFROST', 'minutes:0')
-INFO	: register:000b, reg_name:TIME_REMAINING_UNTIL_NEXT_DEFROST, value:0000, value_human:minutes:0
-INFO	: foo:('PRODUCT_CONTROL', 'mode:Off')
-INFO	: register:000c, reg_name:PRODUCT_CONTROL, value:0000, value_human:mode:Off
-INFO	: foo:('PRODUCT_CONTROL_UPPER_SETPOINT', 'degrees:600')
-INFO	: register:000d, reg_name:PRODUCT_CONTROL_UPPER_SETPOINT, value:0258, value_human:degrees:600
-INFO	: foo:('PRODUCT_CONTROL_LOWER_SETPOINT', 'degrees:-50')
-INFO	: register:000e, reg_name:PRODUCT_CONTROL_LOWER_SETPOINT, value:-032, value_human:degrees:-50
-INFO	: foo:('CONDENSATION_CONTROL', 'Status:Off')
-INFO	: register:000f, reg_name:CONDENSATION_CONTROL, value:0000, value_human:Status:Off
-INFO	: foo:('CONDENSATION_CONTROL_MONITOR_MODE', 'Status:0 Not specified in API')
-INFO	: register:0010, reg_name:CONDENSATION_CONTROL_MONITOR_MODE, value:0000, value_human:Status:0 Not specified in API
-INFO	: foo:('CONDENSATION_CONTROL_INPUT_SELECTION', 'product: 0, pv:0')
-INFO	: register:0011, reg_name:CONDENSATION_CONTROL_INPUT_SELECTION, value:0000, value_human:product: 0, pv:0
-INFO	: foo:('CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT', 'degrees:10')
-INFO	: register:0012, reg_name:CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT, value:000a, value_human:degrees:10
-INFO	: foo:('CONDENSATION_CONTROL_DEUPOINT_LIMIT', 'degrees:0')
-INFO	: register:0013, reg_name:CONDENSATION_CONTROL_DEUPOINT_LIMIT, value:0000, value_human:degrees:0
-INFO	: foo:('CONDENSATION_CONTROL_DUEPOINT_ACTUAL', 'degrees:318')
-INFO	: register:0014, reg_name:CONDENSATION_CONTROL_DUEPOINT_ACTUAL, value:013e, value_human:degrees:318
-INFO	: foo:('CHAMBER_LIGHT_CONTROL', 'Status:Off')
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL, value:0000, value_human:Status:Off
-INFO	: foo:('CHAMBER_MANUAL_EVENT_CONTROL', 'Event Bit array:1')
-INFO	: register:0016, reg_name:CHAMBER_MANUAL_EVENT_CONTROL, value:0001, value_human:Event Bit array:1
-INFO	: foo:('CUSTOMER_MANUAL_EVENT_CONTROL', 'Event Bit array:0')
-INFO	: register:0017, reg_name:CUSTOMER_MANUAL_EVENT_CONTROL, value:0000, value_human:Event Bit array:0
-INFO	: foo:('PROFILE_CONTROL_STATUS', 'Mode:Soak')
-INFO	: register:0018, reg_name:PROFILE_CONTROL_STATUS, value:0040, value_human:Mode:Soak
-INFO	: foo:('PROFILE_ADVANCED_STEP', 'Mode:0 Not specified in API')
-INFO	: register:0019, reg_name:PROFILE_ADVANCED_STEP, value:0000, value_human:Mode:0 Not specified in API
-INFO	: foo:('PROFILE_NAME_CH_1_2', 'A G')
-INFO	: register:001a, reg_name:PROFILE_NAME_CH_1_2, value:4147, value_human:A G
-INFO	: foo:('PROFILE_NAME_CH_3_4', 'A L')
-INFO	: register:001b, reg_name:PROFILE_NAME_CH_3_4, value:414c, value_human:A L
-INFO	: foo:('PROFILE_NAME_CH_5_6', 'Y X')
-INFO	: register:001c, reg_name:PROFILE_NAME_CH_5_6, value:5958, value_human:Y X
-INFO	: foo:('PROFILE_NAME_CH_7_8', '   ')
-INFO	: register:001d, reg_name:PROFILE_NAME_CH_7_8, value:2020, value_human:   
-INFO	: foo:('PROFILE_NAME_CH_9_10', '   ')
-INFO	: register:001e, reg_name:PROFILE_NAME_CH_9_10, value:2020, value_human:   
-INFO	: foo:('PROFILE_START_DATE_YY_MM', 'year: 2018, month:6')
-INFO	: register:001f, reg_name:PROFILE_START_DATE_YY_MM, value:1206, value_human:year: 2018, month:6
-INFO	: foo:('PROFILE_START_DATE_DAY_DOW', 'DayOfMonth:15, DayOfWeek:5')
-INFO	: register:0020, reg_name:PROFILE_START_DATE_DAY_DOW, value:0f05, value_human:DayOfMonth:15, DayOfWeek:5
-INFO	: foo:('PROFILE_START_DATE_HH_MM', 'Hour:13, Minute:30')
-INFO	: register:0021, reg_name:PROFILE_START_DATE_HH_MM, value:0d1e, value_human:Hour:13, Minute:30
-INFO	: foo:('PROFILE_STOP_DATE_YY_MM', 'year: 2018, month:6')
-INFO	: register:0022, reg_name:PROFILE_STOP_DATE_YY_MM, value:1206, value_human:year: 2018, month:6
-INFO	: foo:('PROFILE_STOP_DATE_DAY_DOW', 'DayOfMonth:16, DayOfWeek:6')
-INFO	: register:0023, reg_name:PROFILE_STOP_DATE_DAY_DOW, value:1006, value_human:DayOfMonth:16, DayOfWeek:6
-INFO	: foo:('PROFILE_STOP_DATE_HH_MM', 'Hour:3, Minute:55')
-INFO	: register:0024, reg_name:PROFILE_STOP_DATE_HH_MM, value:0337, value_human:Hour:3, Minute:55
-INFO	: foo:('PROFILE_START_STEP', 'step:1')
-INFO	: register:0025, reg_name:PROFILE_START_STEP, value:0001, value_human:step:1
-INFO	: foo:('PROFILE_CURRENT_STEP', 'step:4')
-INFO	: register:0026, reg_name:PROFILE_CURRENT_STEP, value:0004, value_human:step:4
-INFO	: foo:('PROFILE_LAST_STEP', 'step:10')
-INFO	: register:0027, reg_name:PROFILE_LAST_STEP, value:000a, value_human:step:10
-INFO	: foo:('PROFILE_TIME_LEFT_IN_CURRENT_STEP_HHH', 'hours:0')
-INFO	: register:0028, reg_name:PROFILE_TIME_LEFT_IN_CURRENT_STEP_HHH, value:0000, value_human:hours:0
-INFO	: foo:('PROFILE_TIME_LEFT_IN_CURRENT_STEP_MM_SS', 'Minute:32, Seconds:57')
-INFO	: register:0029, reg_name:PROFILE_TIME_LEFT_IN_CURRENT_STEP_MM_SS, value:2039, value_human:Minute:32, Seconds:57
-INFO	: foo:('PROFILE_WAIT_FOR_STATUS', 'Mode:Not Waiting')
-INFO	: register:002a, reg_name:PROFILE_WAIT_FOR_STATUS, value:0000, value_human:Mode:Not Waiting
-INFO	: foo:('PROFILE_WAIT_FOR_SETPOINT', 'degrees:0')
-INFO	: register:002b, reg_name:PROFILE_WAIT_FOR_SETPOINT, value:0000, value_human:degrees:0
-INFO	: foo:('PROFILE_CURRENT_JUMP_STEP', 'step:1')
-INFO	: register:002c, reg_name:PROFILE_CURRENT_JUMP_STEP, value:0001, value_human:step:1
-INFO	: foo:('PROFILE_JUMPS_REMAINING_IN_CURRENT_STEP', 'jumps:0')
-INFO	: register:002d, reg_name:PROFILE_JUMPS_REMAINING_IN_CURRENT_STEP, value:0000, value_human:jumps:0
-INFO	: foo:('PROFILE_LOOP_1_TARGET_SETPOINT', 'NO MATCH')
-INFO	: register:002e, reg_name:PROFILE_LOOP_1_TARGET_SETPOINT, value:01f4, value_human:NO MATCH
+	Number: 78
+	Data:   000112060f05101700060008003c0000003202d00000000000000258ffce000000000000000a0000011f000100010000004000004147414c59582020202012060f050d1e12061006033700010004000a0000110b000000000001000001f40000000000000000000000000000000000000000000000000000
+	CRC:    D100
+INFO	: data:[1, 4614, 3845, 4119, 6, 8, 60, 0, 50, 720, 0, 0, 0, 600, -50, 0, 0, 0, 10, 0, 287, 1, 1, 0, 64, 0, 16711, 16716, 22872, 8224, 8224, 4614, 3845, 3358, 4614, 4102, 823, 1, 4, 10, 0, 4363, 0, 0, 1, 0, 500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+INFO	: quantity:60
+INFO	: register:0000, reg_name:OPERATIONAL_MODE                                  , value:0001, value_human:mode:On
+INFO	: register:0001, reg_name:CLOCK_YY_MM                                       , value:1206, value_human:year: 2018, month:6
+INFO	: register:0002, reg_name:CLOCK_DAY_DOW                                     , value:0f05, value_human:DayOfMonth:15, DayOfWeek:5
+INFO	: register:0003, reg_name:CLOCK_HH_MM                                       , value:1017, value_human:Hour:16, Minute:23
+INFO	: register:0004, reg_name:CLOCK_SEC                                         , value:0006, value_human:Seconds:6
+INFO	: register:0005, reg_name:POWER_RECOVERY_MODE                               , value:0008, value_human:Mode:Resume
+INFO	: register:0006, reg_name:POWER_OUT_TIME                                    , value:003c, value_human:Seconds:60
+INFO	: register:0007, reg_name:DEFROST_OPERATING_MODE                            , value:0000, value_human:mode:Disabled
+INFO	: register:0008, reg_name:AUTO_DEFROST_TEMPERATURE_SETPOINT                 , value:0032, value_human:degrees:50
+INFO	: register:0009, reg_name:AUTO_DEFROST_TIME_INTERVAL                        , value:02d0, value_human:minutes:720
+INFO	: register:000a, reg_name:DEFROST_STATUS                                    , value:0000, value_human:NO MATCH
+INFO	: register:000b, reg_name:TIME_REMAINING_UNTIL_NEXT_DEFROST                 , value:0000, value_human:minutes:0
+INFO	: register:000c, reg_name:PRODUCT_CONTROL                                   , value:0000, value_human:mode:Off
+INFO	: register:000d, reg_name:PRODUCT_CONTROL_UPPER_SETPOINT                    , value:0258, value_human:degrees:600
+INFO	: register:000e, reg_name:PRODUCT_CONTROL_LOWER_SETPOINT                    , value:-032, value_human:degrees:-50
+INFO	: register:000f, reg_name:CONDENSATION_CONTROL                              , value:0000, value_human:Status:Off
+INFO	: register:0010, reg_name:CONDENSATION_CONTROL_MONITOR_MODE                 , value:0000, value_human:Status:0 Not specified in API
+INFO	: register:0011, reg_name:CONDENSATION_CONTROL_INPUT_SELECTION              , value:0000, value_human:product: 0, pv:0
+INFO	: register:0012, reg_name:CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT  , value:000a, value_human:degrees:10
+INFO	: register:0013, reg_name:CONDENSATION_CONTROL_DEUPOINT_LIMIT               , value:0000, value_human:degrees:0
+INFO	: register:0014, reg_name:CONDENSATION_CONTROL_DUEPOINT_ACTUAL              , value:011f, value_human:degrees:287
+INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0001, value_human:Status:On
+INFO	: register:0016, reg_name:CHAMBER_MANUAL_EVENT_CONTROL                      , value:0001, value_human:Event Bit array:1
+INFO	: register:0017, reg_name:CUSTOMER_MANUAL_EVENT_CONTROL                     , value:0000, value_human:Event Bit array:0
+INFO	: register:0018, reg_name:PROFILE_CONTROL_STATUS                            , value:0040, value_human:Mode:Soak
+INFO	: register:0019, reg_name:PROFILE_ADVANCED_STEP                             , value:0000, value_human:Mode:0 Not specified in API
+INFO	: register:001a, reg_name:PROFILE_NAME_CH_1_2                               , value:4147, value_human:A G
+INFO	: register:001b, reg_name:PROFILE_NAME_CH_3_4                               , value:414c, value_human:A L
+INFO	: register:001c, reg_name:PROFILE_NAME_CH_5_6                               , value:5958, value_human:Y X
+INFO	: register:001d, reg_name:PROFILE_NAME_CH_7_8                               , value:2020, value_human:   
+INFO	: register:001e, reg_name:PROFILE_NAME_CH_9_10                              , value:2020, value_human:   
+INFO	: register:001f, reg_name:PROFILE_START_DATE_YY_MM                          , value:1206, value_human:year: 2018, month:6
+INFO	: register:0020, reg_name:PROFILE_START_DATE_DAY_DOW                        , value:0f05, value_human:DayOfMonth:15, DayOfWeek:5
+INFO	: register:0021, reg_name:PROFILE_START_DATE_HH_MM                          , value:0d1e, value_human:Hour:13, Minute:30
+INFO	: register:0022, reg_name:PROFILE_STOP_DATE_YY_MM                           , value:1206, value_human:year: 2018, month:6
+INFO	: register:0023, reg_name:PROFILE_STOP_DATE_DAY_DOW                         , value:1006, value_human:DayOfMonth:16, DayOfWeek:6
+INFO	: register:0024, reg_name:PROFILE_STOP_DATE_HH_MM                           , value:0337, value_human:Hour:3, Minute:55
+INFO	: register:0025, reg_name:PROFILE_START_STEP                                , value:0001, value_human:step:1
+INFO	: register:0026, reg_name:PROFILE_CURRENT_STEP                              , value:0004, value_human:step:4
+INFO	: register:0027, reg_name:PROFILE_LAST_STEP                                 , value:000a, value_human:step:10
+INFO	: register:0028, reg_name:PROFILE_TIME_LEFT_IN_CURRENT_STEP_HHH             , value:0000, value_human:hours:0
+INFO	: register:0029, reg_name:PROFILE_TIME_LEFT_IN_CURRENT_STEP_MM_SS           , value:110b, value_human:Minute:17, Seconds:11
+INFO	: register:002a, reg_name:PROFILE_WAIT_FOR_STATUS                           , value:0000, value_human:Mode:Not Waiting
+INFO	: register:002b, reg_name:PROFILE_WAIT_FOR_SETPOINT                         , value:0000, value_human:degrees:0
+INFO	: register:002c, reg_name:PROFILE_CURRENT_JUMP_STEP                         , value:0001, value_human:step:1
+INFO	: register:002d, reg_name:PROFILE_JUMPS_REMAINING_IN_CURRENT_STEP           , value:0000, value_human:jumps:0
+INFO	: register:002e, reg_name:PROFILE_LOOP_1_TARGET_SETPOINT                    , value:01f4, value_human:degrees:500
+INFO	: register:002f, reg_name:PROFILE_LOOP_2_TARGET_SETPOINT                    , value:0000, value_human:degrees:0
+INFO	: register:0030, reg_name:PROFILE_LOOP_3_TARGET_SETPOINT                    , value:0000, value_human:degrees:0
+INFO	: register:0031, reg_name:PROFILE_LOOP_4_TARGET_SETPOINT                    , value:0000, value_human:degrees:0
+INFO	: register:0032, reg_name:PROFILE_LOOP_5_TARGET_SETPOINT                    , value:0000, value_human:degrees:0
+INFO	: register:0033, reg_name:PROFILE_LAST_JUMP_FROM_STEP                       , value:0000, value_human:step:0
+INFO	: register:0034, reg_name:PROFILE_LAST_JUMP_TO_STEP                         , value:0000, value_human:step:0
+INFO	: register:0035, reg_name:PROFILE_TOTAL_JUMPS_MADE                          , value:0000, value_human:jumps:0
+INFO	: register:0036, reg_name:ALARM_ACKNOWLEDGE                                 , value:0000, value_human:Status:0 Not specified in API
+INFO	: register:0037, reg_name:EZT-570I_ALARM_STATUS                             , value:0000, value_human:NO MATCH
+INFO	: register:0038, reg_name:INPUT_ALARM_STATUS                                , value:0000, value_human:NO MATCH
+INFO	: register:0039, reg_name:CHAMBER_ALARM_STATUS                              , value:0000, value_human:NO MATCH
+INFO	: register:003a, reg_name:REFRIGERATION_ALARM_STATUS                        , value:0000, value_human:NO MATCH
+INFO	: register:003b, reg_name:SYSTEM_STATUS_MONITOR                             , value:0000, value_human:NO MATCH

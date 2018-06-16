@@ -654,9 +654,51 @@ class ChamberCommandRegisters(object):
                 """0 - 99"""
                 return name, "jumps:{}".format(value)
 
+            elif name == 'PROFILE_LOOP_1_TARGET_SETPOINT':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'PROFILE_LOOP_2_TARGET_SETPOINT':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'PROFILE_LOOP_3_TARGET_SETPOINT':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'PROFILE_LOOP_4_TARGET_SETPOINT':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'PROFILE_LOOP_5_TARGET_SETPOINT':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'PROFILE_LAST_JUMP_FROM_STEP':
+                """0 - 99"""
+                return name, "step:{}".format(value)
+
+            elif name == 'PROFILE_LAST_JUMP_TO_STEP':
+                """0 - 99"""
+                return name, "step:{}".format(value)
+
+            elif name == 'PROFILE_TOTAL_JUMPS_MADE':
+                """0 – 32767"""
+                return name, "jumps:{}".format(value)
+
+            elif name == 'ALARM_ACKNOWLEDGE':
+                mode = {
+                    1: 'Alarm Silence',
+                    2: 'Pumpdown Reset'
+                }
+                if value in mode:
+                    s = mode[value]
+                else:
+                    s = "{} Not specified in API".format(value)
+                return name, "Status:{}".format(s)
+
             elif name == '':
                 pass
-
 
             else:
                 return name, "NO MATCH"

@@ -111,7 +111,7 @@ def main():
     # Read x registers
     # #----------------------------------
     start_reg = chamber.creg.name_to_reg('OPERATIONAL_MODE')
-    quantity_of_reg = 47
+    quantity_of_reg = 60
     values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
     log.info("Modbus Response:{}".format(values))
 
@@ -127,12 +127,11 @@ def print_read_registers(chamber, log, start_reg, values):
     for value in values.data[:]:
         if value is None:
             log.info("value is none")
-        foo = chamber.creg.decode_read_value(reg, value)
-        log.info("foo:{}".format(foo))
+
         reg_name, value_human = chamber.creg.decode_read_value(reg, value)
         log.info(
             (
-                "register:{:04x}, reg_name:{}, value:{:04x}, value_human:{}"
+                "register:{:04x}, reg_name:{:<50}, value:{:04x}, value_human:{}"
             ).format(
                 reg,
                 reg_name,
