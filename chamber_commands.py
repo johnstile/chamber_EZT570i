@@ -388,6 +388,67 @@ class ChamberCommandRegisters(object):
                 s = mode[value]
                 return name, "Status:{}".format(s)
 
+            elif name == 'CONDENSATION_CONTROL_MONITOR_MODE':
+                """
+                1 Use Single Input
+                2 Use Lowest Input
+                4 Use Highest Input
+                8 Use Average of all Inputs
+                """
+                mode = {
+                    1: "Use Single Input",
+                    2: "Use Lowest Input",
+                    4: "Use Highest Input",
+                    8: "Use Average of all Inputs"
+                }
+                if value in mode:
+                    s = mode[value]
+                else:
+                    s = "{} Not specified in API".format(value)
+                return name, "Status:{}".format(s)
+
+            elif name == 'CONDENSATION_CONTROL_INPUT_SELECTION':
+                """
+                Bit oriented: (0 disables, 1 enables).
+                Bit0 Product
+                Bit1 PV1 (monitor)
+                Bit2 PV2 (monitor)
+                Bit3 PV3 (monitor)
+                Bit4 PV4 (monitor)
+                Bit5 PV5 (monitor)
+                Bit6 PV6 (monitor)
+                Bit7 PV7 (monitor)
+                Bit8 PV8 (monitor)
+                """
+                b_product, b_pv = int_to_two_bytes(value & 0xFFFF)
+                product = struct.unpack('B', b_product)[0]
+                pv = struct.unpack('B', b_pv)[0]
+                return name, (
+                    "product: {}, pv:{}"
+                ).format(
+                    product,
+                    pv
+                )
+
+            elif name == 'CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT':
+                """
+                0 - 100 (0.0 – 10.0 degrees C)
+                0 - 180 (0.0 – 18.0 degrees F)
+                """
+                return name, "degrees:{}".format(value)
+
+            elif name == 'CONDENSATION_CONTROL_DEUPOINT_LIMIT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                return name, "degrees:{}".format(value)
+
+            elif name == 'CONDENSATION_CONTROL_DUEPOINT_ACTUAL':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                return name, "degrees:{}".format(value)
+
             elif name == 'CHAMBER_LIGHT_CONTROL':
                 """
                 0 off
@@ -399,6 +460,203 @@ class ChamberCommandRegisters(object):
                 }
                 s = mode[value]
                 return name, "Status:{}".format(s)
+
+            elif name == 'CHAMBER_MANUAL_EVENT_CONTROL':
+                """
+                Bit 0 to 14 == Event 1 to 15.
+                """
+                return name, "Event Bit array:{}".format(value)
+
+            elif name == 'CUSTOMER_MANUAL_EVENT_CONTROL':
+                """
+                Bit 0 to 14 == Event 1 to 15.
+                """
+                return name, "Event Bit array:{}".format(value)
+
+            elif name == 'PROFILE_CONTROL_STATUS':
+                """
+                """
+                mode = {
+                    0: 'Stop/Off',
+                    1: 'Stop/All Off',
+                    2: 'Hold',
+                    4: 'Run/Resume',
+                    8: 'Autostart',
+                    16: 'Wait',
+                    32: 'Ramp',
+                    64: 'Soak',
+                    128: 'Guaranteed Soak'
+                }
+                s = mode[value]
+                return name, "Mode:{}".format(s)
+
+            elif name == 'PROFILE_ADVANCED_STEP':
+                mode = {
+                    1: 'Advance Previous Step',
+                    2: 'Advance Next Step'
+                }
+                if value in mode:
+                    s = mode[value]
+                else:
+                    s = "{} Not specified in API".format(value)
+                return name, "Mode:{}".format(s)
+
+            elif name == 'PROFILE_NAME_CH_1_2':
+                """
+                32 – 126 (high byte)
+                32 – 126 (low byte)
+                """
+                b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+                hch = struct.unpack('B', b_hch)[0]
+                lch = struct.unpack('B', b_lch)[0]
+                return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+            elif name == 'PROFILE_NAME_CH_3_4':
+                b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+                hch = struct.unpack('B', b_hch)[0]
+                lch = struct.unpack('B', b_lch)[0]
+                return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+            elif name == 'PROFILE_NAME_CH_5_6':
+                b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+                hch = struct.unpack('B', b_hch)[0]
+                lch = struct.unpack('B', b_lch)[0]
+                return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+            elif name == 'PROFILE_NAME_CH_7_8':
+                b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+                hch = struct.unpack('B', b_hch)[0]
+                lch = struct.unpack('B', b_lch)[0]
+                return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+            elif name == 'PROFILE_NAME_CH_9_10':
+                b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+                hch = struct.unpack('B', b_hch)[0]
+                lch = struct.unpack('B', b_lch)[0]
+                return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+            elif name == 'PROFILE_START_DATE_YY_MM':
+                """
+                high byte: Year: 0 to 99
+                low byte: Month: 1=Jan, ... 12=Dec
+                """
+                b_year, b_month = int_to_two_bytes(value & 0xFFFF)
+                year = struct.unpack('B', b_year)[0]
+                month = struct.unpack('B', b_month)[0]
+                return name, "year: 20{}, month:{}".format(year, month)
+
+            elif name == 'PROFILE_STOP_DATE_YY_MM':
+                """
+                high byte: Year: 0 to 99
+                low byte: Month: 1=Jan, ... 12=Dec
+                """
+                b_year, b_month = int_to_two_bytes(value & 0xFFFF)
+                year = struct.unpack('B', b_year)[0]
+                month = struct.unpack('B', b_month)[0]
+                return name, "year: 20{}, month:{}".format(year, month)
+
+            elif name == 'PROFILE_START_DATE_DAY_DOW':
+                """
+                high byte: Day of Month: 1 to 31
+                low byte: Day  of Week: 0=Sun, ... 6=Sat
+                """
+                b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
+                dom = struct.unpack('B', b_dom)[0]
+                dow = struct.unpack('B', b_dow)[0]
+                return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
+
+            elif name == 'PROFILE_STOP_DATE_DAY_DOW':
+                """
+                high byte: Day of Month: 1 to 31
+                low byte: Day  of Week: 0=Sun, ... 6=Sat
+                """
+                b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
+                dom = struct.unpack('B', b_dom)[0]
+                dow = struct.unpack('B', b_dow)[0]
+                return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
+
+            elif name == 'PROFILE_START_DATE_HH_MM':
+                """
+                high byte: Hours: 1 to 23
+                low byte: Minutes: 0 to 59
+                """
+                b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
+                hour = struct.unpack('B', b_hour)[0]
+                minutes = struct.unpack('B', b_minutes)[0]
+                return name, "Hour:{}, Minute:{}".format(hour, minutes)
+
+            elif name == 'PROFILE_STOP_DATE_HH_MM':
+                """
+                high byte: Hours: 1 to 23
+                low byte: Minutes: 0 to 59
+                """
+                b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
+                hour = struct.unpack('B', b_hour)[0]
+                minutes = struct.unpack('B', b_minutes)[0]
+                return name, "Hour:{}, Minute:{}".format(hour, minutes)
+
+            elif name == 'PROFILE_START_STEP':
+                """0 - 99"""
+                return name, "step:{}".format(value)
+
+            elif name == 'PROFILE_CURRENT_STEP':
+                """0 - 99"""
+                return name, "step:{}".format(value)
+
+            elif name == 'PROFILE_LAST_STEP':
+                """0 - 99"""
+                return name, "step:{}".format(value)
+
+            elif name == 'PROFILE_TIME_LEFT_IN_CURRENT_STEP_HHH':
+                """1 – 999 Hours"""
+                return name, "hours:{}".format(value)
+
+            elif name == 'PROFILE_TIME_LEFT_IN_CURRENT_STEP_MM_SS':
+                """
+                 high byte: Minutes: 0 to 59
+                 low byte: Seconds: 0 to 59
+                 """
+                b_minutes, b_seconds = int_to_two_bytes(value & 0xFFFF)
+                minutes = struct.unpack('B', b_minutes)[0]
+                seconds = struct.unpack('B', b_seconds)[0]
+                return name, "Minute:{}, Seconds:{}".format(minutes, seconds)
+
+            elif name == 'PROFILE_WAIT_FOR_STATUS':
+                mode = {
+                    0:    'Not Waiting',
+                    1:    'Input 1',
+                    2:    'Input 2',
+                    4:    'Input 3',
+                    8:    'Input 4',
+                    16:   'Input 5',
+                    32:   'Input 6',
+                    64:   'Input 7',
+                    128:  'Input 8',
+                    256:  'Input 9',
+                    512:  'Input 10',
+                    1024: 'Input 11',
+                    2048: 'Input 12',
+                    4096: 'Input 13',
+                    8192: 'Digital Input'
+                }
+                s = mode[value]
+                return name, "Mode:{}".format(s)
+
+            elif name == 'PROFILE_WAIT_FOR_SETPOINT':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'PROFILE_CURRENT_JUMP_STEP':
+                """0 - 99"""
+                return name, "step:{}".format(value)
+
+            elif name == 'PROFILE_JUMPS_REMAINING_IN_CURRENT_STEP':
+                """0 - 99"""
+                return name, "jumps:{}".format(value)
+
+            elif name == '':
+                pass
+
 
             else:
                 return name, "NO MATCH"

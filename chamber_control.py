@@ -111,7 +111,7 @@ def main():
     # Read x registers
     # #----------------------------------
     start_reg = chamber.creg.name_to_reg('OPERATIONAL_MODE')
-    quantity_of_reg = 20
+    quantity_of_reg = 47
     values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
     log.info("Modbus Response:{}".format(values))
 
