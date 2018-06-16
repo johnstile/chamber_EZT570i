@@ -194,6 +194,11 @@ class ChamberCommandRegisters(object):
         'PROFILE_STEP_TIME_ADJUSTMENT': 179,  # w,
         'EZT570I_OFFLINE_DOWNLOAD_PROFILE': 180  # r,
     }
+
+    def bitfield(n):
+        """Convert int to array of bits"""
+        return [int(digit) for digit in bin(n)[2:]] # [2:] to chop off the "0b" part
+
     def reg_value_to_name(self, search_reg):
         response = None
         for name, reg in self.ctrl.iteritems():  # for name, age in list.items():  (for Python 3.x)
@@ -420,15 +425,19 @@ class ChamberCommandRegisters(object):
                 Bit7 PV7 (monitor)
                 Bit8 PV8 (monitor)
                 """
-                b_product, b_pv = int_to_two_bytes(value & 0xFFFF)
-                product = struct.unpack('B', b_product)[0]
-                pv = struct.unpack('B', b_pv)[0]
-                return name, (
-                    "product: {}, pv:{}"
-                ).format(
-                    product,
-                    pv
-                )
+                bit_array = self.bitfield(value)
+                response = {
+                    'Product' : 0,
+                    'PV1' : bit_array[0],
+                    'PV2' : bit_array[1],
+                    'PV3' : bit_array[2],
+                    'PV4' : bit_array[3],
+                    'PV5' : bit_array[4],
+                    'PV6' : bit_array[5],
+                    'PV7' : bit_array[6],
+                    'PV8' : bit_array[7],
+                }
+                return name, ("pv:{}").format(response)
 
             elif name == 'CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT':
                 """
@@ -696,6 +705,171 @@ class ChamberCommandRegisters(object):
                 else:
                     s = "{} Not specified in API".format(value)
                 return name, "Status:{}".format(s)
+
+            elif name == 'EZT-570I_ALARM_STATUS':
+                state = {
+                    0: 'norma'
+                    1: 'Alarm'
+                }
+                bit_array = self.bitfield(value)
+                response = {
+                    'Input1 Sensor Break': state[bit_array[0]],
+                    'Input2 Sensor Break': state[bit_array[1]],
+                    'Input3 Sensor Break': state[bit_array[2]],
+                    'Input4 Sensor Break': state[bit_array[3]],
+                    'Input5 Sensor Break': state[bit_array[4]],
+                    'Input6 Sensor Break': state[bit_array[5]],
+                    'Input7 Sensor Break': state[bit_array[6]],
+                    'Input8 Sensor Break': state[bit_array[7]],
+                    'Input9 Sensor Break': state[bit_array[8]],
+                    'Input10 Sensor Break': state[bit_array[9]],
+                    'Input11 Sensor Break': state[bit_array[10]],
+                    'Input12 Sensor Break': state[bit_array[11]],
+                    'Input13 Sensor Break': state[bit_array[12]],
+                    '(not assigned)': state[bit_array[13]],
+                    'Loop Communications Failure': state[bit_array[14]],
+                }
+                return name, ("status:{}").format(response)
+
+            elif name == 'INPUT_ALARM_STATUS':
+                state = {
+                    0: 'norma'
+                    1: 'Alarm'
+                }
+                bit_array = self.bitfield(value)
+                response = {
+                    'Input1 Alarm':   state[bit_array[0]],
+                    'Input2 Alarm':   state[bit_array[1]],
+                    'Input3 Alarm':   state[bit_array[2]],
+                    'Input4 Alarm':   state[bit_array[3]],
+                    'Input5 Alarm':   state[bit_array[4]],
+                    'Input6 Alarm':   state[bit_array[5]],
+                    'Input7 Alarm':   state[bit_array[6]],
+                    'Input8 Alarm':   state[bit_array[7]],
+                    'Input9 Alarm':   state[bit_array[8]],
+                    'Input10 Alarm':  state[bit_array[9]],
+                    'Input11 Alarm':  state[bit_array[10]],
+                    'Input12 Alarm':  state[bit_array[11]],
+                    'Input13 Alarm':  state[bit_array[12]],
+                    '(not assigned)': state[bit_array[13]],
+                    '(not assigned)': state[bit_array[14]],
+                }
+                return name, ("status:{}").format(response)
+
+            elif name == 'CHAMBER_ALARM_STATUS':
+                state = {
+                    0: 'norma'
+                    1: 'Alarm'
+                }
+                bit_array = self.bitfield(value)
+                response = {
+                    'Heater High Limit (Plenum A)': state[bit_array[0]],
+                    'External Product Safety': state[bit_array[1]],
+                    'Boiler Over-Temp (Plenum A)': state[bit_array[2]],
+                    'Boiler Low Water (Plenum A)': state[bit_array[3]],
+                    'Dehumidifier System Fault (System B Boiler Over-Temp)': state[bit_array[4]],
+                    'Motor Overload (Plenum A)': state[bit_array[5]],
+                    'Fluid System High Limit (Plenum B Heater High Limit)': state[bit_array[6]],
+                    'Fluid System High Pressure (Plenum B Motor Overload)': state[bit_array[7]],
+                    'Fluid System Low Flow': state[bit_array[8]],
+                    'Door Open': state[bit_array[9]],
+                    '(System B Boiler Low Water)': state[bit_array[10]],
+                    '(not assigned)': state[bit_array[11]],
+                    'Emergency Stop': state[bit_array[12]],
+                    'Power Failure': state[bit_array[13]],
+                    'Transfer Error': state[bit_array[14]],
+                }
+                return name, ("status:{}").format(response)
+
+            elif name == 'REFRIGERATION_ALARM_STATUS':
+                state = {
+                    0: 'norma'
+                    1: 'Alarm'
+                }
+                bit_array = self.bitfield(value)
+                response = {
+                    'System 1(A) High/Low Pressure': state[bit_array[0]],
+                    'System 1(A) Low Oil Pressure': state[bit_array[1]],
+                    'System 1(A) High Discharge Temperature': state[bit_array[2]],
+                    'System 1(A) Compressor Protection Module': state[bit_array[3]],
+                    'Pumpdown Disabled': state[bit_array[4]],
+                    'System 1(A) Floodback Monitor': state[bit_array[5]],
+                    '(not assigned)': state[bit_array[6]],
+                    '(not assigned)': state[bit_array[7]],
+                    'System 2(B) High/Low Pressure': state[bit_array[8]],
+                    'System 2(B) Low Oil Pressure': state[bit_array[9]],
+                    'System 2(B) High Discharge Temperature': state[bit_array[10]],
+                    'System 2(B) Compressor Protection Module': state[bit_array[11]],
+                    '(not assigned)': state[bit_array[12]],
+                    'System B Floodback Monitor': state[bit_array[13]],
+                    '(not assigned)': state[bit_array[14]],
+                }
+                return name, ("status:{}").format(response)
+
+            elif name == 'SYSTEM_STATUS_MONITOR':
+                state = {
+                    0: 'norma'
+                    1: 'Alarm'
+                }
+                bit_array = self.bitfield(value)
+                response = {
+                    'Humidity Water Reservoir Low': state[bit_array[0]],
+                    'Humidity Disabled (temperature out-of-range)': state[bit_array[1]],
+                    'Humidity High Dewpoint Limit': state[bit_array[2]],
+                    'Humidity Low Dewpoint Limit': state[bit_array[3]],
+                    'Door Open': state[bit_array[4]],
+                    '(not assigned)': state[bit_array[5]],
+                    '(not assigned)': state[bit_array[6]],
+                    '(not assigned)': state[bit_array[7]],
+                    'Service Air Circulators': state[bit_array[8]],
+                    'Service Heating/Cooling System': state[bit_array[9]],
+                    'Service Humidity System': state[bit_array[10]],
+                    'Service Purge System': state[bit_array[11]],
+                    'Service Altitude System': state[bit_array[12]],
+                    'Service Transfer Mechanism': state[bit_array[13]],
+                    '(not assigned)': state[bit_array[14]],
+                }
+                return name, ("status:{}").format(response)
+
+            elif name == 'LOOP_1_SETPOINT':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_2_SETPOINT':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_3_SETPOINT':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_4_SETPOINT':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_5_SETPOINT':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_1_PROCESS_VALUE':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_2_PROCESS_VALUE':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_3_PROCESS_VALUE':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_4_PROCESS_VALUE':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_5_PROCESS_VALUE':
+                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                return name, "degrees:{}".format(value)
 
             elif name == '':
                 pass
