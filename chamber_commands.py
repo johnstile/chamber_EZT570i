@@ -3,6 +3,10 @@
 """EZT570i Command Register Reference"""
 import struct
 
+a_state = {
+    0: 'normal',
+    1: 'Alarm'
+}
 
 class ChamberCommandRegisters(object):
     """Read and Write Registers
@@ -12,10 +16,9 @@ class ChamberCommandRegisters(object):
 
     def __init__(self):
         # Meaningful name for alarms states
-        self.a_state = {
-            0: 'norma',
-            1: 'Alarm'
-        }
+        pass
+
+
 
     # Dictionary map bytes to function
     ctrl = {
@@ -204,17 +207,12 @@ class ChamberCommandRegisters(object):
         return [int(digit) for digit in bin(n)[2:]] # [2:] to chop off the "0b" part
 
     def reg_value_to_name(self, search_reg):
-        response = None
-        for name, reg in self.ctrl.iteritems():  # for name, age in list.items():  (for Python 3.x)
+        for name, reg in self.ctrl.iteritems():
             if reg == search_reg:
-                response = name
-        return response
+                return name
 
     def name_to_reg(self, search_name):
-        response = None
-        if search_name in self.ctrl:
-            response = self.ctrl[search_name]
-        return response
+        return self.ctrl.get(search_name)
 
     def get_loop_autotune_status(self, name, value):
         mode = {
@@ -223,10 +221,7 @@ class ChamberCommandRegisters(object):
             2: 'Autotune In Progress',
             4: 'Cancel Autotune'
         }
-        if value in mode:
-            s = mode[value]
-        else:
-            s = "{} Not specified in API".format(value)
+        s = mode.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
     def get_loop_alarm_type(self, name, value):
@@ -239,10 +234,7 @@ class ChamberCommandRegisters(object):
             40: 'Deviation Low',
             56: 'Deviation Both'
         }
-        if value in mode:
-            s = mode[value]
-        else:
-            s = "{} Not specified in API".format(value)
+        s = mode.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
 
@@ -279,10 +271,7 @@ class ChamberCommandRegisters(object):
             8192: 'Digital Output (Customer Event) 14 Selected',
             16384: 'Digital Output (Customer Event) 15 Selected'
         }
-        if value in mode:
-            s = mode[value]
-        else:
-            s = "{} Not specified in API".format(value)
+        s = mode.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
     def get_loop_alarm_mode(self, name, value):
@@ -338,801 +327,767 @@ class ChamberCommandRegisters(object):
     def decode_read_value(self, reg, value):
         name = self.reg_value_to_name(reg)
         int_to_two_bytes = struct.Struct('!h').pack
-        if name is not None:
-            if name == 'OPERATIONAL_MODE':
-                mode = {
-                    0: 'Off',
-                    1: 'On'
-                }
-                if value in mode:
-                    s = mode[value]
-                else:
-                    s = "{} Not specified in API".format(value)
-                return name, "Status:{}".format(s)
-
-            elif name == 'CLOCK_YY_MM':
-                """
-                high byte: Year: 0 to 99
-                low byte: Month: 1=Jan, ... 12=Dec
-                """
-                b_year, b_month = int_to_two_bytes(value & 0xFFFF)
-                year = struct.unpack('B', b_year)[0]
-                month = struct.unpack('B', b_month)[0]
-                return name, "year: 20{}, month:{}".format(year, month)
-
-            elif name == 'CLOCK_DAY_DOW':
-                """
-                high byte: Day of Month: 1 to 31
-                low byte: Day  of Week: 0=Sun, ... 6=Sat
-                """
-                b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
-                dom = struct.unpack('B', b_dom)[0]
-                dow = struct.unpack('B', b_dow)[0]
-                return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
-
-            elif name == 'CLOCK_HH_MM':
-                """
-                high byte: Hours: 1 to 23
-                low byte: Minutes: 0 to 59
-                """
-                b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
-                hour = struct.unpack('B', b_hour)[0]
-                minutes = struct.unpack('B', b_minutes)[0]
-                return name, "Hour:{}, Minute:{}".format(hour, minutes)
-
-            elif name == 'CLOCK_SEC':
-                """
-                2 bytes: seconds: 0 to 59
-                """
-                return name, "Seconds:{}".format(value)
-
-            elif name == 'POWER_RECOVERY_MODE':
-                mode = {
-                    0: 'Continue',
-                    1: 'Hold',
-                    2: 'Terminate',
-                    4: 'Reset',
-                    8: 'Resume'
-                }
-                if value in mode:
-                    s = mode[value]
-                else:
-                    s = "{} Not specified in API".format(value)
-                return name, "Status:{}".format(s)
-
-            elif name == 'POWER_OUT_TIME':
-                """
-                0 - 32767 seconds
-                """
-                return name, "Seconds:{}".format(value)
-
-            elif name == 'DEFROST_OPERATING_MODE':
-                mode = {
-                    0: 'Disabled',
-                    1: 'Manual Mode Selected',
-                    3: 'Auto Mode Selected'
-                }
-                if value in mode:
-                    s = mode[value]
-                else:
-                    s = "{} Not specified in API".format(value)
-                return name, "Status:{}".format(s)
-
-            elif name == 'AUTO_DEFROST_TEMPERATURE_SETPOINT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'AUTO_DEFROST_TIME_INTERVAL':
-                """
-                0 - 32767 minutes
-                """
-                return name, "minutes:{}".format(value)
-
-            elif name == 'DEFROST STATUS':
-                mode = {
-                    0: 'Not in Defrost',
-                    1: 'In Defrost',
-                    3: 'In Prechill'
-                }
-                if value in mode:
-                    s = mode[value]
-                else:
-                    s = "{} Not specified in API".format(value)
-                return name, "Status:{}".format(s)
-
-            elif name == 'TIME_REMAINING_UNTIL_NEXT_DEFROST':
-                """
-                0 - 32767 minutes
-                """
-                return name, "minutes:{}".format(value)
-
-            elif name == 'PRODUCT_CONTROL':
-                mode = {
-                    0: 'Off',
-                    1: 'Deviation',
-                    2: 'Process',
-                    4: 'Off',
-                    5: 'Deviation using Event for enable',
-                    6: 'Process using Event for enable'
-                }
-                if value in mode:
-                    s = mode[value]
-                else:
-                    s = "{} Not specified in API".format(value)
-                return name, "Status:{}".format(s)
-
-            elif name == 'PRODUCT_CONTROL_UPPER_SETPOINT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'PRODUCT_CONTROL_LOWER_SETPOINT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'CONDENSATION_CONTROL':
-                mode = {
-                    0: "Off",
-                    1: "On"
-                }
-                if value in mode:
-                    s = mode[value]
-                else:
-                    s = "{} Not specified in API".format(value)
-                return name, "Status:{}".format(s)
-
-            elif name == 'CONDENSATION_CONTROL_MONITOR_MODE':
-                mode = {
-                    1: "Use Single Input",
-                    2: "Use Lowest Input",
-                    4: "Use Highest Input",
-                    8: "Use Average of all Inputs"
-                }
-                if value in mode:
-                    s = mode[value]
-                else:
-                    s = "{} Not specified in API".format(value)
-                return name, "Status:{}".format(s)
-
-            elif name == 'CONDENSATION_CONTROL_INPUT_SELECTION':
-                bit_array = self.bitfield(value)
-                response = {
-                    'Product': 0,
-                    'PV1': bit_array[0],
-                    'PV2': bit_array[1],
-                    'PV3': bit_array[2],
-                    'PV4': bit_array[3],
-                    'PV5': bit_array[4],
-                    'PV6': bit_array[5],
-                    'PV7': bit_array[6],
-                    'PV8': bit_array[7],
-                }
-                return name, "pv:{}".format(response)
-
-            elif name == 'CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT':
-                """
-                0 - 100 (0.0 – 10.0 degrees C)
-                0 - 180 (0.0 – 18.0 degrees F)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'CONDENSATION_CONTROL_DEUPOINT_LIMIT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'CONDENSATION_CONTROL_DUEPOINT_ACTUAL':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'CHAMBER_LIGHT_CONTROL':
-                mode = {
-                    0: "Off",
-                    1: "On"
-                }
-                if value in mode:
-                    s = mode[value]
-                else:
-                    s = "{} Not specified in API".format(value)
-                return name, "Status:{}".format(s)
-
-            elif name == 'CHAMBER_MANUAL_EVENT_CONTROL':
-                """
-                Bit 0 to 14 == Event 1 to 15.
-                """
-                return name, "Event Bit array:{}".format(value)
-
-            elif name == 'CUSTOMER_MANUAL_EVENT_CONTROL':
-                """
-                Bit 0 to 14 == Event 1 to 15.
-                """
-                return name, "Event Bit array:{}".format(value)
-
-            elif name == 'PROFILE_CONTROL_STATUS':
-                mode = {
-                    0: 'Stop/Off',
-                    1: 'Stop/All Off',
-                    2: 'Hold',
-                    4: 'Run/Resume',
-                    8: 'Autostart',
-                    16: 'Wait',
-                    32: 'Ramp',
-                    64: 'Soak',
-                    128: 'Guaranteed Soak'
-                }
-                if value in mode:
-                    s = mode[value]
-                else:
-                    s = "{} Not specified in API".format(value)
-                return name, "Status:{}".format(s)
-
-            elif name == 'PROFILE_ADVANCED_STEP':
-                mode = {
-                    1: 'Advance Previous Step',
-                    2: 'Advance Next Step'
-                }
-                if value in mode:
-                    s = mode[value]
-                else:
-                    s = "{} Not specified in API".format(value)
-                return name, "Mode:{}".format(s)
-
-            elif name == 'PROFILE_NAME_CH_1_2':
-                """
-                32 – 126 (high byte)
-                32 – 126 (low byte)
-                """
-                b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-                hch = struct.unpack('B', b_hch)[0]
-                lch = struct.unpack('B', b_lch)[0]
-                return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
-
-            elif name == 'PROFILE_NAME_CH_3_4':
-                b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-                hch = struct.unpack('B', b_hch)[0]
-                lch = struct.unpack('B', b_lch)[0]
-                return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
-
-            elif name == 'PROFILE_NAME_CH_5_6':
-                b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-                hch = struct.unpack('B', b_hch)[0]
-                lch = struct.unpack('B', b_lch)[0]
-                return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
-
-            elif name == 'PROFILE_NAME_CH_7_8':
-                b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-                hch = struct.unpack('B', b_hch)[0]
-                lch = struct.unpack('B', b_lch)[0]
-                return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
-
-            elif name == 'PROFILE_NAME_CH_9_10':
-                b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-                hch = struct.unpack('B', b_hch)[0]
-                lch = struct.unpack('B', b_lch)[0]
-                return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
-
-            elif name == 'PROFILE_START_DATE_YY_MM':
-                """
-                high byte: Year: 0 to 99
-                low byte: Month: 1=Jan, ... 12=Dec
-                """
-                b_year, b_month = int_to_two_bytes(value & 0xFFFF)
-                year = struct.unpack('B', b_year)[0]
-                month = struct.unpack('B', b_month)[0]
-                return name, "year: 20{}, month:{}".format(year, month)
-
-            elif name == 'PROFILE_STOP_DATE_YY_MM':
-                """
-                high byte: Year: 0 to 99
-                low byte: Month: 1=Jan, ... 12=Dec
-                """
-                b_year, b_month = int_to_two_bytes(value & 0xFFFF)
-                year = struct.unpack('B', b_year)[0]
-                month = struct.unpack('B', b_month)[0]
-                return name, "year: 20{}, month:{}".format(year, month)
-
-            elif name == 'PROFILE_START_DATE_DAY_DOW':
-                """
-                high byte: Day of Month: 1 to 31
-                low byte: Day  of Week: 0=Sun, ... 6=Sat
-                """
-                b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
-                dom = struct.unpack('B', b_dom)[0]
-                dow = struct.unpack('B', b_dow)[0]
-                return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
-
-            elif name == 'PROFILE_STOP_DATE_DAY_DOW':
-                """
-                high byte: Day of Month: 1 to 31
-                low byte: Day  of Week: 0=Sun, ... 6=Sat
-                """
-                b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
-                dom = struct.unpack('B', b_dom)[0]
-                dow = struct.unpack('B', b_dow)[0]
-                return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
-
-            elif name == 'PROFILE_START_DATE_HH_MM':
-                """
-                high byte: Hours: 1 to 23
-                low byte: Minutes: 0 to 59
-                """
-                b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
-                hour = struct.unpack('B', b_hour)[0]
-                minutes = struct.unpack('B', b_minutes)[0]
-                return name, "Hour:{}, Minute:{}".format(hour, minutes)
-
-            elif name == 'PROFILE_STOP_DATE_HH_MM':
-                """
-                high byte: Hours: 1 to 23
-                low byte: Minutes: 0 to 59
-                """
-                b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
-                hour = struct.unpack('B', b_hour)[0]
-                minutes = struct.unpack('B', b_minutes)[0]
-                return name, "Hour:{}, Minute:{}".format(hour, minutes)
-
-            elif name == 'PROFILE_START_STEP':
-                """0 - 99"""
-                return name, "step:{}".format(value)
-
-            elif name == 'PROFILE_CURRENT_STEP':
-                """0 - 99"""
-                return name, "step:{}".format(value)
-
-            elif name == 'PROFILE_LAST_STEP':
-                """0 - 99"""
-                return name, "step:{}".format(value)
-
-            elif name == 'PROFILE_TIME_LEFT_IN_CURRENT_STEP_HHH':
-                """1 – 999 Hours"""
-                return name, "hours:{}".format(value)
-
-            elif name == 'PROFILE_TIME_LEFT_IN_CURRENT_STEP_MM_SS':
-                """
-                 high byte: Minutes: 0 to 59
-                 low byte: Seconds: 0 to 59
-                 """
-                b_minutes, b_seconds = int_to_two_bytes(value & 0xFFFF)
-                minutes = struct.unpack('B', b_minutes)[0]
-                seconds = struct.unpack('B', b_seconds)[0]
-                return name, "Minute:{}, Seconds:{}".format(minutes, seconds)
-
-            elif name == 'PROFILE_WAIT_FOR_STATUS':
-                mode = {
-                    0:    'Not Waiting',
-                    1:    'Input 1',
-                    2:    'Input 2',
-                    4:    'Input 3',
-                    8:    'Input 4',
-                    16:   'Input 5',
-                    32:   'Input 6',
-                    64:   'Input 7',
-                    128:  'Input 8',
-                    256:  'Input 9',
-                    512:  'Input 10',
-                    1024: 'Input 11',
-                    2048: 'Input 12',
-                    4096: 'Input 13',
-                    8192: 'Digital Input'
-                }
-                if value in mode:
-                    s = mode[value]
-                else:
-                    s = "{} Not specified in API".format(value)
-                return name, "Status:{}".format(s)
-
-            elif name == 'PROFILE_WAIT_FOR_SETPOINT':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
-                return name, "degrees:{}".format(value)
-
-            elif name == 'PROFILE_CURRENT_JUMP_STEP':
-                """0 - 99"""
-                return name, "step:{}".format(value)
-
-            elif name == 'PROFILE_JUMPS_REMAINING_IN_CURRENT_STEP':
-                """0 - 99"""
-                return name, "jumps:{}".format(value)
-
-            elif name == 'PROFILE_LOOP_1_TARGET_SETPOINT':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
-                return name, "degrees:{}".format(value)
-
-            elif name == 'PROFILE_LOOP_2_TARGET_SETPOINT':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
-                return name, "degrees:{}".format(value)
-
-            elif name == 'PROFILE_LOOP_3_TARGET_SETPOINT':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
-                return name, "degrees:{}".format(value)
-
-            elif name == 'PROFILE_LOOP_4_TARGET_SETPOINT':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
-                return name, "degrees:{}".format(value)
-
-            elif name == 'PROFILE_LOOP_5_TARGET_SETPOINT':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
-                return name, "degrees:{}".format(value)
-
-            elif name == 'PROFILE_LAST_JUMP_FROM_STEP':
-                """0 - 99"""
-                return name, "step:{}".format(value)
-
-            elif name == 'PROFILE_LAST_JUMP_TO_STEP':
-                """0 - 99"""
-                return name, "step:{}".format(value)
-
-            elif name == 'PROFILE_TOTAL_JUMPS_MADE':
-                """0 – 32767"""
-                return name, "jumps:{}".format(value)
-
-            elif name == 'ALARM_ACKNOWLEDGE':
-                mode = {
-                    1: 'Alarm Silence',
-                    2: 'Pumpdown Reset'
-                }
-                if value in mode:
-                    s = mode[value]
-                else:
-                    s = "{} Not specified in API".format(value)
-                return name, "Status:{}".format(s)
-
-            elif name == 'EZT-570I_ALARM_STATUS':
-                bit_array = self.bitfield(value)
-                response = {
-                    'Input1 Sensor Break': self.a_state[bit_array[0]],
-                    'Input2 Sensor Break': self.a_state[bit_array[1]],
-                    'Input3 Sensor Break': self.a_state[bit_array[2]],
-                    'Input4 Sensor Break': self.a_state[bit_array[3]],
-                    'Input5 Sensor Break': self.a_state[bit_array[4]],
-                    'Input6 Sensor Break': self.a_state[bit_array[5]],
-                    'Input7 Sensor Break': self.a_state[bit_array[6]],
-                    'Input8 Sensor Break': self.a_state[bit_array[7]],
-                    'Input9 Sensor Break': self.a_state[bit_array[8]],
-                    'Input10 Sensor Break': self.a_state[bit_array[9]],
-                    'Input11 Sensor Break': self.a_state[bit_array[10]],
-                    'Input12 Sensor Break': self.a_state[bit_array[11]],
-                    'Input13 Sensor Break': self.a_state[bit_array[12]],
-                    '(not assigned)': self.a_state[bit_array[13]],
-                    'Loop Communications Failure': self.a_state[bit_array[14]],
-                }
-                return name, "status:{}".format(response)
-
-            elif name == 'INPUT_ALARM_STATUS':
-                bit_array = self.bitfield(value)
-                response = {
-                    'Input1 Alarm':   self.a_state[bit_array[0]],
-                    'Input2 Alarm':   self.a_state[bit_array[1]],
-                    'Input3 Alarm':   self.a_state[bit_array[2]],
-                    'Input4 Alarm':   self.a_state[bit_array[3]],
-                    'Input5 Alarm':   self.a_state[bit_array[4]],
-                    'Input6 Alarm':   self.a_state[bit_array[5]],
-                    'Input7 Alarm':   self.a_state[bit_array[6]],
-                    'Input8 Alarm':   self.a_state[bit_array[7]],
-                    'Input9 Alarm':   self.a_state[bit_array[8]],
-                    'Input10 Alarm':  self.a_state[bit_array[9]],
-                    'Input11 Alarm':  self.a_state[bit_array[10]],
-                    'Input12 Alarm':  self.a_state[bit_array[11]],
-                    'Input13 Alarm':  self.a_state[bit_array[12]],
-                    '(not assigned 1)': self.a_state[bit_array[13]],
-                    '(not assigned 2)': self.a_state[bit_array[14]],
-                }
-                return name, "status:{}".format(response)
-
-            elif name == 'CHAMBER_ALARM_STATUS':
-                bit_array = self.bitfield(value)
-                response = {
-                    'Heater High Limit (Plenum A)': self.a_state[bit_array[0]],
-                    'External Product Safety': self.a_state[bit_array[1]],
-                    'Boiler Over-Temp (Plenum A)': self.a_state[bit_array[2]],
-                    'Boiler Low Water (Plenum A)': self.a_state[bit_array[3]],
-                    'Dehumidifier System Fault (System B Boiler Over-Temp)': self.a_state[bit_array[4]],
-                    'Motor Overload (Plenum A)': self.a_state[bit_array[5]],
-                    'Fluid System High Limit (Plenum B Heater High Limit)': self.a_state[bit_array[6]],
-                    'Fluid System High Pressure (Plenum B Motor Overload)': self.a_state[bit_array[7]],
-                    'Fluid System Low Flow': self.a_state[bit_array[8]],
-                    'Door Open': self.a_state[bit_array[9]],
-                    '(System B Boiler Low Water)': self.a_state[bit_array[10]],
-                    '(not assigned)': self.a_state[bit_array[11]],
-                    'Emergency Stop': self.a_state[bit_array[12]],
-                    'Power Failure': self.a_state[bit_array[13]],
-                    'Transfer Error': self.a_state[bit_array[14]],
-                }
-                return name, "status:{}".format(response)
-
-            elif name == 'REFRIGERATION_ALARM_STATUS':
-                bit_array = self.bitfield(value)
-                response = {
-                    'System 1(A) High/Low Pressure': self.a_state[bit_array[0]],
-                    'System 1(A) Low Oil Pressure': self.a_state[bit_array[1]],
-                    'System 1(A) High Discharge Temperature': self.a_state[bit_array[2]],
-                    'System 1(A) Compressor Protection Module': self.a_state[bit_array[3]],
-                    'Pumpdown Disabled': self.a_state[bit_array[4]],
-                    'System 1(A) Floodback Monitor': self.a_state[bit_array[5]],
-                    '(not assigned) 1': self.a_state[bit_array[6]],
-                    '(not assigned) 2': self.a_state[bit_array[7]],
-                    'System 2(B) High/Low Pressure': self.a_state[bit_array[8]],
-                    'System 2(B) Low Oil Pressure': self.a_state[bit_array[9]],
-                    'System 2(B) High Discharge Temperature': self.a_state[bit_array[10]],
-                    'System 2(B) Compressor Protection Module': self.a_state[bit_array[11]],
-                    '(not assigned) 3': self.a_state[bit_array[12]],
-                    'System B Floodback Monitor': self.a_state[bit_array[13]],
-                    '(not assigned) 4': self.a_state[bit_array[14]],
-                }
-                return name, "status:{}".format(response)
-
-            elif name == 'SYSTEM_STATUS_MONITOR':
-                bit_array = self.bitfield(value)
-                response = {
-                    'Humidity Water Reservoir Low': self.a_state[bit_array[0]],
-                    'Humidity Disabled (temperature out-of-range)': self.a_state[bit_array[1]],
-                    'Humidity High Dewpoint Limit': self.a_state[bit_array[2]],
-                    'Humidity Low Dewpoint Limit': self.a_state[bit_array[3]],
-                    'Door Open': self.a_state[bit_array[4]],
-                    '(not assigned) 1': self.a_state[bit_array[5]],
-                    '(not assigned) 2': self.a_state[bit_array[6]],
-                    '(not assigned) 3': self.a_state[bit_array[7]],
-                    'Service Air Circulators': self.a_state[bit_array[8]],
-                    'Service Heating/Cooling System': self.a_state[bit_array[9]],
-                    'Service Humidity System': self.a_state[bit_array[10]],
-                    'Service Purge System': self.a_state[bit_array[11]],
-                    'Service Altitude System': self.a_state[bit_array[12]],
-                    'Service Transfer Mechanism': self.a_state[bit_array[13]],
-                    '(not assigned) 4': self.a_state[bit_array[14]],
-                }
-                return name, "status:{}".format(response)
-
-            elif name == 'LOOP_1_SETPOINT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_2_SETPOINT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_3_SETPOINT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_4_SETPOINT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_5_SETPOINT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_1_PROCESS_VALUE':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_2_PROCESS_VALUE':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_3_PROCESS_VALUE':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_4_PROCESS_VALUE':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_5_PROCESS_VALUE':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_1_PERCENT_OUTPUT':
-                return self.get_loop_percent_output(name, value)
-
-            elif name == 'LOOP_2_PERCENT_OUTPUT':
-                return self.get_loop_percent_output(name, value)
-
-            elif name == 'LOOP_3_PERCENT_OUTPUT':
-                return self.get_loop_percent_output(name, value)
-
-            elif name == 'LOOP_4_PERCENT_OUTPUT':
-                return self.get_loop_percent_output(name, value)
-
-            elif name == 'LOOP_5_PERCENT_OUTPUT':
-                return self.get_loop_percent_output(name, value)
-
-            elif name == 'LOOP_1_AUTOTUNE_STATUS':
-                return self.get_loop_autotune_status(name, value)
-
-            elif name == 'LOOP_2_AUTOTUNE_STATUS':
-                return self.get_loop_autotune_status(name, value)
-
-            elif name == 'LOOP_3_AUTOTUNE_STATUS':
-                return self.get_loop_autotune_status(name, value)
-
-            elif name == 'LOOP_4_AUTOTUNE_STATUS':
-                return self.get_loop_autotune_status(name, value)
-
-            elif name == 'LOOP_5_AUTOTUNE_STATUS':
-                return self.get_loop_autotune_status(name, value)
-
-            elif name == 'LOOP_1_UPPER_SETPOINT_LIMIT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_2_UPPER_SETPOINT_LIMIT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_3_UPPER_SETPOINT_LIMIT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_4_UPPER_SETPOINT_LIMIT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_5_UPPER_SETPOINT_LIMIT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-            elif name == 'LOOP_1_LOWER_SETPOINT_LIMIT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_2_LOWER_SETPOINT_LIMIT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_3_LOWER_SETPOINT_LIMIT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_4_LOWER_SETPOINT_LIMIT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_5_LOWER_SETPOINT_LIMIT':
-                """
-                -32768 – 32767 (-3276.8 – 3276.7 degrees)
-                """
-                return name, "degrees:{}".format(value)
-
-            elif name == 'LOOP_1_ALARM_TYPE':
-                return self.get_loop_alarm_type(name, value)
-
-            elif name == 'LOOP_2_ALARM_TYPE':
-                return self.get_loop_alarm_type(name, value)
-
-            elif name == 'LOOP_3_ALARM_TYPE':
-                return self.get_loop_alarm_type(name, value)
-
-            elif name == 'LOOP_4_ALARM_TYPE':
-                return self.get_loop_alarm_type(name, value)
-
-            elif name == 'LOOP_5_ALARM_TYPE':
-                return self.get_loop_alarm_type(name, value)
-
-            elif name == 'LOOP_1_ALARM_MODE':
-                return self.get_loop_alarm_mode(name, value)
-
-            elif name == 'LOOP_2_ALARM_MODE':
-                return self.get_loop_alarm_mode(name, value)
-
-            elif name == 'LOOP_3_ALARM_MODE':
-                return self.get_loop_alarm_mode(name, value)
-
-            elif name == 'LOOP_4_ALARM_MODE':
-                return self.get_loop_alarm_mode(name, value)
-
-            elif name == 'LOOP_5_ALARM_MODE':
-                return self.get_loop_alarm_mode(name, value)
-
-            elif name == 'LOOP_1_ALARM_OUTPUT_ASSIGNMENT':
-                return self.get_loop_alarm_output_assignment(name, value)
-
-            elif name == 'LOOP_2_ALARM_OUTPUT_ASSIGNMENT':
-                return self.get_loop_alarm_output_assignment(name, value)
-
-            elif name == 'LOOP_3_ALARM_OUTPUT_ASSIGNMENT':
-                return self.get_loop_alarm_output_assignment(name, value)
-
-            elif name == 'LOOP_4_ALARM_OUTPUT_ASSIGNMENT':
-                return self.get_loop_alarm_output_assignment(name, value)
-
-            elif name == 'LOOP_5_ALARM_OUTPUT_ASSIGNMENT':
-                return self.get_loop_alarm_output_assignment(name, value)
-
-            elif name == 'LOOP_1_HIGH_ALARM_SETPOINT':
-                return self.get_loop_alarm_setpoint(name, value)
-
-            elif name == 'LOOP_2_HIGH_ALARM_SETPOINT':
-                return self.get_loop_alarm_setpoint(name, value)
-
-            elif name == 'LOOP_3_HIGH_ALARM_SETPOINT':
-                return self.get_loop_alarm_setpoint(name, value)
-
-            elif name == 'LOOP_4_HIGH_ALARM_SETPOINT':
-                return self.get_loop_alarm_setpoint(name, value)
-
-            elif name == 'LOOP_5_HIGH_ALARM_SETPOINT':
-                return self.get_loop_alarm_setpoint(name, value)
-
-            elif name == 'LOOP_1_LOW_ALARM_SETPOINT':
-                return self.get_loop_alarm_setpoint(name, value)
-
-            elif name == 'LOOP_2_LOW_ALARM_SETPOINT':
-                return self.get_loop_alarm_setpoint(name, value)
-
-            elif name == 'LOOP_3_LOW_ALARM_SETPOINT':
-                return self.get_loop_alarm_setpoint(name, value)
-
-            elif name == 'LOOP_4_LOW_ALARM_SETPOINT':
-                return self.get_loop_alarm_setpoint(name, value)
-
-            elif name == 'LOOP_5_LOW_ALARM_SETPOINT':
-                return self.get_loop_alarm_setpoint(name, value)
-
-            elif name == 'LOOP_1_ALARM_HYSTERESIS':
-                return self.get_loop_alarm_hysteresis(name, value)
-
-            elif name == 'LOOP_2_ALARM_HYSTERESIS':
-                return self.get_loop_alarm_hysteresis(name, value)
-
-            elif name == 'LOOP_3_ALARM_HYSTERESIS':
-                return self.get_loop_alarm_hysteresis(name, value)
-
-            elif name == 'LOOP_4_ALARM_HYSTERESIS':
-                return self.get_loop_alarm_hysteresis(name, value)
-
-            elif name == 'LOOP_5_ALARM_HYSTERESIS':
-                return self.get_loop_alarm_hysteresis(name, value)
-
-            elif name == '':
-                pass
-
-            else:
-                return name, "NO MATCH"
+
+        if not name:
+            return
+
+        if name == 'OPERATIONAL_MODE':
+            mode = {
+                0: 'Off',
+                1: 'On'
+            }
+            s = mode.get(value, "{} Not specified in API".format(value))
+            return name, "Status:{}".format(s)
+
+        elif name == 'CLOCK_YY_MM':
+            """
+            high byte: Year: 0 to 99
+            low byte: Month: 1=Jan, ... 12=Dec
+            """
+            b_year, b_month = int_to_two_bytes(value & 0xFFFF)
+            year = struct.unpack('B', b_year)[0]
+            month = struct.unpack('B', b_month)[0]
+            return name, "year: 20{}, month:{}".format(year, month)
+
+        elif name == 'CLOCK_DAY_DOW':
+            """
+            high byte: Day of Month: 1 to 31
+            low byte: Day  of Week: 0=Sun, ... 6=Sat
+            """
+            b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
+            dom = struct.unpack('B', b_dom)[0]
+            dow = struct.unpack('B', b_dow)[0]
+            return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
+
+        elif name == 'CLOCK_HH_MM':
+            """
+            high byte: Hours: 1 to 23
+            low byte: Minutes: 0 to 59
+            """
+            b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
+            hour = struct.unpack('B', b_hour)[0]
+            minutes = struct.unpack('B', b_minutes)[0]
+            return name, "Hour:{}, Minute:{}".format(hour, minutes)
+
+        elif name == 'CLOCK_SEC':
+            """
+            2 bytes: seconds: 0 to 59
+            """
+            return name, "Seconds:{}".format(value)
+
+        elif name == 'POWER_RECOVERY_MODE':
+            mode = {
+                0: 'Continue',
+                1: 'Hold',
+                2: 'Terminate',
+                4: 'Reset',
+                8: 'Resume'
+            }
+            s = mode.get(value, "{} Not specified in API".format(value))
+            return name, "Status:{}".format(s)
+
+        elif name == 'POWER_OUT_TIME':
+            """
+            0 - 32767 seconds
+            """
+            return name, "Seconds:{}".format(value)
+
+        elif name == 'DEFROST_OPERATING_MODE':
+            mode = {
+                0: 'Disabled',
+                1: 'Manual Mode Selected',
+                3: 'Auto Mode Selected'
+            }
+            s = mode.get(value, "{} Not specified in API".format(value))
+            return name, "Status:{}".format(s)
+
+        elif name == 'AUTO_DEFROST_TEMPERATURE_SETPOINT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'AUTO_DEFROST_TIME_INTERVAL':
+            """
+            0 - 32767 minutes
+            """
+            return name, "minutes:{}".format(value)
+
+        elif name == 'DEFROST STATUS':
+            mode = {
+                0: 'Not in Defrost',
+                1: 'In Defrost',
+                3: 'In Prechill'
+            }
+            s = mode.get(value, "{} Not specified in API".format(value))
+            return name, "Status:{}".format(s)
+
+        elif name == 'TIME_REMAINING_UNTIL_NEXT_DEFROST':
+            """
+            0 - 32767 minutes
+            """
+            return name, "minutes:{}".format(value)
+
+        elif name == 'PRODUCT_CONTROL':
+            mode = {
+                0: 'Off',
+                1: 'Deviation',
+                2: 'Process',
+                4: 'Off',
+                5: 'Deviation using Event for enable',
+                6: 'Process using Event for enable'
+            }
+            s = mode.get(value, "{} Not specified in API".format(value))
+            return name, "Status:{}".format(s)
+
+        elif name == 'PRODUCT_CONTROL_UPPER_SETPOINT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'PRODUCT_CONTROL_LOWER_SETPOINT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'CONDENSATION_CONTROL':
+            mode = {
+                0: "Off",
+                1: "On"
+            }
+            s = mode.get(value, "{} Not specified in API".format(value))
+            return name, "Status:{}".format(s)
+
+        elif name == 'CONDENSATION_CONTROL_MONITOR_MODE':
+            mode = {
+                1: "Use Single Input",
+                2: "Use Lowest Input",
+                4: "Use Highest Input",
+                8: "Use Average of all Inputs"
+            }
+            s = mode.get(value, "{} Not specified in API".format(value))
+            return name, "Status:{}".format(s)
+
+        elif name == 'CONDENSATION_CONTROL_INPUT_SELECTION':
+            bit_array = self.bitfield(value)
+            response = {
+                'Product': 0,
+                'PV1': bit_array[0],
+                'PV2': bit_array[1],
+                'PV3': bit_array[2],
+                'PV4': bit_array[3],
+                'PV5': bit_array[4],
+                'PV6': bit_array[5],
+                'PV7': bit_array[6],
+                'PV8': bit_array[7],
+            }
+            return name, "pv:{}".format(response)
+
+        elif name == 'CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT':
+            """
+            0 - 100 (0.0 – 10.0 degrees C)
+            0 - 180 (0.0 – 18.0 degrees F)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'CONDENSATION_CONTROL_DEUPOINT_LIMIT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'CONDENSATION_CONTROL_DUEPOINT_ACTUAL':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'CHAMBER_LIGHT_CONTROL':
+            mode = {
+                0: "Off",
+                1: "On"
+            }
+            s = mode.get(value, "{} Not specified in API".format(value))
+            return name, "Status:{}".format(s)
+
+        elif name == 'CHAMBER_MANUAL_EVENT_CONTROL':
+            """
+            Bit 0 to 14 == Event 1 to 15.
+            """
+            return name, "Event Bit array:{}".format(value)
+
+        elif name == 'CUSTOMER_MANUAL_EVENT_CONTROL':
+            """
+            Bit 0 to 14 == Event 1 to 15.
+            """
+            return name, "Event Bit array:{}".format(value)
+
+        elif name == 'PROFILE_CONTROL_STATUS':
+            mode = {
+                0: 'Stop/Off',
+                1: 'Stop/All Off',
+                2: 'Hold',
+                4: 'Run/Resume',
+                8: 'Autostart',
+                16: 'Wait',
+                32: 'Ramp',
+                64: 'Soak',
+                128: 'Guaranteed Soak'
+            }
+            s = mode.get(value, "{} Not specified in API".format(value))
+            return name, "Status:{}".format(s)
+
+        elif name == 'PROFILE_ADVANCED_STEP':
+            mode = {
+                1: 'Advance Previous Step',
+                2: 'Advance Next Step'
+            }
+            s = mode.get(value, "{} Not specified in API".format(value))
+            return name, "Mode:{}".format(s)
+
+        elif name == 'PROFILE_NAME_CH_1_2':
+            """
+            32 – 126 (high byte)
+            32 – 126 (low byte)
+            """
+            b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+            hch = struct.unpack('B', b_hch)[0]
+            lch = struct.unpack('B', b_lch)[0]
+            return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+        elif name == 'PROFILE_NAME_CH_3_4':
+            b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+            hch = struct.unpack('B', b_hch)[0]
+            lch = struct.unpack('B', b_lch)[0]
+            return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+        elif name == 'PROFILE_NAME_CH_5_6':
+            b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+            hch = struct.unpack('B', b_hch)[0]
+            lch = struct.unpack('B', b_lch)[0]
+            return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+        elif name == 'PROFILE_NAME_CH_7_8':
+            b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+            hch = struct.unpack('B', b_hch)[0]
+            lch = struct.unpack('B', b_lch)[0]
+            return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+        elif name == 'PROFILE_NAME_CH_9_10':
+            b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+            hch = struct.unpack('B', b_hch)[0]
+            lch = struct.unpack('B', b_lch)[0]
+            return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+        elif name == 'PROFILE_START_DATE_YY_MM':
+            """
+            high byte: Year: 0 to 99
+            low byte: Month: 1=Jan, ... 12=Dec
+            """
+            b_year, b_month = int_to_two_bytes(value & 0xFFFF)
+            year = struct.unpack('B', b_year)[0]
+            month = struct.unpack('B', b_month)[0]
+            return name, "year: 20{}, month:{}".format(year, month)
+
+        elif name == 'PROFILE_STOP_DATE_YY_MM':
+            """
+            high byte: Year: 0 to 99
+            low byte: Month: 1=Jan, ... 12=Dec
+            """
+            b_year, b_month = int_to_two_bytes(value & 0xFFFF)
+            year = struct.unpack('B', b_year)[0]
+            month = struct.unpack('B', b_month)[0]
+            return name, "year: 20{}, month:{}".format(year, month)
+
+        elif name == 'PROFILE_START_DATE_DAY_DOW':
+            """
+            high byte: Day of Month: 1 to 31
+            low byte: Day  of Week: 0=Sun, ... 6=Sat
+            """
+            b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
+            dom = struct.unpack('B', b_dom)[0]
+            dow = struct.unpack('B', b_dow)[0]
+            return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
+
+        elif name == 'PROFILE_STOP_DATE_DAY_DOW':
+            """
+            high byte: Day of Month: 1 to 31
+            low byte: Day  of Week: 0=Sun, ... 6=Sat
+            """
+            b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
+            dom = struct.unpack('B', b_dom)[0]
+            dow = struct.unpack('B', b_dow)[0]
+            return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
+
+        elif name == 'PROFILE_START_DATE_HH_MM':
+            """
+            high byte: Hours: 1 to 23
+            low byte: Minutes: 0 to 59
+            """
+            b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
+            hour = struct.unpack('B', b_hour)[0]
+            minutes = struct.unpack('B', b_minutes)[0]
+            return name, "Hour:{}, Minute:{}".format(hour, minutes)
+
+        elif name == 'PROFILE_STOP_DATE_HH_MM':
+            """
+            high byte: Hours: 1 to 23
+            low byte: Minutes: 0 to 59
+            """
+            b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
+            hour = struct.unpack('B', b_hour)[0]
+            minutes = struct.unpack('B', b_minutes)[0]
+            return name, "Hour:{}, Minute:{}".format(hour, minutes)
+
+        elif name == 'PROFILE_START_STEP':
+            """0 - 99"""
+            return name, "step:{}".format(value)
+
+        elif name == 'PROFILE_CURRENT_STEP':
+            """0 - 99"""
+            return name, "step:{}".format(value)
+
+        elif name == 'PROFILE_LAST_STEP':
+            """0 - 99"""
+            return name, "step:{}".format(value)
+
+        elif name == 'PROFILE_TIME_LEFT_IN_CURRENT_STEP_HHH':
+            """1 – 999 Hours"""
+            return name, "hours:{}".format(value)
+
+        elif name == 'PROFILE_TIME_LEFT_IN_CURRENT_STEP_MM_SS':
+            """
+             high byte: Minutes: 0 to 59
+             low byte: Seconds: 0 to 59
+             """
+            b_minutes, b_seconds = int_to_two_bytes(value & 0xFFFF)
+            minutes = struct.unpack('B', b_minutes)[0]
+            seconds = struct.unpack('B', b_seconds)[0]
+            return name, "Minute:{}, Seconds:{}".format(minutes, seconds)
+
+        elif name == 'PROFILE_WAIT_FOR_STATUS':
+            mode = {
+                0:    'Not Waiting',
+                1:    'Input 1',
+                2:    'Input 2',
+                4:    'Input 3',
+                8:    'Input 4',
+                16:   'Input 5',
+                32:   'Input 6',
+                64:   'Input 7',
+                128:  'Input 8',
+                256:  'Input 9',
+                512:  'Input 10',
+                1024: 'Input 11',
+                2048: 'Input 12',
+                4096: 'Input 13',
+                8192: 'Digital Input'
+            }
+            s = mode.get(value, "{} Not specified in API".format(value))
+            return name, "Status:{}".format(s)
+
+        elif name == 'PROFILE_WAIT_FOR_SETPOINT':
+            """-32768 – 32767 (-3276.8 – 3276.7)"""
+            return name, "degrees:{}".format(value)
+
+        elif name == 'PROFILE_CURRENT_JUMP_STEP':
+            """0 - 99"""
+            return name, "step:{}".format(value)
+
+        elif name == 'PROFILE_JUMPS_REMAINING_IN_CURRENT_STEP':
+            """0 - 99"""
+            return name, "jumps:{}".format(value)
+
+        elif name == 'PROFILE_LOOP_1_TARGET_SETPOINT':
+            """-32768 – 32767 (-3276.8 – 3276.7)"""
+            return name, "degrees:{}".format(value)
+
+        elif name == 'PROFILE_LOOP_2_TARGET_SETPOINT':
+            """-32768 – 32767 (-3276.8 – 3276.7)"""
+            return name, "degrees:{}".format(value)
+
+        elif name == 'PROFILE_LOOP_3_TARGET_SETPOINT':
+            """-32768 – 32767 (-3276.8 – 3276.7)"""
+            return name, "degrees:{}".format(value)
+
+        elif name == 'PROFILE_LOOP_4_TARGET_SETPOINT':
+            """-32768 – 32767 (-3276.8 – 3276.7)"""
+            return name, "degrees:{}".format(value)
+
+        elif name == 'PROFILE_LOOP_5_TARGET_SETPOINT':
+            """-32768 – 32767 (-3276.8 – 3276.7)"""
+            return name, "degrees:{}".format(value)
+
+        elif name == 'PROFILE_LAST_JUMP_FROM_STEP':
+            """0 - 99"""
+            return name, "step:{}".format(value)
+
+        elif name == 'PROFILE_LAST_JUMP_TO_STEP':
+            """0 - 99"""
+            return name, "step:{}".format(value)
+
+        elif name == 'PROFILE_TOTAL_JUMPS_MADE':
+            """0 – 32767"""
+            return name, "jumps:{}".format(value)
+
+        elif name == 'ALARM_ACKNOWLEDGE':
+            mode = {
+                1: 'Alarm Silence',
+                2: 'Pumpdown Reset'
+            }
+            s = mode.get(value, "{} Not specified in API".format(value))
+            return name, "Status:{}".format(s)
+
+        elif name == 'EZT-570I_ALARM_STATUS':
+            bit_array = self.bitfield(value)
+            response = {
+                'Input1 Sensor Break': a_state[bit_array[0]],
+                'Input2 Sensor Break': a_state[bit_array[1]],
+                'Input3 Sensor Break': a_state[bit_array[2]],
+                'Input4 Sensor Break': a_state[bit_array[3]],
+                'Input5 Sensor Break': a_state[bit_array[4]],
+                'Input6 Sensor Break': a_state[bit_array[5]],
+                'Input7 Sensor Break': a_state[bit_array[6]],
+                'Input8 Sensor Break': a_state[bit_array[7]],
+                'Input9 Sensor Break': a_state[bit_array[8]],
+                'Input10 Sensor Break': a_state[bit_array[9]],
+                'Input11 Sensor Break': a_state[bit_array[10]],
+                'Input12 Sensor Break': a_state[bit_array[11]],
+                'Input13 Sensor Break': a_state[bit_array[12]],
+                '(not assigned)': a_state[bit_array[13]],
+                'Loop Communications Failure': a_state[bit_array[14]],
+            }
+            return name, "status:{}".format(response)
+
+        elif name == 'INPUT_ALARM_STATUS':
+            bit_array = self.bitfield(value)
+            response = {
+                'Input1 Alarm':   a_state[bit_array[0]],
+                'Input2 Alarm':   a_state[bit_array[1]],
+                'Input3 Alarm':   a_state[bit_array[2]],
+                'Input4 Alarm':   a_state[bit_array[3]],
+                'Input5 Alarm':   a_state[bit_array[4]],
+                'Input6 Alarm':   a_state[bit_array[5]],
+                'Input7 Alarm':   a_state[bit_array[6]],
+                'Input8 Alarm':   a_state[bit_array[7]],
+                'Input9 Alarm':   a_state[bit_array[8]],
+                'Input10 Alarm':  a_state[bit_array[9]],
+                'Input11 Alarm':  a_state[bit_array[10]],
+                'Input12 Alarm':  a_state[bit_array[11]],
+                'Input13 Alarm':  a_state[bit_array[12]],
+                '(not assigned 1)': a_state[bit_array[13]],
+                '(not assigned 2)': a_state[bit_array[14]]
+            }
+            return name, "status:{}".format(response)
+
+        elif name == 'CHAMBER_ALARM_STATUS':
+            bit_array = self.bitfield(value)
+            response = {
+                'Heater High Limit (Plenum A)': a_state[bit_array[0]],
+                'External Product Safety': a_state[bit_array[1]],
+                'Boiler Over-Temp (Plenum A)': a_state[bit_array[2]],
+                'Boiler Low Water (Plenum A)': a_state[bit_array[3]],
+                'Dehumidifier System Fault (System B Boiler Over-Temp)': a_state[bit_array[4]],
+                'Motor Overload (Plenum A)': a_state[bit_array[5]],
+                'Fluid System High Limit (Plenum B Heater High Limit)': a_state[bit_array[6]],
+                'Fluid System High Pressure (Plenum B Motor Overload)': a_state[bit_array[7]],
+                'Fluid System Low Flow': a_state[bit_array[8]],
+                'Door Open': a_state[bit_array[9]],
+                '(System B Boiler Low Water)': a_state[bit_array[10]],
+                '(not assigned)': a_state[bit_array[11]],
+                'Emergency Stop': a_state[bit_array[12]],
+                'Power Failure': a_state[bit_array[13]],
+                'Transfer Error': a_state[bit_array[14]],
+            }
+            return name, "status:{}".format(response)
+
+        elif name == 'REFRIGERATION_ALARM_STATUS':
+            bit_array = self.bitfield(value)
+            response = {
+                'System 1(A) High/Low Pressure': a_state[bit_array[0]],
+                'System 1(A) Low Oil Pressure': a_state[bit_array[1]],
+                'System 1(A) High Discharge Temperature': a_state[bit_array[2]],
+                'System 1(A) Compressor Protection Module': a_state[bit_array[3]],
+                'Pumpdown Disabled': a_state[bit_array[4]],
+                'System 1(A) Floodback Monitor': a_state[bit_array[5]],
+                '(not assigned) 1': a_state[bit_array[6]],
+                '(not assigned) 2': a_state[bit_array[7]],
+                'System 2(B) High/Low Pressure': a_state[bit_array[8]],
+                'System 2(B) Low Oil Pressure': a_state[bit_array[9]],
+                'System 2(B) High Discharge Temperature': a_state[bit_array[10]],
+                'System 2(B) Compressor Protection Module': a_state[bit_array[11]],
+                '(not assigned) 3': a_state[bit_array[12]],
+                'System B Floodback Monitor': a_state[bit_array[13]],
+                '(not assigned) 4': a_state[bit_array[14]],
+            }
+            return name, "status:{}".format(response)
+
+        elif name == 'SYSTEM_STATUS_MONITOR':
+            bit_array = self.bitfield(value)
+            response = {
+                'Humidity Water Reservoir Low': a_state[bit_array[0]],
+                'Humidity Disabled (temperature out-of-range)': a_state[bit_array[1]],
+                'Humidity High Dewpoint Limit': a_state[bit_array[2]],
+                'Humidity Low Dewpoint Limit': a_state[bit_array[3]],
+                'Door Open': a_state[bit_array[4]],
+                '(not assigned) 1': a_state[bit_array[5]],
+                '(not assigned) 2': a_state[bit_array[6]],
+                '(not assigned) 3': a_state[bit_array[7]],
+                'Service Air Circulators': a_state[bit_array[8]],
+                'Service Heating/Cooling System': a_state[bit_array[9]],
+                'Service Humidity System': a_state[bit_array[10]],
+                'Service Purge System': a_state[bit_array[11]],
+                'Service Altitude System': a_state[bit_array[12]],
+                'Service Transfer Mechanism': a_state[bit_array[13]],
+                '(not assigned) 4': a_state[bit_array[14]],
+            }
+            return name, "status:{}".format(response)
+
+        elif name == 'LOOP_1_SETPOINT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_2_SETPOINT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_3_SETPOINT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_4_SETPOINT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_5_SETPOINT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_1_PROCESS_VALUE':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_2_PROCESS_VALUE':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_3_PROCESS_VALUE':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_4_PROCESS_VALUE':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_5_PROCESS_VALUE':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_1_PERCENT_OUTPUT':
+            return self.get_loop_percent_output(name, value)
+
+        elif name == 'LOOP_2_PERCENT_OUTPUT':
+            return self.get_loop_percent_output(name, value)
+
+        elif name == 'LOOP_3_PERCENT_OUTPUT':
+            return self.get_loop_percent_output(name, value)
+
+        elif name == 'LOOP_4_PERCENT_OUTPUT':
+            return self.get_loop_percent_output(name, value)
+
+        elif name == 'LOOP_5_PERCENT_OUTPUT':
+            return self.get_loop_percent_output(name, value)
+
+        elif name == 'LOOP_1_AUTOTUNE_STATUS':
+            return self.get_loop_autotune_status(name, value)
+
+        elif name == 'LOOP_2_AUTOTUNE_STATUS':
+            return self.get_loop_autotune_status(name, value)
+
+        elif name == 'LOOP_3_AUTOTUNE_STATUS':
+            return self.get_loop_autotune_status(name, value)
+
+        elif name == 'LOOP_4_AUTOTUNE_STATUS':
+            return self.get_loop_autotune_status(name, value)
+
+        elif name == 'LOOP_5_AUTOTUNE_STATUS':
+            return self.get_loop_autotune_status(name, value)
+
+        elif name == 'LOOP_1_UPPER_SETPOINT_LIMIT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_2_UPPER_SETPOINT_LIMIT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_3_UPPER_SETPOINT_LIMIT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_4_UPPER_SETPOINT_LIMIT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_5_UPPER_SETPOINT_LIMIT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+        elif name == 'LOOP_1_LOWER_SETPOINT_LIMIT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_2_LOWER_SETPOINT_LIMIT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_3_LOWER_SETPOINT_LIMIT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_4_LOWER_SETPOINT_LIMIT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_5_LOWER_SETPOINT_LIMIT':
+            """
+            -32768 – 32767 (-3276.8 – 3276.7 degrees)
+            """
+            return name, "degrees:{}".format(value)
+
+        elif name == 'LOOP_1_ALARM_TYPE':
+            return self.get_loop_alarm_type(name, value)
+
+        elif name == 'LOOP_2_ALARM_TYPE':
+            return self.get_loop_alarm_type(name, value)
+
+        elif name == 'LOOP_3_ALARM_TYPE':
+            return self.get_loop_alarm_type(name, value)
+
+        elif name == 'LOOP_4_ALARM_TYPE':
+            return self.get_loop_alarm_type(name, value)
+
+        elif name == 'LOOP_5_ALARM_TYPE':
+            return self.get_loop_alarm_type(name, value)
+
+        elif name == 'LOOP_1_ALARM_MODE':
+            return self.get_loop_alarm_mode(name, value)
+
+        elif name == 'LOOP_2_ALARM_MODE':
+            return self.get_loop_alarm_mode(name, value)
+
+        elif name == 'LOOP_3_ALARM_MODE':
+            return self.get_loop_alarm_mode(name, value)
+
+        elif name == 'LOOP_4_ALARM_MODE':
+            return self.get_loop_alarm_mode(name, value)
+
+        elif name == 'LOOP_5_ALARM_MODE':
+            return self.get_loop_alarm_mode(name, value)
+
+        elif name == 'LOOP_1_ALARM_OUTPUT_ASSIGNMENT':
+            return self.get_loop_alarm_output_assignment(name, value)
+
+        elif name == 'LOOP_2_ALARM_OUTPUT_ASSIGNMENT':
+            return self.get_loop_alarm_output_assignment(name, value)
+
+        elif name == 'LOOP_3_ALARM_OUTPUT_ASSIGNMENT':
+            return self.get_loop_alarm_output_assignment(name, value)
+
+        elif name == 'LOOP_4_ALARM_OUTPUT_ASSIGNMENT':
+            return self.get_loop_alarm_output_assignment(name, value)
+
+        elif name == 'LOOP_5_ALARM_OUTPUT_ASSIGNMENT':
+            return self.get_loop_alarm_output_assignment(name, value)
+
+        elif name == 'LOOP_1_HIGH_ALARM_SETPOINT':
+            return self.get_loop_alarm_setpoint(name, value)
+
+        elif name == 'LOOP_2_HIGH_ALARM_SETPOINT':
+            return self.get_loop_alarm_setpoint(name, value)
+
+        elif name == 'LOOP_3_HIGH_ALARM_SETPOINT':
+            return self.get_loop_alarm_setpoint(name, value)
+
+        elif name == 'LOOP_4_HIGH_ALARM_SETPOINT':
+            return self.get_loop_alarm_setpoint(name, value)
+
+        elif name == 'LOOP_5_HIGH_ALARM_SETPOINT':
+            return self.get_loop_alarm_setpoint(name, value)
+
+        elif name == 'LOOP_1_LOW_ALARM_SETPOINT':
+            return self.get_loop_alarm_setpoint(name, value)
+
+        elif name == 'LOOP_2_LOW_ALARM_SETPOINT':
+            return self.get_loop_alarm_setpoint(name, value)
+
+        elif name == 'LOOP_3_LOW_ALARM_SETPOINT':
+            return self.get_loop_alarm_setpoint(name, value)
+
+        elif name == 'LOOP_4_LOW_ALARM_SETPOINT':
+            return self.get_loop_alarm_setpoint(name, value)
+
+        elif name == 'LOOP_5_LOW_ALARM_SETPOINT':
+            return self.get_loop_alarm_setpoint(name, value)
+
+        elif name == 'LOOP_1_ALARM_HYSTERESIS':
+            return self.get_loop_alarm_hysteresis(name, value)
+
+        elif name == 'LOOP_2_ALARM_HYSTERESIS':
+            return self.get_loop_alarm_hysteresis(name, value)
+
+        elif name == 'LOOP_3_ALARM_HYSTERESIS':
+            return self.get_loop_alarm_hysteresis(name, value)
+
+        elif name == 'LOOP_4_ALARM_HYSTERESIS':
+            return self.get_loop_alarm_hysteresis(name, value)
+
+        elif name == 'LOOP_5_ALARM_HYSTERESIS':
+            return self.get_loop_alarm_hysteresis(name, value)
+
+        elif name == '':
+            pass
+        else:
+            return name, "NO MATCH"
 
 
 
