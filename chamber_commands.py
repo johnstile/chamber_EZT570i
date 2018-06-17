@@ -11,7 +11,11 @@ class ChamberCommandRegisters(object):
     """
 
     def __init__(self):
-        pass
+        # Meaningful name for alarms states
+        self.a_state = {
+            0: 'norma',
+            1: 'Alarm'
+        }
 
     # Dictionary map bytes to function
     ctrl = {
@@ -195,7 +199,7 @@ class ChamberCommandRegisters(object):
         'EZT570I_OFFLINE_DOWNLOAD_PROFILE': 180  # r,
     }
 
-    def bitfield(n):
+    def bitfield(self, n):
         """Convert int to array of bits"""
         return [int(digit) for digit in bin(n)[2:]] # [2:] to chop off the "0b" part
 
@@ -211,6 +215,108 @@ class ChamberCommandRegisters(object):
         if search_name in self.ctrl:
             response = self.ctrl[search_name]
         return response
+
+    def get_loop_autotune_status(self, name, value):
+        mode = {
+            0: 'Autotune Off',
+            1: 'Start Autotune',
+            2: 'Autotune In Progress',
+            4: 'Cancel Autotune'
+        }
+        if value in mode:
+            s = mode[value]
+        else:
+            s = "{} Not specified in API".format(value)
+        return name, "Status:{}".format(s)
+
+    def get_loop_alarm_type(self, name, value):
+        mode = {
+            0: 'Alarm Off',
+            3: 'Porcess High',
+            5: 'Process Low',
+            7: 'Process Both',
+            24: 'Deviation High',
+            40: 'Deviation Low',
+            56: 'Deviation Both'
+        }
+        if value in mode:
+            s = mode[value]
+        else:
+            s = "{} Not specified in API".format(value)
+        return name, "Status:{}".format(s)
+
+
+    def get_loop_alarm_hysteresis(self, name, value):
+        """
+        0 – 32767 (0 – 3276.7 degrees)
+        """
+        response = value / 10
+        return name, "degrees:{}".format(response)
+
+    def get_loop_alarm_setpoint(self, name, value):
+        """
+        -32768 – 32767 (-3276.8 – 3276.7)
+        """
+        response = value / 10
+        return name, "degrees:{}".format(response)
+
+    def get_loop_alarm_output_assignment(self, name, value):
+        mode = {
+            0: 'No Output Selected',
+            1: 'Digital Output (Customer Event) 1 Selected',
+            2: 'Digital Output (Customer Event) 2 Selected',
+            4: 'Digital Output (Customer Event) 3 Selected',
+            8: 'Digital Output (Customer Event) 4 Selected',
+            16: 'Digital Output (Customer Event) 5 Selected',
+            32: 'Digital Output (Customer Event) 6 Selected',
+            64: 'Digital Output (Customer Event) 7 Selected',
+            128: 'Digital Output (Customer Event) 8 Selected',
+            256: 'Digital Output (Customer Event) 9 Selected',
+            512: 'Digital Output (Customer Event) 10 Selected',
+            1024: 'Digital Output (Customer Event) 11 Selected',
+            2048: 'Digital Output (Customer Event) 12 Selected',
+            4096: 'Digital Output (Customer Event) 13 Selected',
+            8192: 'Digital Output (Customer Event) 14 Selected',
+            16384: 'Digital Output (Customer Event) 15 Selected'
+        }
+        if value in mode:
+            s = mode[value]
+        else:
+            s = "{} Not specified in API".format(value)
+        return name, "Status:{}".format(s)
+
+    def get_loop_alarm_mode(self, name, value):
+        bit_array = self.bitfield(value)
+        bit0 = {
+            0: 'Alarm Self Clears',
+            1: 'Alarm Latches'
+        }
+        bit1 = {
+            0: 'Close on Alarm',
+            1: 'Open on Alarm'
+        }
+        bit4 = {
+            0: 'Audible Alarm Off',
+            1: 'Audible Alarm On'
+        }
+        bit5 = {
+            0: 'Chamber Continues On Alarm',
+            1: 'Chamber Shuts Down On Alarm'
+        }
+        response = {
+            'Step': bit0[bit_array[0]],
+            'Door': bit1[bit_array[1]],
+            'Audible': bit4[bit_array[4]],
+            'Profile': bit5[bit_array[5]]
+        }
+        return name, ("status:{}").format(response)
+
+    def get_loop_percent_output(self, name, value):
+        """
+        -10000 – 10000 (-100.00 – 100.00)
+        """
+        response = value / 100
+        return name, "%out:{}".format(response)
 
     def encode_set_value(self, name, value):
         """
@@ -231,17 +337,18 @@ class ChamberCommandRegisters(object):
 
     def decode_read_value(self, reg, value):
         name = self.reg_value_to_name(reg)
-        response = None
         int_to_two_bytes = struct.Struct('!h').pack
-
         if name is not None:
             if name == 'OPERATIONAL_MODE':
                 mode = {
                     0: 'Off',
                     1: 'On'
                 }
-                s = mode[value]
-                return name, "mode:{}".format(s)
+                if value in mode:
+                    s = mode[value]
+                else:
+                    s = "{} Not specified in API".format(value)
+                return name, "Status:{}".format(s)
 
             elif name == 'CLOCK_YY_MM':
                 """
@@ -280,13 +387,6 @@ class ChamberCommandRegisters(object):
                 return name, "Seconds:{}".format(value)
 
             elif name == 'POWER_RECOVERY_MODE':
-                """
-                0 Continue
-                1 Hold
-                2 Terminate
-                4 Reset
-                8 Resume
-                """
                 mode = {
                     0: 'Continue',
                     1: 'Hold',
@@ -294,8 +394,11 @@ class ChamberCommandRegisters(object):
                     4: 'Reset',
                     8: 'Resume'
                 }
-                s = mode[value]
-                return name, "Mode:{}".format(s)
+                if value in mode:
+                    s = mode[value]
+                else:
+                    s = "{} Not specified in API".format(value)
+                return name, "Status:{}".format(s)
 
             elif name == 'POWER_OUT_TIME':
                 """
@@ -304,18 +407,16 @@ class ChamberCommandRegisters(object):
                 return name, "Seconds:{}".format(value)
 
             elif name == 'DEFROST_OPERATING_MODE':
-                """
-                0 Disabled
-                1 Manual Mode Selected
-                2 Auto Mode Selected
-                """
                 mode = {
                     0: 'Disabled',
                     1: 'Manual Mode Selected',
                     3: 'Auto Mode Selected'
                 }
-                s = mode[value]
-                return name, "mode:{}".format(s)
+                if value in mode:
+                    s = mode[value]
+                else:
+                    s = "{} Not specified in API".format(value)
+                return name, "Status:{}".format(s)
 
             elif name == 'AUTO_DEFROST_TEMPERATURE_SETPOINT':
                 """
@@ -330,18 +431,16 @@ class ChamberCommandRegisters(object):
                 return name, "minutes:{}".format(value)
 
             elif name == 'DEFROST STATUS':
-                """
-                0 Not in Defrost
-                1 In Defrost
-                2 In Prechill
-                """
                 mode = {
                     0: 'Not in Defrost',
                     1: 'In Defrost',
                     3: 'In Prechill'
                 }
-                s = mode[value]
-                return name, "mode:{}".format(s)
+                if value in mode:
+                    s = mode[value]
+                else:
+                    s = "{} Not specified in API".format(value)
+                return name, "Status:{}".format(s)
 
             elif name == 'TIME_REMAINING_UNTIL_NEXT_DEFROST':
                 """
@@ -350,14 +449,6 @@ class ChamberCommandRegisters(object):
                 return name, "minutes:{}".format(value)
 
             elif name == 'PRODUCT_CONTROL':
-                """
-                0 Off
-                1 Deviation
-                2 Process
-                4 Off
-                5 Deviation using Event for enable
-                6 Process using Event for enable
-                """
                 mode = {
                     0: 'Off',
                     1: 'Deviation',
@@ -366,8 +457,11 @@ class ChamberCommandRegisters(object):
                     5: 'Deviation using Event for enable',
                     6: 'Process using Event for enable'
                 }
-                s = mode[value]
-                return name, "mode:{}".format(s)
+                if value in mode:
+                    s = mode[value]
+                else:
+                    s = "{} Not specified in API".format(value)
+                return name, "Status:{}".format(s)
 
             elif name == 'PRODUCT_CONTROL_UPPER_SETPOINT':
                 """
@@ -382,24 +476,17 @@ class ChamberCommandRegisters(object):
                 return name, "degrees:{}".format(value)
 
             elif name == 'CONDENSATION_CONTROL':
-                """
-                0 off
-                1 on
-                """
                 mode = {
                     0: "Off",
                     1: "On"
                 }
-                s = mode[value]
+                if value in mode:
+                    s = mode[value]
+                else:
+                    s = "{} Not specified in API".format(value)
                 return name, "Status:{}".format(s)
 
             elif name == 'CONDENSATION_CONTROL_MONITOR_MODE':
-                """
-                1 Use Single Input
-                2 Use Lowest Input
-                4 Use Highest Input
-                8 Use Average of all Inputs
-                """
                 mode = {
                     1: "Use Single Input",
                     2: "Use Lowest Input",
@@ -413,31 +500,19 @@ class ChamberCommandRegisters(object):
                 return name, "Status:{}".format(s)
 
             elif name == 'CONDENSATION_CONTROL_INPUT_SELECTION':
-                """
-                Bit oriented: (0 disables, 1 enables).
-                Bit0 Product
-                Bit1 PV1 (monitor)
-                Bit2 PV2 (monitor)
-                Bit3 PV3 (monitor)
-                Bit4 PV4 (monitor)
-                Bit5 PV5 (monitor)
-                Bit6 PV6 (monitor)
-                Bit7 PV7 (monitor)
-                Bit8 PV8 (monitor)
-                """
                 bit_array = self.bitfield(value)
                 response = {
-                    'Product' : 0,
-                    'PV1' : bit_array[0],
-                    'PV2' : bit_array[1],
-                    'PV3' : bit_array[2],
-                    'PV4' : bit_array[3],
-                    'PV5' : bit_array[4],
-                    'PV6' : bit_array[5],
-                    'PV7' : bit_array[6],
-                    'PV8' : bit_array[7],
+                    'Product': 0,
+                    'PV1': bit_array[0],
+                    'PV2': bit_array[1],
+                    'PV3': bit_array[2],
+                    'PV4': bit_array[3],
+                    'PV5': bit_array[4],
+                    'PV6': bit_array[5],
+                    'PV7': bit_array[6],
+                    'PV8': bit_array[7],
                 }
-                return name, ("pv:{}").format(response)
+                return name, "pv:{}".format(response)
 
             elif name == 'CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT':
                 """
@@ -459,15 +534,14 @@ class ChamberCommandRegisters(object):
                 return name, "degrees:{}".format(value)
 
             elif name == 'CHAMBER_LIGHT_CONTROL':
-                """
-                0 off
-                1 on
-                """
                 mode = {
                     0: "Off",
                     1: "On"
                 }
-                s = mode[value]
+                if value in mode:
+                    s = mode[value]
+                else:
+                    s = "{} Not specified in API".format(value)
                 return name, "Status:{}".format(s)
 
             elif name == 'CHAMBER_MANUAL_EVENT_CONTROL':
@@ -483,8 +557,6 @@ class ChamberCommandRegisters(object):
                 return name, "Event Bit array:{}".format(value)
 
             elif name == 'PROFILE_CONTROL_STATUS':
-                """
-                """
                 mode = {
                     0: 'Stop/Off',
                     1: 'Stop/All Off',
@@ -496,8 +568,11 @@ class ChamberCommandRegisters(object):
                     64: 'Soak',
                     128: 'Guaranteed Soak'
                 }
-                s = mode[value]
-                return name, "Mode:{}".format(s)
+                if value in mode:
+                    s = mode[value]
+                else:
+                    s = "{} Not specified in API".format(value)
+                return name, "Status:{}".format(s)
 
             elif name == 'PROFILE_ADVANCED_STEP':
                 mode = {
@@ -648,8 +723,11 @@ class ChamberCommandRegisters(object):
                     4096: 'Input 13',
                     8192: 'Digital Input'
                 }
-                s = mode[value]
-                return name, "Mode:{}".format(s)
+                if value in mode:
+                    s = mode[value]
+                else:
+                    s = "{} Not specified in API".format(value)
+                return name, "Status:{}".format(s)
 
             elif name == 'PROFILE_WAIT_FOR_SETPOINT':
                 """-32768 – 32767 (-3276.8 – 3276.7)"""
@@ -707,175 +785,356 @@ class ChamberCommandRegisters(object):
                 return name, "Status:{}".format(s)
 
             elif name == 'EZT-570I_ALARM_STATUS':
-                state = {
-                    0: 'norma'
-                    1: 'Alarm'
-                }
                 bit_array = self.bitfield(value)
                 response = {
-                    'Input1 Sensor Break': state[bit_array[0]],
-                    'Input2 Sensor Break': state[bit_array[1]],
-                    'Input3 Sensor Break': state[bit_array[2]],
-                    'Input4 Sensor Break': state[bit_array[3]],
-                    'Input5 Sensor Break': state[bit_array[4]],
-                    'Input6 Sensor Break': state[bit_array[5]],
-                    'Input7 Sensor Break': state[bit_array[6]],
-                    'Input8 Sensor Break': state[bit_array[7]],
-                    'Input9 Sensor Break': state[bit_array[8]],
-                    'Input10 Sensor Break': state[bit_array[9]],
-                    'Input11 Sensor Break': state[bit_array[10]],
-                    'Input12 Sensor Break': state[bit_array[11]],
-                    'Input13 Sensor Break': state[bit_array[12]],
-                    '(not assigned)': state[bit_array[13]],
-                    'Loop Communications Failure': state[bit_array[14]],
+                    'Input1 Sensor Break': self.a_state[bit_array[0]],
+                    'Input2 Sensor Break': self.a_state[bit_array[1]],
+                    'Input3 Sensor Break': self.a_state[bit_array[2]],
+                    'Input4 Sensor Break': self.a_state[bit_array[3]],
+                    'Input5 Sensor Break': self.a_state[bit_array[4]],
+                    'Input6 Sensor Break': self.a_state[bit_array[5]],
+                    'Input7 Sensor Break': self.a_state[bit_array[6]],
+                    'Input8 Sensor Break': self.a_state[bit_array[7]],
+                    'Input9 Sensor Break': self.a_state[bit_array[8]],
+                    'Input10 Sensor Break': self.a_state[bit_array[9]],
+                    'Input11 Sensor Break': self.a_state[bit_array[10]],
+                    'Input12 Sensor Break': self.a_state[bit_array[11]],
+                    'Input13 Sensor Break': self.a_state[bit_array[12]],
+                    '(not assigned)': self.a_state[bit_array[13]],
+                    'Loop Communications Failure': self.a_state[bit_array[14]],
                 }
-                return name, ("status:{}").format(response)
+                return name, "status:{}".format(response)
 
             elif name == 'INPUT_ALARM_STATUS':
-                state = {
-                    0: 'norma'
-                    1: 'Alarm'
-                }
                 bit_array = self.bitfield(value)
                 response = {
-                    'Input1 Alarm':   state[bit_array[0]],
-                    'Input2 Alarm':   state[bit_array[1]],
-                    'Input3 Alarm':   state[bit_array[2]],
-                    'Input4 Alarm':   state[bit_array[3]],
-                    'Input5 Alarm':   state[bit_array[4]],
-                    'Input6 Alarm':   state[bit_array[5]],
-                    'Input7 Alarm':   state[bit_array[6]],
-                    'Input8 Alarm':   state[bit_array[7]],
-                    'Input9 Alarm':   state[bit_array[8]],
-                    'Input10 Alarm':  state[bit_array[9]],
-                    'Input11 Alarm':  state[bit_array[10]],
-                    'Input12 Alarm':  state[bit_array[11]],
-                    'Input13 Alarm':  state[bit_array[12]],
-                    '(not assigned)': state[bit_array[13]],
-                    '(not assigned)': state[bit_array[14]],
+                    'Input1 Alarm':   self.a_state[bit_array[0]],
+                    'Input2 Alarm':   self.a_state[bit_array[1]],
+                    'Input3 Alarm':   self.a_state[bit_array[2]],
+                    'Input4 Alarm':   self.a_state[bit_array[3]],
+                    'Input5 Alarm':   self.a_state[bit_array[4]],
+                    'Input6 Alarm':   self.a_state[bit_array[5]],
+                    'Input7 Alarm':   self.a_state[bit_array[6]],
+                    'Input8 Alarm':   self.a_state[bit_array[7]],
+                    'Input9 Alarm':   self.a_state[bit_array[8]],
+                    'Input10 Alarm':  self.a_state[bit_array[9]],
+                    'Input11 Alarm':  self.a_state[bit_array[10]],
+                    'Input12 Alarm':  self.a_state[bit_array[11]],
+                    'Input13 Alarm':  self.a_state[bit_array[12]],
+                    '(not assigned 1)': self.a_state[bit_array[13]],
+                    '(not assigned 2)': self.a_state[bit_array[14]],
                 }
-                return name, ("status:{}").format(response)
+                return name, "status:{}".format(response)
 
             elif name == 'CHAMBER_ALARM_STATUS':
-                state = {
-                    0: 'norma'
-                    1: 'Alarm'
-                }
                 bit_array = self.bitfield(value)
                 response = {
-                    'Heater High Limit (Plenum A)': state[bit_array[0]],
-                    'External Product Safety': state[bit_array[1]],
-                    'Boiler Over-Temp (Plenum A)': state[bit_array[2]],
-                    'Boiler Low Water (Plenum A)': state[bit_array[3]],
-                    'Dehumidifier System Fault (System B Boiler Over-Temp)': state[bit_array[4]],
-                    'Motor Overload (Plenum A)': state[bit_array[5]],
-                    'Fluid System High Limit (Plenum B Heater High Limit)': state[bit_array[6]],
-                    'Fluid System High Pressure (Plenum B Motor Overload)': state[bit_array[7]],
-                    'Fluid System Low Flow': state[bit_array[8]],
-                    'Door Open': state[bit_array[9]],
-                    '(System B Boiler Low Water)': state[bit_array[10]],
-                    '(not assigned)': state[bit_array[11]],
-                    'Emergency Stop': state[bit_array[12]],
-                    'Power Failure': state[bit_array[13]],
-                    'Transfer Error': state[bit_array[14]],
+                    'Heater High Limit (Plenum A)': self.a_state[bit_array[0]],
+                    'External Product Safety': self.a_state[bit_array[1]],
+                    'Boiler Over-Temp (Plenum A)': self.a_state[bit_array[2]],
+                    'Boiler Low Water (Plenum A)': self.a_state[bit_array[3]],
+                    'Dehumidifier System Fault (System B Boiler Over-Temp)': self.a_state[bit_array[4]],
+                    'Motor Overload (Plenum A)': self.a_state[bit_array[5]],
+                    'Fluid System High Limit (Plenum B Heater High Limit)': self.a_state[bit_array[6]],
+                    'Fluid System High Pressure (Plenum B Motor Overload)': self.a_state[bit_array[7]],
+                    'Fluid System Low Flow': self.a_state[bit_array[8]],
+                    'Door Open': self.a_state[bit_array[9]],
+                    '(System B Boiler Low Water)': self.a_state[bit_array[10]],
+                    '(not assigned)': self.a_state[bit_array[11]],
+                    'Emergency Stop': self.a_state[bit_array[12]],
+                    'Power Failure': self.a_state[bit_array[13]],
+                    'Transfer Error': self.a_state[bit_array[14]],
                 }
-                return name, ("status:{}").format(response)
+                return name, "status:{}".format(response)
 
             elif name == 'REFRIGERATION_ALARM_STATUS':
-                state = {
-                    0: 'norma'
-                    1: 'Alarm'
-                }
                 bit_array = self.bitfield(value)
                 response = {
-                    'System 1(A) High/Low Pressure': state[bit_array[0]],
-                    'System 1(A) Low Oil Pressure': state[bit_array[1]],
-                    'System 1(A) High Discharge Temperature': state[bit_array[2]],
-                    'System 1(A) Compressor Protection Module': state[bit_array[3]],
-                    'Pumpdown Disabled': state[bit_array[4]],
-                    'System 1(A) Floodback Monitor': state[bit_array[5]],
-                    '(not assigned)': state[bit_array[6]],
-                    '(not assigned)': state[bit_array[7]],
-                    'System 2(B) High/Low Pressure': state[bit_array[8]],
-                    'System 2(B) Low Oil Pressure': state[bit_array[9]],
-                    'System 2(B) High Discharge Temperature': state[bit_array[10]],
-                    'System 2(B) Compressor Protection Module': state[bit_array[11]],
-                    '(not assigned)': state[bit_array[12]],
-                    'System B Floodback Monitor': state[bit_array[13]],
-                    '(not assigned)': state[bit_array[14]],
+                    'System 1(A) High/Low Pressure': self.a_state[bit_array[0]],
+                    'System 1(A) Low Oil Pressure': self.a_state[bit_array[1]],
+                    'System 1(A) High Discharge Temperature': self.a_state[bit_array[2]],
+                    'System 1(A) Compressor Protection Module': self.a_state[bit_array[3]],
+                    'Pumpdown Disabled': self.a_state[bit_array[4]],
+                    'System 1(A) Floodback Monitor': self.a_state[bit_array[5]],
+                    '(not assigned) 1': self.a_state[bit_array[6]],
+                    '(not assigned) 2': self.a_state[bit_array[7]],
+                    'System 2(B) High/Low Pressure': self.a_state[bit_array[8]],
+                    'System 2(B) Low Oil Pressure': self.a_state[bit_array[9]],
+                    'System 2(B) High Discharge Temperature': self.a_state[bit_array[10]],
+                    'System 2(B) Compressor Protection Module': self.a_state[bit_array[11]],
+                    '(not assigned) 3': self.a_state[bit_array[12]],
+                    'System B Floodback Monitor': self.a_state[bit_array[13]],
+                    '(not assigned) 4': self.a_state[bit_array[14]],
                 }
-                return name, ("status:{}").format(response)
+                return name, "status:{}".format(response)
 
             elif name == 'SYSTEM_STATUS_MONITOR':
-                state = {
-                    0: 'norma'
-                    1: 'Alarm'
-                }
                 bit_array = self.bitfield(value)
                 response = {
-                    'Humidity Water Reservoir Low': state[bit_array[0]],
-                    'Humidity Disabled (temperature out-of-range)': state[bit_array[1]],
-                    'Humidity High Dewpoint Limit': state[bit_array[2]],
-                    'Humidity Low Dewpoint Limit': state[bit_array[3]],
-                    'Door Open': state[bit_array[4]],
-                    '(not assigned)': state[bit_array[5]],
-                    '(not assigned)': state[bit_array[6]],
-                    '(not assigned)': state[bit_array[7]],
-                    'Service Air Circulators': state[bit_array[8]],
-                    'Service Heating/Cooling System': state[bit_array[9]],
-                    'Service Humidity System': state[bit_array[10]],
-                    'Service Purge System': state[bit_array[11]],
-                    'Service Altitude System': state[bit_array[12]],
-                    'Service Transfer Mechanism': state[bit_array[13]],
-                    '(not assigned)': state[bit_array[14]],
+                    'Humidity Water Reservoir Low': self.a_state[bit_array[0]],
+                    'Humidity Disabled (temperature out-of-range)': self.a_state[bit_array[1]],
+                    'Humidity High Dewpoint Limit': self.a_state[bit_array[2]],
+                    'Humidity Low Dewpoint Limit': self.a_state[bit_array[3]],
+                    'Door Open': self.a_state[bit_array[4]],
+                    '(not assigned) 1': self.a_state[bit_array[5]],
+                    '(not assigned) 2': self.a_state[bit_array[6]],
+                    '(not assigned) 3': self.a_state[bit_array[7]],
+                    'Service Air Circulators': self.a_state[bit_array[8]],
+                    'Service Heating/Cooling System': self.a_state[bit_array[9]],
+                    'Service Humidity System': self.a_state[bit_array[10]],
+                    'Service Purge System': self.a_state[bit_array[11]],
+                    'Service Altitude System': self.a_state[bit_array[12]],
+                    'Service Transfer Mechanism': self.a_state[bit_array[13]],
+                    '(not assigned) 4': self.a_state[bit_array[14]],
                 }
-                return name, ("status:{}").format(response)
+                return name, "status:{}".format(response)
 
             elif name == 'LOOP_1_SETPOINT':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                """
+                -32768 – 32767 (-3276.8 – 3276.7)
+                """
                 return name, "degrees:{}".format(value)
 
             elif name == 'LOOP_2_SETPOINT':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                """
+                -32768 – 32767 (-3276.8 – 3276.7)
+                """
                 return name, "degrees:{}".format(value)
 
             elif name == 'LOOP_3_SETPOINT':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                """
+                -32768 – 32767 (-3276.8 – 3276.7)
+                """
                 return name, "degrees:{}".format(value)
 
             elif name == 'LOOP_4_SETPOINT':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                """
+                -32768 – 32767 (-3276.8 – 3276.7)
+                """
                 return name, "degrees:{}".format(value)
 
             elif name == 'LOOP_5_SETPOINT':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                """
+                -32768 – 32767 (-3276.8 – 3276.7)
+                """
                 return name, "degrees:{}".format(value)
 
             elif name == 'LOOP_1_PROCESS_VALUE':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                """
+                -32768 – 32767 (-3276.8 – 3276.7)
+                """
                 return name, "degrees:{}".format(value)
 
             elif name == 'LOOP_2_PROCESS_VALUE':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                """
+                -32768 – 32767 (-3276.8 – 3276.7)
+                """
                 return name, "degrees:{}".format(value)
 
             elif name == 'LOOP_3_PROCESS_VALUE':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                """
+                -32768 – 32767 (-3276.8 – 3276.7)
+                """
                 return name, "degrees:{}".format(value)
 
             elif name == 'LOOP_4_PROCESS_VALUE':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                """
+                -32768 – 32767 (-3276.8 – 3276.7)
+                """
                 return name, "degrees:{}".format(value)
 
             elif name == 'LOOP_5_PROCESS_VALUE':
-                """-32768 – 32767 (-3276.8 – 3276.7)"""
+                """
+                -32768 – 32767 (-3276.8 – 3276.7)
+                """
                 return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_1_PERCENT_OUTPUT':
+                return self.get_loop_percent_output(name, value)
+
+            elif name == 'LOOP_2_PERCENT_OUTPUT':
+                return self.get_loop_percent_output(name, value)
+
+            elif name == 'LOOP_3_PERCENT_OUTPUT':
+                return self.get_loop_percent_output(name, value)
+
+            elif name == 'LOOP_4_PERCENT_OUTPUT':
+                return self.get_loop_percent_output(name, value)
+
+            elif name == 'LOOP_5_PERCENT_OUTPUT':
+                return self.get_loop_percent_output(name, value)
+
+            elif name == 'LOOP_1_AUTOTUNE_STATUS':
+                return self.get_loop_autotune_status(name, value)
+
+            elif name == 'LOOP_2_AUTOTUNE_STATUS':
+                return self.get_loop_autotune_status(name, value)
+
+            elif name == 'LOOP_3_AUTOTUNE_STATUS':
+                return self.get_loop_autotune_status(name, value)
+
+            elif name == 'LOOP_4_AUTOTUNE_STATUS':
+                return self.get_loop_autotune_status(name, value)
+
+            elif name == 'LOOP_5_AUTOTUNE_STATUS':
+                return self.get_loop_autotune_status(name, value)
+
+            elif name == 'LOOP_1_UPPER_SETPOINT_LIMIT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_2_UPPER_SETPOINT_LIMIT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_3_UPPER_SETPOINT_LIMIT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_4_UPPER_SETPOINT_LIMIT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_5_UPPER_SETPOINT_LIMIT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                return name, "degrees:{}".format(value)
+            elif name == 'LOOP_1_LOWER_SETPOINT_LIMIT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_2_LOWER_SETPOINT_LIMIT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_3_LOWER_SETPOINT_LIMIT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_4_LOWER_SETPOINT_LIMIT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_5_LOWER_SETPOINT_LIMIT':
+                """
+                -32768 – 32767 (-3276.8 – 3276.7 degrees)
+                """
+                return name, "degrees:{}".format(value)
+
+            elif name == 'LOOP_1_ALARM_TYPE':
+                return self.get_loop_alarm_type(name, value)
+
+            elif name == 'LOOP_2_ALARM_TYPE':
+                return self.get_loop_alarm_type(name, value)
+
+            elif name == 'LOOP_3_ALARM_TYPE':
+                return self.get_loop_alarm_type(name, value)
+
+            elif name == 'LOOP_4_ALARM_TYPE':
+                return self.get_loop_alarm_type(name, value)
+
+            elif name == 'LOOP_5_ALARM_TYPE':
+                return self.get_loop_alarm_type(name, value)
+
+            elif name == 'LOOP_1_ALARM_MODE':
+                return self.get_loop_alarm_mode(name, value)
+
+            elif name == 'LOOP_2_ALARM_MODE':
+                return self.get_loop_alarm_mode(name, value)
+
+            elif name == 'LOOP_3_ALARM_MODE':
+                return self.get_loop_alarm_mode(name, value)
+
+            elif name == 'LOOP_4_ALARM_MODE':
+                return self.get_loop_alarm_mode(name, value)
+
+            elif name == 'LOOP_5_ALARM_MODE':
+                return self.get_loop_alarm_mode(name, value)
+
+            elif name == 'LOOP_1_ALARM_OUTPUT_ASSIGNMENT':
+                return self.get_loop_alarm_output_assignment(name, value)
+
+            elif name == 'LOOP_2_ALARM_OUTPUT_ASSIGNMENT':
+                return self.get_loop_alarm_output_assignment(name, value)
+
+            elif name == 'LOOP_3_ALARM_OUTPUT_ASSIGNMENT':
+                return self.get_loop_alarm_output_assignment(name, value)
+
+            elif name == 'LOOP_4_ALARM_OUTPUT_ASSIGNMENT':
+                return self.get_loop_alarm_output_assignment(name, value)
+
+            elif name == 'LOOP_5_ALARM_OUTPUT_ASSIGNMENT':
+                return self.get_loop_alarm_output_assignment(name, value)
+
+            elif name == 'LOOP_1_HIGH_ALARM_SETPOINT':
+                return self.get_loop_alarm_setpoint(name, value)
+
+            elif name == 'LOOP_2_HIGH_ALARM_SETPOINT':
+                return self.get_loop_alarm_setpoint(name, value)
+
+            elif name == 'LOOP_3_HIGH_ALARM_SETPOINT':
+                return self.get_loop_alarm_setpoint(name, value)
+
+            elif name == 'LOOP_4_HIGH_ALARM_SETPOINT':
+                return self.get_loop_alarm_setpoint(name, value)
+
+            elif name == 'LOOP_5_HIGH_ALARM_SETPOINT':
+                return self.get_loop_alarm_setpoint(name, value)
+
+            elif name == 'LOOP_1_LOW_ALARM_SETPOINT':
+                return self.get_loop_alarm_setpoint(name, value)
+
+            elif name == 'LOOP_2_LOW_ALARM_SETPOINT':
+                return self.get_loop_alarm_setpoint(name, value)
+
+            elif name == 'LOOP_3_LOW_ALARM_SETPOINT':
+                return self.get_loop_alarm_setpoint(name, value)
+
+            elif name == 'LOOP_4_LOW_ALARM_SETPOINT':
+                return self.get_loop_alarm_setpoint(name, value)
+
+            elif name == 'LOOP_5_LOW_ALARM_SETPOINT':
+                return self.get_loop_alarm_setpoint(name, value)
+
+            elif name == 'LOOP_1_ALARM_HYSTERESIS':
+                return self.get_loop_alarm_hysteresis(name, value)
+
+            elif name == 'LOOP_2_ALARM_HYSTERESIS':
+                return self.get_loop_alarm_hysteresis(name, value)
+
+            elif name == 'LOOP_3_ALARM_HYSTERESIS':
+                return self.get_loop_alarm_hysteresis(name, value)
+
+            elif name == 'LOOP_4_ALARM_HYSTERESIS':
+                return self.get_loop_alarm_hysteresis(name, value)
+
+            elif name == 'LOOP_5_ALARM_HYSTERESIS':
+                return self.get_loop_alarm_hysteresis(name, value)
 
             elif name == '':
                 pass
 
             else:
                 return name, "NO MATCH"
+
+
 
 class ChamberProfileRegisters(object):
     """Write Registers used in,
