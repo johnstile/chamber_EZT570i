@@ -89,23 +89,6 @@ class ChamberCommunication(object):
         # default timeout period in the EZT-570i of 200ms, it makes a total pause of 203ms minimum.
         self.comm_wait_time = 0.203
 
-    def main(self):
-        """Use mode bus to read and write registers"""
-
-        self.connect()
-
-        # Chamber "Profile" file
-        project_file = '/home/jstile/chamber/our_files/Profiles_09-01-2017-09-53-40/GALILEO.txt'
-        self.load_profile(project_file)
-
-        register = 0x003D
-        quantity = 2
-        self.read_registers(register, quantity)
-
-        register = 0x0015
-        value = 0x0000
-        self.write_register(register, value)
-
     def connect(self):
         # Get communication
         self.comm_func[self.comm_type]['connect']()
@@ -651,5 +634,24 @@ if __name__ == '__main__':
     log.setLevel(logging.INFO)  # DEBUG,INFO,WARNING,ERROR,CRITICAL
     log.debug("Initialized Logger")
 
+    from chamber_commands import ChamberCommandRegisters
+    commands = ChamberCommandRegisters()
+    light_control = commands.ctrl['CHAMBER_LIGHT_CONTROL']
+
     chamber = ChamberCommunication(comm_type='dummy', log=log)
-    chamber.main()
+    chamber.connect()
+
+    # Chamber "Profile" file
+    project_file = '/home/jstile/chamber/our_files/Profiles_09-01-2017-09-53-40/GALILEO.txt'
+
+    chamber.load_profile(project_file)
+
+    state = {
+        'Off' : 0,
+        'On' : 1
+    }
+    chamber.read_registers(light_control)
+    chamber.write_register(light_control, state['On'])
+    chamber.read_registers(light_control)
+    chamber.write_register(light_control, state['Off'])
+    chamber.read_registers(light_control)
