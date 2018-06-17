@@ -83,8 +83,8 @@ def main():
     # ----------------------------------
     # Load Profile file
     # ----------------------------------
-    #project_file = '/home/jstile/chamber/our_files/Profiles_09-01-2017-09-53-40/GALILEO.txt'
-    #chamber.ccomm.load_profile(project_file)
+    project_file = 'GALAXY.txt'
+    chamber.ccomm.load_profile(project_file)
 
     #----------------------------------
     # Write Value
