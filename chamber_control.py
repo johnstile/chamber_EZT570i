@@ -20,7 +20,7 @@ class Chamber(object):
     """"""
     def __init__(self, log, comm_type):
         self.log = log
-        self.creg = chamber_commands.ChamberCommandRegisters()
+        self.creg = chamber_commands.ChamberCommandRegisters(log)
         self.ccomm = chamber_communication.ChamberCommunication(comm_type, log)
 
     def connect(self):
@@ -111,7 +111,7 @@ def main():
     # Read x registers
     # #----------------------------------
     start_reg = chamber.creg.name_to_reg('OPERATIONAL_MODE')
-    quantity_of_reg = 60
+    quantity_of_reg = 200
     values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
     log.info("Modbus Response:{}".format(values))
 
