@@ -2,6 +2,28 @@
 # -*- coding: utf-8 -*-
 """EZT570i Command Register Reference"""
 import struct
+import ctypes
+
+class BitFields(ctypes.BigEndianStructure):
+    """Several registers hold bit-oriented data"""
+    _fields_ = [
+        ("bit1", ctypes.c_uint8, 1),  # asByte & 1
+        ("bit2", ctypes.c_uint8, 1),  # asByte & 2
+        ("bit3", ctypes.c_uint8, 1),  # asByte & 4
+        ("bit4", ctypes.c_uint8, 1),  # asByte & 8
+        ("bit5", ctypes.c_uint8, 1),  # asByte & 16
+        ("bit6", ctypes.c_uint8, 1),  # asByte & 32
+        ("bit7", ctypes.c_uint8, 1),  # asByte & 64
+        ("bit8", ctypes.c_uint8, 1),  # asByte & 128
+        ("bit9", ctypes.c_uint8, 1),  # asByte & 512
+        ("bit10", ctypes.c_uint8, 1),  # asByte & 1024
+        ("bit11", ctypes.c_uint8, 1),  # asByte & 2048
+        ("bit12", ctypes.c_uint8, 1),  # asByte & 4096
+        ("bit13", ctypes.c_uint8, 1),  # asByte & 16384
+        ("bit14", ctypes.c_uint8, 1),  # asByte & 32768
+        ("bit15", ctypes.c_uint8, 1),  # asByte & 65536
+        ("bit16", ctypes.c_uint8, 1),  # asByte & 65536
+    ]
 
 a_state = {
     0: 'normal',
@@ -16,13 +38,10 @@ class ChamberCommandRegisters(object):
     Used in Write Register Commnad (0x06) for single register write.
     """
 
-    def __init__(self):
-        # Meaningful name for alarms states
-        pass
+    def __init__(self, log):
+        self.log = log
 
-
-
-    # Dictionary map bytes to function
+    # Dictionary map registers to function
     ctrl = {
         'OPERATIONAL_MODE': 0,  # r,
         'CLOCK_YY_MM': 1,  # r, Clock (Year, Month)
@@ -134,11 +153,11 @@ class ChamberCommandRegisters(object):
         'LOOP_3_HIGH_ALARM_SETPOINT': 93,  # r/w,
         'LOOP_4_HIGH_ALARM_SETPOINT': 105,  # r/w,
         'LOOP_5_HIGH_ALARM_SETPOINT': 117,  # r/w,
-        'LOOP_1 LOW_ALARM_SETPOINT': 70,  # r/w,
-        'LOOP_2 LOW_ALARM_SETPOINT': 82,  # r/w,
-        'LOOP_3 LOW_ALARM_SETPOINT': 94,  # r/w,
-        'LOOP_4 LOW_ALARM_SETPOINT': 106,  # r/w,
-        'LOOP_5 LOW_ALARM_SETPOINT': 118,  # r/w,
+        'LOOP_1_LOW_ALARM_SETPOINT': 70,  # r/w,
+        'LOOP_2_LOW_ALARM_SETPOINT': 82,  # r/w,
+        'LOOP_3_LOW_ALARM_SETPOINT': 94,  # r/w,
+        'LOOP_4_LOW_ALARM_SETPOINT': 106,  # r/w,
+        'LOOP_5_LOW_ALARM_SETPOINT': 118,  # r/w,
         'LOOP_1_ALARM_HYSTERESIS': 71,  # r/w,
         'LOOP_2_ALARM_HYSTERESIS': 83,  # r/w,
         'LOOP_3_ALARM_HYSTERESIS': 95,  # r/w,
@@ -222,19 +241,40 @@ class ChamberCommandRegisters(object):
         return reg, code
 
     def decode_read_value(self, reg, value):
+        """Run method that matches the register name"""
         name = self.reg_value_to_name(reg)
 
         if not name:
-            return
+            return "UNDEFINED", "NO MATCH"
 
         operation = getattr(self, name.lower())
         if not callable(operation):
             return name, "NO MATCH"
+
         return operation(name, value)
 
-    def bitfield(self, n):
+    def bitfield(self, raw):
         """Convert int to array of bits"""
-        return [int(digit) for digit in bin(n)[2:]] # [2:] to chop off the "0b" part
+        bits_fields = BitFields(raw)
+        response = [
+            bits_fields.bit1,
+            bits_fields.bit2,
+            bits_fields.bit3,
+            bits_fields.bit4,
+            bits_fields.bit5,
+            bits_fields.bit6,
+            bits_fields.bit7,
+            bits_fields.bit8,
+            bits_fields.bit9,
+            bits_fields.bit10,
+            bits_fields.bit11,
+            bits_fields.bit12,
+            bits_fields.bit13,
+            bits_fields.bit14,
+            bits_fields.bit15,
+            bits_fields.bit16
+        ]
+        return response
 
     def reg_value_to_name(self, search_reg):
         for name, reg in self.ctrl.iteritems():
@@ -267,20 +307,43 @@ class ChamberCommandRegisters(object):
         s = mode.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
+    def get_monitor_input_alarm_type(self, name, value):
+        mode = {
+            0: 'Alarm Off',
+            3: 'Process High',
+            5: 'Process Low',
+            7: 'Process Both'
+        }
+        s = mode.get(value, "{} Not specified in API".format(value))
+        return name, "Status:{}".format(s)
 
-    def get_loop_alarm_hysteresis(self, name, value):
+    def get_signed_int_tens_decimal(self, name, value):
         """
-        0 – 32767 (0 – 3276.7 degrees)
-        """
+         -32768 – 32767 (-3276.8 – 3276.7)
+         """
         response = value / 10
-        return name, "degrees:{}".format(response)
+        return name, "degrees:{:.1f}".format(float(response))
 
-    def get_loop_alarm_setpoint(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7)
-        """
-        response = value / 10
-        return name, "degrees:{}".format(response)
+    def get_event_control(self, name, value):
+        bit_array = self.bitfield(value)
+        response = {
+            'Event 1': a_state[bit_array[0]],
+            'Event2': a_state[bit_array[1]],
+            'Event 3': a_state[bit_array[2]],
+            'Event 4': a_state[bit_array[3]],
+            'Event 5': a_state[bit_array[4]],
+            'Event 6': a_state[bit_array[5]],
+            'Event 7': a_state[bit_array[6]],
+            'Event 8': a_state[bit_array[7]],
+            'Event 9': a_state[bit_array[8]],
+            'Event 10': a_state[bit_array[9]],
+            'Event 11': a_state[bit_array[10]],
+            'Event 12': a_state[bit_array[11]],
+            'Event 13': a_state[bit_array[12]],
+            'Event 14': a_state[bit_array[13]],
+            'Event 15': a_state[bit_array[14]]
+        }
+        return name, "status:{}".format(response)
 
     def get_loop_alarm_output_assignment(self, name, value):
         mode = {
@@ -408,16 +471,10 @@ class ChamberCommandRegisters(object):
         return name, "Status:{}".format(s)
 
     def auto_defrost_temperature_setpoint(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def auto_defrost_time_interval(self, name, value):
-        """
-        0 - 32767 minutes
-        """
-        return name, "minutes:{}".format(value)
+        return self.get_minutes(name, value)
 
     def defrost_status(self, name, value):
         mode = {
@@ -426,14 +483,18 @@ class ChamberCommandRegisters(object):
             3: 'In Prechill'
         }
         s = mode.get(value, "{} Not specified in API".format(value))
+        return name, "Status:{}".format(s)
 
     def time_remaining_until_next_defrost(self, name, value):
+        return self.get_minutes(name, value)
+
+    def get_minutes(self, name, value):
         """
-        0 - 32767 minutes
-        """
+            0 - 32767 minutes
+            """
         return name, "minutes:{}".format(value)
 
-    def production_control(self, name, value):
+    def product_control(self, name, value):
         mode = {
             0: 'Off',
             1: 'Deviation',
@@ -446,16 +507,10 @@ class ChamberCommandRegisters(object):
         return name, "Status:{}".format(s)
 
     def product_control_upper_setpoint(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
-    def product_control_lower_setupoint(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+    def product_control_lower_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
 
     def condensation_control(self, name, value):
         mode = {
@@ -491,23 +546,13 @@ class ChamberCommandRegisters(object):
         return name, "pv:{}".format(response)
 
     def condensation_control_temperatore_ramp_rate_limit(self, name, value):
-        """
-        0 - 100 (0.0 – 10.0 degrees C)
-        0 - 180 (0.0 – 18.0 degrees F)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def condensation_control_deupoint_limit(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def condensation_control_duepoint_actual(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def chamber_light_control(self, name, value):
         mode = {
@@ -518,16 +563,10 @@ class ChamberCommandRegisters(object):
         return name, "Status:{}".format(s)
 
     def chamber_manual_event_control(self, name, value):
-        """
-        Bit 0 to 14 == Event 1 to 15.
-        """
-        return name, "Event Bit array:{}".format(value)
+        return self.get_event_control(name, value)
 
     def customer_manual_event_control(self, name, value):
-        """
-        Bit 0 to 14 == Event 1 to 15.
-        """
-        return name, "Event Bit array:{}".format(value)
+        return self.get_event_control(name, value)
 
     def profile_control_status(self, name, value):
         mode = {
@@ -710,8 +749,7 @@ class ChamberCommandRegisters(object):
         return name, "Status:{}".format(s)
 
     def profile_wait_for_setpoint(self, name, value):
-        """-32768 – 32767 (-3276.8 – 3276.7)"""
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def profile_current_jump_step(self, name, value):
         """0 - 99"""
@@ -722,24 +760,19 @@ class ChamberCommandRegisters(object):
         return name, "jumps:{}".format(value)
 
     def profile_loop_1_target_setpoint(self, name, value):
-        """-32768 – 32767 (-3276.8 – 3276.7)"""
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def profile_loop_2_target_setpoint(self, name, value):
-        """-32768 – 32767 (-3276.8 – 3276.7)"""
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def profile_loop_3_target_setpoint(self, name, value):
-        """-32768 – 32767 (-3276.8 – 3276.7)"""
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def profile_loop_4_target_setpoint(self, name, value):
-        """-32768 – 32767 (-3276.8 – 3276.7)"""
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def profile_loop_5_target_setpoint(self, name, value):
-        """-32768 – 32767 (-3276.8 – 3276.7)"""
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def profile_last_jump_from_step(self, name, value):
         """0 - 99"""
@@ -867,64 +900,34 @@ class ChamberCommandRegisters(object):
         return name, "status:{}".format(response)
 
     def loop_1_setpoint(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_2_setpoint(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_3_setpoint(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_4_setpoint(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_5_setpoint(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_1_process_value(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_2_process_value(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_3_process_value(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_4_process_value(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_5_process_value(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_1_percent_output(self, name, value):
         return self.get_loop_percent_output(name, value)
@@ -957,63 +960,34 @@ class ChamberCommandRegisters(object):
         return self.get_loop_autotune_status(name, value)
 
     def loop_1_upper_setpoint_limit(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_2_upper_setpoint_limit(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_3_upper_setpoint_limit(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_4_upper_setpoint_limit(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_5_upper_setpoint_limit(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
+
     def loop_1_lower_setpoint_limit(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_2_lower_setpoint_limit(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_3_lower_setpoint_limit(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_4_lower_setpoint_limit(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_5_lower_setpoint_limit(self, name, value):
-        """
-        -32768 – 32767 (-3276.8 – 3276.7 degrees)
-        """
-        return name, "degrees:{}".format(value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_1_alarm_type(self, name, value):
         return self.get_loop_alarm_type(name, value)
@@ -1061,50 +1035,231 @@ class ChamberCommandRegisters(object):
         return self.get_loop_alarm_output_assignment(name, value)
 
     def loop_1_high_alarm_setpoint(self, name, value):
-        return self.get_loop_alarm_setpoint(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_2_high_alarm_setpoint(self, name, value):
-        return self.get_loop_alarm_setpoint(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_3_high_alarm_setpoint(self, name, value):
-        return self.get_loop_alarm_setpoint(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_4_high_alarm_setpoint(self, name, value):
-        return self.get_loop_alarm_setpoint(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_5_high_alarm_setpoint(self, name, value):
-        return self.get_loop_alarm_setpoint(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_1_low_alarm_setpoint(self, name, value):
-        return self.get_loop_alarm_setpoint(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_2_low_alarm_setpoint(self, name, value):
-        return self.get_loop_alarm_setpoint(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_3_low_alarm_setpoint(self, name, value):
-        return self.get_loop_alarm_setpoint(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_4_low_alarm_setpoint(self, name, value):
-        return self.get_loop_alarm_setpoint(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_5_low_alarm_setpoint(self, name, value):
-        return self.get_loop_alarm_setpoint(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_1_alarm_hysteresis(self, name, value):
-        return self.get_loop_alarm_hysteresis(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_2_alarm_hysteresis(self, name, value):
-        return self.get_loop_alarm_hysteresis(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_3_alarm_hysteresis(self, name, value):
-        return self.get_loop_alarm_hysteresis(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_4_alarm_hysteresis(self, name, value):
-        return self.get_loop_alarm_hysteresis(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
     def loop_5_alarm_hysteresis(self, name, value):
-        return self.get_loop_alarm_hysteresis(name, value)
+        return self.get_signed_int_tens_decimal(name, value)
 
+    def monitor_input_1_process_value(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_2_process_value(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_3_process_value(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_4_process_value(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_5_process_value(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_6_process_value(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_7_process_value(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_8_process_value(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_1_alarm_type(self, name, value):
+        return self.get_monitor_input_alarm_type(name, value)
+
+    def monitor_input_2_alarm_type(self, name, value):
+        return self.get_monitor_input_alarm_type(name, value)
+
+    def monitor_input_3_alarm_type(self, name, value):
+        return self.get_monitor_input_alarm_type(name, value)
+
+    def monitor_input_4_alarm_type(self, name, value):
+        return self.get_monitor_input_alarm_type(name, value)
+
+    def monitor_input_5_alarm_type(self, name, value):
+        return self.get_monitor_input_alarm_type(name, value)
+
+    def monitor_input_6_alarm_type(self, name, value):
+        return self.get_monitor_input_alarm_type(name, value)
+
+    def monitor_input_7_alarm_type(self, name, value):
+        return self.get_monitor_input_alarm_type(name, value)
+
+    def monitor_input_8_alarm_type(self, name, value):
+        return self.get_monitor_input_alarm_type(name, value)
+
+    def monitor_input_1_alarm_mode(self, name, value):
+        return self.get_loop_alarm_mode(name, value)
+
+    def monitor_input_2_alarm_mode(self, name, value):
+        return self.get_loop_alarm_mode(name, value)
+
+    def monitor_input_3_alarm_mode(self, name, value):
+        return self.get_loop_alarm_mode(name, value)
+
+    def monitor_input_4_alarm_mode(self, name, value):
+        return self.get_loop_alarm_mode(name, value)
+
+    def monitor_input_5_alarm_mode(self, name, value):
+        return self.get_loop_alarm_mode(name, value)
+
+    def monitor_input_6_alarm_mode(self, name, value):
+        return self.get_loop_alarm_mode(name, value)
+
+    def monitor_input_7_alarm_mode(self, name, value):
+        return self.get_loop_alarm_mode(name, value)
+
+    def monitor_input_8_alarm_mode(self, name, value):
+        return self.get_loop_alarm_mode(name, value)
+
+    def monitor_input_1_alarm_output_assignment(self, name, value):
+        return self.get_loop_alarm_output_assignment(name, value)
+
+    def monitor_input_2_alarm_output_assignment(self, name, value):
+        return self.get_loop_alarm_output_assignment(name, value)
+
+    def monitor_input_3_alarm_output_assignment(self, name, value):
+        return self.get_loop_alarm_output_assignment(name, value)
+
+    def monitor_input_4_alarm_output_assignment(self, name, value):
+        return self.get_loop_alarm_output_assignment(name, value)
+
+    def monitor_input_5_alarm_output_assignment(self, name, value):
+        return self.get_loop_alarm_output_assignment(name, value)
+
+    def monitor_input_6_alarm_output_assignment(self, name, value):
+        return self.get_loop_alarm_output_assignment(name, value)
+
+    def monitor_input_7_alarm_output_assignment(self, name, value):
+        return self.get_loop_alarm_output_assignment(name, value)
+
+    def monitor_input_8_alarm_output_assignment(self, name, value):
+        return self.get_loop_alarm_output_assignment(name, value)
+
+    def monitor_input_1_high_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_2_high_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_3_high_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_4_high_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_5_high_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_6_high_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_7_high_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_8_high_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_1_low_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_2_low_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_3_low_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_4_low_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_5_low_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_6_low_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_7_low_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_8_low_alarm_setpoint(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_1_alarm_hysteresis(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_2_alarm_hysteresis(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_3_alarm_hysteresis(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_4_alarm_hysteresis(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_5_alarm_hysteresis(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_6_alarm_hysteresis(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_7_alarm_hysteresis(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def monitor_input_8_alarm_hysteresis(self, name, value):
+        return self.get_signed_int_tens_decimal(name, value)
+
+    def profile_step_time_adjustment(self,name, value):
+        """
+        0 – 32767 minutes
+        """
+        return name, "minute:{}".format(value)
+
+    def ezt570i_offline_download_profile(self,name, value):
+        mode = {
+            0: 'Online',
+            1: 'Offline/Downloading Profile'
+        }
+        s = mode.get(value, "{} Not specified in API".format(value))
+        return name, "Status:{}".format(s)
 
 class ChamberProfileRegisters(object):
     """Write Registers used in,
