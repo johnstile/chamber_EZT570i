@@ -635,7 +635,7 @@ if __name__ == '__main__':
     log.debug("Initialized Logger")
 
     from chamber_commands import ChamberCommandRegisters
-    commands = ChamberCommandRegisters()
+    commands = ChamberCommandRegisters(log)
     light_control = commands.ctrl['CHAMBER_LIGHT_CONTROL']
 
     chamber = ChamberCommunication(comm_type='dummy', log=log)
