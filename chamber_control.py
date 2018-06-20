@@ -86,6 +86,7 @@ def main():
     project_file = 'GALAXY.txt'
     chamber.ccomm.load_profile(project_file)
 
+    sys.exit()
     #----------------------------------
     # Write Value
     #-----------------------------------
