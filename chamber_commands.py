@@ -400,6 +400,15 @@ class ChamberCommandRegisters(object):
         response = value / 100
         return name, "%out:{}".format(response)
 
+    def get_minutes(self, name, value):
+        """
+            0 - 32767 minutes
+        """
+        return name, "minutes:{}".format(value)
+
+    #-------------------------------
+    # Start register methods
+    #-------------------------------
     def operational_mode(self, name, value):
         mode = {
             0: 'Off',
@@ -487,12 +496,6 @@ class ChamberCommandRegisters(object):
 
     def time_remaining_until_next_defrost(self, name, value):
         return self.get_minutes(name, value)
-
-    def get_minutes(self, name, value):
-        """
-            0 - 32767 minutes
-            """
-        return name, "minutes:{}".format(value)
 
     def product_control(self, name, value):
         mode = {
