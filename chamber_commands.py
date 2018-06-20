@@ -25,12 +25,53 @@ class BitFields(ctypes.BigEndianStructure):
         ("bit16", ctypes.c_uint8, 1),  # asByte & 65536
     ]
 
-a_state = {
+int_to_two_bytes = struct.Struct('!h').pack
+
+state_alarm = {
     0: 'normal',
     1: 'Alarm'
 }
 
-int_to_two_bytes = struct.Struct('!h').pack
+state_on_off = {
+    0: 'off',
+    1: 'on'
+}
+state_power_recovery_mode = {
+    0: 'continue',
+    1: 'hold',
+    2: 'terminate',
+    4: 'reset',
+    8: 'resume'
+}
+
+state_defrost_operating_mode = {
+    0: 'disabled',
+    1: 'manual mode selected',
+    3: 'auto mode selected'
+}
+
+state_get_loop_autotune_status = {
+    0: 'autotune off',
+    1: 'start autotune',
+    2: 'autotune in progress',
+    4: 'cancel autotune'
+}
+
+state_product_control = {
+    0: 'off',
+    1: 'deviation',
+    2: 'process',
+    4: 'off',
+    5: 'deviation using event for enable',
+    6: 'process using event for enable'
+}
+
+state_condensation_control_monitor_mode = {
+    1: "Use Single Input",
+    2: "Use Lowest Input",
+    4: "Use Highest Input",
+    8: "Use Average of all Inputs"
+}
 
 class ChamberCommandRegisters(object):
     """Translate between human and modbus register <=> names, and values <=> meaning
@@ -68,7 +109,7 @@ class ChamberCommandRegisters(object):
         'CHAMBER_MANUAL_EVENT_CONTROL': 22,  # r/w,
         'CUSTOMER_MANUAL_EVENT_CONTROL': 23,  # r/w,
         'PROFILE_CONTROL_STATUS': 24,  # r/w,
-        'PROFILE_ADVANCED_STEP': 25,  # w,
+        'PROFILE_ADVANCE_STEP': 25,  # w,
         'PROFILE_NAME_CH_1_2': 26,  # r,
         'PROFILE_NAME_CH_3_4': 27,  # r,
         'PROFILE_NAME_CH_5_6': 28,  # r,
@@ -98,21 +139,21 @@ class ChamberCommandRegisters(object):
         'PROFILE_LAST_JUMP_TO_STEP': 52,  # r,
         'PROFILE_TOTAL_JUMPS_MADE': 53,  # r,
         'ALARM_ACKNOWLEDGE': 54,  # w,
-        'EZT570I_ALARM_STATUS': 55,  # w,
-        'INPUT_ALARM_STATUS': 56,  # w,
-        'CHAMBER_ALARM_STATUS': 57,  # w,
-        'REFRIGERATION_ALARM_STATUS': 58,  # w,
+        'EZT570I_ALARM_STATUS': 55,  # r,
+        'INPUT_ALARM_STATUS': 56,  # r,
+        'CHAMBER_ALARM_STATUS': 57,  # r,
+        'REFRIGERATION_ALARM_STATUS': 58,  # r,
         'SYSTEM_STATUS_MONITOR': 59,  # r,
         'LOOP_1_SETPOINT': 60,  # r/w,
         'LOOP_2_SETPOINT': 72,  # r/w,
         'LOOP_3_SETPOINT': 84,  # r/w,
         'LOOP_4_SETPOINT': 96,  # r/w,
         'LOOP_5_SETPOINT': 108,  # r/w,
-        'LOOP_1_PROCESS_VALUE': 61,  # r/w,
-        'LOOP_2_PROCESS_VALUE': 73,  # r/w,
-        'LOOP_3_PROCESS_VALUE': 85,  # r/w,
-        'LOOP_4_PROCESS_VALUE': 97,  # r/w,
-        'LOOP_5_PROCESS_VALUE': 109,  # r/w,
+        'LOOP_1_PROCESS_VALUE': 61,  # r,
+        'LOOP_2_PROCESS_VALUE': 73,  # r,
+        'LOOP_3_PROCESS_VALUE': 85,  # r,
+        'LOOP_4_PROCESS_VALUE': 97,  # r,
+        'LOOP_5_PROCESS_VALUE': 109,  # r,
         'LOOP_1_PERCENT_OUTPUT': 62,  # r,
         'LOOP_2_PERCENT_OUTPUT': 74,  # r,
         'LOOP_3_PERCENT_OUTPUT': 86,  # r,
@@ -163,14 +204,14 @@ class ChamberCommandRegisters(object):
         'LOOP_3_ALARM_HYSTERESIS': 95,  # r/w,
         'LOOP_4_ALARM_HYSTERESIS': 107,  # r/w,
         'LOOP_5_ALARM_HYSTERESIS': 119,  # r/w,
-        'MONITOR_INPUT_1_PROCESS_VALUE': 120,  # r,w,
-        'MONITOR_INPUT_2_PROCESS_VALUE': 127,  # r,w,
-        'MONITOR_INPUT_3_PROCESS_VALUE': 134,  # r,w,
-        'MONITOR_INPUT_4_PROCESS_VALUE': 141,  # r,w,
-        'MONITOR_INPUT_5_PROCESS_VALUE': 148,  # r,w,
-        'MONITOR_INPUT_6_PROCESS_VALUE': 155,  # r,w,
-        'MONITOR_INPUT_7_PROCESS_VALUE': 162,  # r,w,
-        'MONITOR_INPUT_8_PROCESS_VALUE': 169,  # r,w,
+        'MONITOR_INPUT_1_PROCESS_VALUE': 120,  # r,
+        'MONITOR_INPUT_2_PROCESS_VALUE': 127,  # r,
+        'MONITOR_INPUT_3_PROCESS_VALUE': 134,  # r,
+        'MONITOR_INPUT_4_PROCESS_VALUE': 141,  # r,
+        'MONITOR_INPUT_5_PROCESS_VALUE': 148,  # r,
+        'MONITOR_INPUT_6_PROCESS_VALUE': 155,  # r,
+        'MONITOR_INPUT_7_PROCESS_VALUE': 162,  # r,
+        'MONITOR_INPUT_8_PROCESS_VALUE': 169,  # r,
         'MONITOR_INPUT_1_ALARM_TYPE': 121,  # r/w
         'MONITOR_INPUT_2_ALARM_TYPE': 128,  # r/w
         'MONITOR_INPUT_3_ALARM_TYPE': 135,  # r/w
@@ -231,14 +272,20 @@ class ChamberCommandRegisters(object):
         :return: 1) EZT570i register, 2) value to write
         """
         reg = self.name_to_reg(name)
-        code = None
-        if reg is not None:
-            if name == 'CHAMBER_LIGHT_CONTROL':
-                if value == 'off':
-                    code = 0
-                elif value == 'on':
-                    code = 1
-        return reg, code
+        if not reg:
+            return (None, None)
+
+        setter = "set_{}".format(name.lower())
+
+        try:
+            operation = getattr(self, setter)
+        except AttributeError:
+            return name, "Non Writeable Register"
+
+        if not callable(operation):
+            return name, "NO MATCH"
+
+        return reg, operation(value)
 
     def decode_read_value(self, reg, value):
         """Run method that matches the register name"""
@@ -247,7 +294,11 @@ class ChamberCommandRegisters(object):
         if not name:
             return "UNDEFINED", "NO MATCH"
 
-        operation = getattr(self, name.lower())
+        try:
+            operation = getattr(self, name.lower())
+        except AttributeError:
+            return name, "Non Readable Register"
+
         if not callable(operation):
             return name, "NO MATCH"
 
@@ -285,17 +336,12 @@ class ChamberCommandRegisters(object):
         return self.ctrl.get(search_name)
 
     def get_loop_autotune_status(self, name, value):
-        mode = {
-            0: 'Autotune Off',
-            1: 'Start Autotune',
-            2: 'Autotune In Progress',
-            4: 'Cancel Autotune'
-        }
-        s = mode.get(value, "{} Not specified in API".format(value))
+
+        s = state_get_loop_autotune_status.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
     def get_loop_alarm_type(self, name, value):
-        mode = {
+        state = {
             0: 'Alarm Off',
             3: 'Porcess High',
             5: 'Process Low',
@@ -304,17 +350,17 @@ class ChamberCommandRegisters(object):
             40: 'Deviation Low',
             56: 'Deviation Both'
         }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
     def get_monitor_input_alarm_type(self, name, value):
-        mode = {
+        state = {
             0: 'Alarm Off',
             3: 'Process High',
             5: 'Process Low',
             7: 'Process Both'
         }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
     def get_signed_int_tens_decimal(self, name, value):
@@ -324,29 +370,37 @@ class ChamberCommandRegisters(object):
         response = value / 10
         return name, "degrees:{:.1f}".format(float(response))
 
+    def set_signed_int_tens_decimal(self, value):
+        """
+         -32768 – 32767 (-3276.8 – 3276.7)
+         """
+        response = value * 10
+        assert 0 <= response < 2 ** 16
+        return response
+
     def get_event_control(self, name, value):
         bit_array = self.bitfield(value)
         response = {
-            'Event 1': a_state[bit_array[0]],
-            'Event2': a_state[bit_array[1]],
-            'Event 3': a_state[bit_array[2]],
-            'Event 4': a_state[bit_array[3]],
-            'Event 5': a_state[bit_array[4]],
-            'Event 6': a_state[bit_array[5]],
-            'Event 7': a_state[bit_array[6]],
-            'Event 8': a_state[bit_array[7]],
-            'Event 9': a_state[bit_array[8]],
-            'Event 10': a_state[bit_array[9]],
-            'Event 11': a_state[bit_array[10]],
-            'Event 12': a_state[bit_array[11]],
-            'Event 13': a_state[bit_array[12]],
-            'Event 14': a_state[bit_array[13]],
-            'Event 15': a_state[bit_array[14]]
+            'Event 1': state_alarm[bit_array[0]],
+            'Event2': state_alarm[bit_array[1]],
+            'Event 3': state_alarm[bit_array[2]],
+            'Event 4': state_alarm[bit_array[3]],
+            'Event 5': state_alarm[bit_array[4]],
+            'Event 6': state_alarm[bit_array[5]],
+            'Event 7': state_alarm[bit_array[6]],
+            'Event 8': state_alarm[bit_array[7]],
+            'Event 9': state_alarm[bit_array[8]],
+            'Event 10': state_alarm[bit_array[9]],
+            'Event 11': state_alarm[bit_array[10]],
+            'Event 12': state_alarm[bit_array[11]],
+            'Event 13': state_alarm[bit_array[12]],
+            'Event 14': state_alarm[bit_array[13]],
+            'Event 15': state_alarm[bit_array[14]]
         }
         return name, "status:{}".format(response)
 
     def get_loop_alarm_output_assignment(self, name, value):
-        mode = {
+        state = {
             0: 'No Output Selected',
             1: 'Digital Output (Customer Event) 1 Selected',
             2: 'Digital Output (Customer Event) 2 Selected',
@@ -364,7 +418,7 @@ class ChamberCommandRegisters(object):
             8192: 'Digital Output (Customer Event) 14 Selected',
             16384: 'Digital Output (Customer Event) 15 Selected'
         }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
     def get_loop_alarm_mode(self, name, value):
@@ -406,15 +460,15 @@ class ChamberCommandRegisters(object):
         """
         return name, "minutes:{}".format(value)
 
+    def set_minutes(self, value):
+        assert 0 <= value <= 32767
+        return value
+
     #-------------------------------
     # Start register methods
     #-------------------------------
     def operational_mode(self, name, value):
-        mode = {
-            0: 'Off',
-            1: 'On'
-        }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state_on_off.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
     def clock_yy_mm(self, name, value):
@@ -454,15 +508,15 @@ class ChamberCommandRegisters(object):
         return name, "Seconds:{}".format(value)
 
     def power_recovery_mode(self, name, value):
-        mode = {
-            0: 'Continue',
-            1: 'Hold',
-            2: 'Terminate',
-            4: 'Reset',
-            8: 'Resume'
-        }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state_power_recovery_mode.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
+
+    def set_power_recovery_mode(self, value):
+        value = value.lower()
+        for mode_state, mode_name in state_power_recovery_mode.iteritems():
+            if mode_name == value:
+                return mode_state
+        return "NOMATCH"
 
     def power_out_time(self, name, value):
         """
@@ -470,72 +524,96 @@ class ChamberCommandRegisters(object):
         """
         return name, "Seconds:{}".format(value)
 
+    def set_power_out_time(self, value):
+        """
+        0 - 32767 seconds
+        """
+        assert 0 <= value <= 32767
+        return value
+
     def defrost_operating_mode(self, name, value):
-        mode = {
-            0: 'Disabled',
-            1: 'Manual Mode Selected',
-            3: 'Auto Mode Selected'
-        }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state_defrost_operating_mode.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
+
+    def set_defrost_operating_mode(self, name, value):
+        value = value.lower()
+        for mode_state, mode_name in state_defrost_operating_mode.iteritems():
+            if mode_name == value:
+                return mode_state
+        return "NOMATCH"
 
     def auto_defrost_temperature_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_auto_defrost_temperature_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def auto_defrost_time_interval(self, name, value):
         return self.get_minutes(name, value)
 
+    def set_auto_defrost_time_interval(self, value):
+        return self.set_minutes(value)
+
     def defrost_status(self, name, value):
-        mode = {
+        state = {
             0: 'Not in Defrost',
             1: 'In Defrost',
             3: 'In Prechill'
         }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
     def time_remaining_until_next_defrost(self, name, value):
         return self.get_minutes(name, value)
 
     def product_control(self, name, value):
-        mode = {
-            0: 'Off',
-            1: 'Deviation',
-            2: 'Process',
-            4: 'Off',
-            5: 'Deviation using Event for enable',
-            6: 'Process using Event for enable'
-        }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state_product_control.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
+
+    def set_product_control(self, value):
+        value = value.lower()
+        for mode_state, mode_name in state_product_control.iteritems():
+            if mode_name == value:
+                return mode_state
+        return "NOMATCH"
 
     def product_control_upper_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_product_control_upper_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def product_control_lower_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_product_control_lower_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def condensation_control(self, name, value):
-        mode = {
-            0: "Off",
-            1: "On"
-        }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state_on_off.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
+    def set_condensation_control(self, value):
+        value = value.lower()
+        for mode_state, mode_name in state_on_off.iteritems():
+            if mode_name == value:
+                return mode_state
+        return "NOMATCH"
+
     def condensation_control_monitor_mode(self, name, value):
-        mode = {
-            1: "Use Single Input",
-            2: "Use Lowest Input",
-            4: "Use Highest Input",
-            8: "Use Average of all Inputs"
-        }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state_condensation_control_monitor_mode.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
+
+    def set_condensation_control_monitor_mode(self, value):
+        value = value.lower()
+        for mode_state, mode_name in state_condensation_control_monitor_mode.iteritems():
+            if mode_name == value:
+                return mode_state
+        return "NOMATCH"
 
     def condensation_control_input_selection(self, name, value):
         bit_array = self.bitfield(value)
-        response = {
+        response_condensation_control_input_selection = {
             'Product': 0,
             'PV1': bit_array[0],
             'PV2': bit_array[1],
@@ -546,10 +624,17 @@ class ChamberCommandRegisters(object):
             'PV7': bit_array[6],
             'PV8': bit_array[7],
         }
-        return name, "pv:{}".format(response)
+        return name, "pv:{}".format(response_condensation_control_input_selection)
+
+    def set_condensation_control_input_selection(self, value):
+        # TODO
+        pass
 
     def condensation_control_temperatore_ramp_rate_limit(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_condensation_control_temperatore_ramp_rate_limit(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def condensation_control_deupoint_limit(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
@@ -558,21 +643,32 @@ class ChamberCommandRegisters(object):
         return self.get_signed_int_tens_decimal(name, value)
 
     def chamber_light_control(self, name, value):
-        mode = {
-            0: "Off",
-            1: "On"
-        }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state_on_off.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
+
+    def set_chamber_light_control(self, value):
+        value = value.lower()
+        for state_value, state_name in state_on_off.iteritems():
+            if state_name == value:
+                return state_value
+        return "NOMATCH"
 
     def chamber_manual_event_control(self, name, value):
         return self.get_event_control(name, value)
 
+    def set_chamber_manual_event_control(self, value):
+        # TODO
+        pass
+
     def customer_manual_event_control(self, name, value):
         return self.get_event_control(name, value)
 
+    def set_customer_manual_event_control(self, name, value):
+        # TODO
+        pass
+
     def profile_control_status(self, name, value):
-        mode = {
+        state = {
             0: 'Stop/Off',
             1: 'Stop/All Off',
             2: 'Hold',
@@ -583,16 +679,23 @@ class ChamberCommandRegisters(object):
             64: 'Soak',
             128: 'Guaranteed Soak'
         }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
-    def profile_advanced_step(self, name, value):
-        mode = {
-            1: 'Advance Previous Step',
-            2: 'Advance Next Step'
+    def set_profile_control_status(self, value):
+        # TODO
+        pass
+
+    def set_profile_advance_step(self, value):
+        state = {
+            1: 'advance previous step',
+            2: 'advance next step'
         }
-        s = mode.get(value, "{} Not specified in API".format(value))
-        return name, "Mode:{}".format(s)
+        value = value.lower()
+        for state_value, state_name in state.iteritems():
+            if state_name == value:
+                return state_value
+        return "NOMATCH"
 
     def profile_name_ch_1_2(self, name, value):
         """
@@ -708,6 +811,11 @@ class ChamberCommandRegisters(object):
         """0 - 99"""
         return name, "step:{}".format(value)
 
+    def set_profile_start_step(self, value):
+        """0 - 99"""
+        assert 0 <= value <= 99
+        return value
+
     def profile_current_step(self, name, value):
         """0 - 99"""
         return name, "step:{}".format(value)
@@ -731,7 +839,7 @@ class ChamberCommandRegisters(object):
         return name, "Minute:{}, Seconds:{}".format(minutes, seconds)
 
     def profile_wait_for_status(self, name, value):
-        mode = {
+        state = {
             0:    'Not Waiting',
             1:    'Input 1',
             2:    'Input 2',
@@ -748,7 +856,7 @@ class ChamberCommandRegisters(object):
             4096: 'Input 13',
             8192: 'Digital Input'
         }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
     def profile_wait_for_setpoint(self, name, value):
@@ -789,116 +897,119 @@ class ChamberCommandRegisters(object):
         """0 – 32767"""
         return name, "jumps:{}".format(value)
 
-    def alarm_acknowledge(self, name, value):
-        mode = {
-            1: 'Alarm Silence',
-            2: 'Pumpdown Reset'
+    def set_alarm_acknowledge(self, value):
+        state = {
+            1: 'alarm silence',
+            2: 'pumpdown reset'
         }
-        s = mode.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
+        value = value.lower()
+        for state_value, state_name in state.iteritems():
+            if state_name == value:
+                return state_value
+        return "NOMATCH"
 
     def ezt570i_alarm_status(self, name, value):
         bit_array = self.bitfield(value)
         response = {
-            'Input1 Sensor Break': a_state[bit_array[0]],
-            'Input2 Sensor Break': a_state[bit_array[1]],
-            'Input3 Sensor Break': a_state[bit_array[2]],
-            'Input4 Sensor Break': a_state[bit_array[3]],
-            'Input5 Sensor Break': a_state[bit_array[4]],
-            'Input6 Sensor Break': a_state[bit_array[5]],
-            'Input7 Sensor Break': a_state[bit_array[6]],
-            'Input8 Sensor Break': a_state[bit_array[7]],
-            'Input9 Sensor Break': a_state[bit_array[8]],
-            'Input10 Sensor Break': a_state[bit_array[9]],
-            'Input11 Sensor Break': a_state[bit_array[10]],
-            'Input12 Sensor Break': a_state[bit_array[11]],
-            'Input13 Sensor Break': a_state[bit_array[12]],
-            '(not assigned)': a_state[bit_array[13]],
-            'Loop Communications Failure': a_state[bit_array[14]],
+            'Input1 Sensor Break': state_alarm[bit_array[0]],
+            'Input2 Sensor Break': state_alarm[bit_array[1]],
+            'Input3 Sensor Break': state_alarm[bit_array[2]],
+            'Input4 Sensor Break': state_alarm[bit_array[3]],
+            'Input5 Sensor Break': state_alarm[bit_array[4]],
+            'Input6 Sensor Break': state_alarm[bit_array[5]],
+            'Input7 Sensor Break': state_alarm[bit_array[6]],
+            'Input8 Sensor Break': state_alarm[bit_array[7]],
+            'Input9 Sensor Break': state_alarm[bit_array[8]],
+            'Input10 Sensor Break': state_alarm[bit_array[9]],
+            'Input11 Sensor Break': state_alarm[bit_array[10]],
+            'Input12 Sensor Break': state_alarm[bit_array[11]],
+            'Input13 Sensor Break': state_alarm[bit_array[12]],
+            '(not assigned)': state_alarm[bit_array[13]],
+            'Loop Communications Failure': state_alarm[bit_array[14]],
         }
         return name, "status:{}".format(response)
 
     def input_alarm_status(self, name, value):
         bit_array = self.bitfield(value)
         response = {
-            'Input1 Alarm':   a_state[bit_array[0]],
-            'Input2 Alarm':   a_state[bit_array[1]],
-            'Input3 Alarm':   a_state[bit_array[2]],
-            'Input4 Alarm':   a_state[bit_array[3]],
-            'Input5 Alarm':   a_state[bit_array[4]],
-            'Input6 Alarm':   a_state[bit_array[5]],
-            'Input7 Alarm':   a_state[bit_array[6]],
-            'Input8 Alarm':   a_state[bit_array[7]],
-            'Input9 Alarm':   a_state[bit_array[8]],
-            'Input10 Alarm':  a_state[bit_array[9]],
-            'Input11 Alarm':  a_state[bit_array[10]],
-            'Input12 Alarm':  a_state[bit_array[11]],
-            'Input13 Alarm':  a_state[bit_array[12]],
-            '(not assigned 1)': a_state[bit_array[13]],
-            '(not assigned 2)': a_state[bit_array[14]]
+            'Input1 Alarm':   state_alarm[bit_array[0]],
+            'Input2 Alarm':   state_alarm[bit_array[1]],
+            'Input3 Alarm':   state_alarm[bit_array[2]],
+            'Input4 Alarm':   state_alarm[bit_array[3]],
+            'Input5 Alarm':   state_alarm[bit_array[4]],
+            'Input6 Alarm':   state_alarm[bit_array[5]],
+            'Input7 Alarm':   state_alarm[bit_array[6]],
+            'Input8 Alarm':   state_alarm[bit_array[7]],
+            'Input9 Alarm':   state_alarm[bit_array[8]],
+            'Input10 Alarm':  state_alarm[bit_array[9]],
+            'Input11 Alarm':  state_alarm[bit_array[10]],
+            'Input12 Alarm':  state_alarm[bit_array[11]],
+            'Input13 Alarm':  state_alarm[bit_array[12]],
+            '(not assigned 1)': state_alarm[bit_array[13]],
+            '(not assigned 2)': state_alarm[bit_array[14]]
         }
         return name, "status:{}".format(response)
 
     def chamber_alarm_status(self, name, value):
         bit_array = self.bitfield(value)
         response = {
-            'Heater High Limit (Plenum A)': a_state[bit_array[0]],
-            'External Product Safety': a_state[bit_array[1]],
-            'Boiler Over-Temp (Plenum A)': a_state[bit_array[2]],
-            'Boiler Low Water (Plenum A)': a_state[bit_array[3]],
-            'Dehumidifier System Fault (System B Boiler Over-Temp)': a_state[bit_array[4]],
-            'Motor Overload (Plenum A)': a_state[bit_array[5]],
-            'Fluid System High Limit (Plenum B Heater High Limit)': a_state[bit_array[6]],
-            'Fluid System High Pressure (Plenum B Motor Overload)': a_state[bit_array[7]],
-            'Fluid System Low Flow': a_state[bit_array[8]],
-            'Door Open': a_state[bit_array[9]],
-            '(System B Boiler Low Water)': a_state[bit_array[10]],
-            '(not assigned)': a_state[bit_array[11]],
-            'Emergency Stop': a_state[bit_array[12]],
-            'Power Failure': a_state[bit_array[13]],
-            'Transfer Error': a_state[bit_array[14]],
+            'Heater High Limit (Plenum A)': state_alarm[bit_array[0]],
+            'External Product Safety': state_alarm[bit_array[1]],
+            'Boiler Over-Temp (Plenum A)': state_alarm[bit_array[2]],
+            'Boiler Low Water (Plenum A)': state_alarm[bit_array[3]],
+            'Dehumidifier System Fault (System B Boiler Over-Temp)': state_alarm[bit_array[4]],
+            'Motor Overload (Plenum A)': state_alarm[bit_array[5]],
+            'Fluid System High Limit (Plenum B Heater High Limit)': state_alarm[bit_array[6]],
+            'Fluid System High Pressure (Plenum B Motor Overload)': state_alarm[bit_array[7]],
+            'Fluid System Low Flow': state_alarm[bit_array[8]],
+            'Door Open': state_alarm[bit_array[9]],
+            '(System B Boiler Low Water)': state_alarm[bit_array[10]],
+            '(not assigned)': state_alarm[bit_array[11]],
+            'Emergency Stop': state_alarm[bit_array[12]],
+            'Power Failure': state_alarm[bit_array[13]],
+            'Transfer Error': state_alarm[bit_array[14]],
         }
         return name, "status:{}".format(response)
 
     def refrigeration_alarm_status(self, name, value):
         bit_array = self.bitfield(value)
         response = {
-            'System 1(A) High/Low Pressure': a_state[bit_array[0]],
-            'System 1(A) Low Oil Pressure': a_state[bit_array[1]],
-            'System 1(A) High Discharge Temperature': a_state[bit_array[2]],
-            'System 1(A) Compressor Protection Module': a_state[bit_array[3]],
-            'Pumpdown Disabled': a_state[bit_array[4]],
-            'System 1(A) Floodback Monitor': a_state[bit_array[5]],
-            '(not assigned) 1': a_state[bit_array[6]],
-            '(not assigned) 2': a_state[bit_array[7]],
-            'System 2(B) High/Low Pressure': a_state[bit_array[8]],
-            'System 2(B) Low Oil Pressure': a_state[bit_array[9]],
-            'System 2(B) High Discharge Temperature': a_state[bit_array[10]],
-            'System 2(B) Compressor Protection Module': a_state[bit_array[11]],
-            '(not assigned) 3': a_state[bit_array[12]],
-            'System B Floodback Monitor': a_state[bit_array[13]],
-            '(not assigned) 4': a_state[bit_array[14]],
+            'System 1(A) High/Low Pressure': state_alarm[bit_array[0]],
+            'System 1(A) Low Oil Pressure': state_alarm[bit_array[1]],
+            'System 1(A) High Discharge Temperature': state_alarm[bit_array[2]],
+            'System 1(A) Compressor Protection Module': state_alarm[bit_array[3]],
+            'Pumpdown Disabled': state_alarm[bit_array[4]],
+            'System 1(A) Floodback Monitor': state_alarm[bit_array[5]],
+            '(not assigned) 1': state_alarm[bit_array[6]],
+            '(not assigned) 2': state_alarm[bit_array[7]],
+            'System 2(B) High/Low Pressure': state_alarm[bit_array[8]],
+            'System 2(B) Low Oil Pressure': state_alarm[bit_array[9]],
+            'System 2(B) High Discharge Temperature': state_alarm[bit_array[10]],
+            'System 2(B) Compressor Protection Module': state_alarm[bit_array[11]],
+            '(not assigned) 3': state_alarm[bit_array[12]],
+            'System B Floodback Monitor': state_alarm[bit_array[13]],
+            '(not assigned) 4': state_alarm[bit_array[14]],
         }
         return name, "status:{}".format(response)
 
     def system_status_monitor(self, name, value):
         bit_array = self.bitfield(value)
         response = {
-            'Humidity Water Reservoir Low': a_state[bit_array[0]],
-            'Humidity Disabled (temperature out-of-range)': a_state[bit_array[1]],
-            'Humidity High Dewpoint Limit': a_state[bit_array[2]],
-            'Humidity Low Dewpoint Limit': a_state[bit_array[3]],
-            'Door Open': a_state[bit_array[4]],
-            '(not assigned) 1': a_state[bit_array[5]],
-            '(not assigned) 2': a_state[bit_array[6]],
-            '(not assigned) 3': a_state[bit_array[7]],
-            'Service Air Circulators': a_state[bit_array[8]],
-            'Service Heating/Cooling System': a_state[bit_array[9]],
-            'Service Humidity System': a_state[bit_array[10]],
-            'Service Purge System': a_state[bit_array[11]],
-            'Service Altitude System': a_state[bit_array[12]],
-            'Service Transfer Mechanism': a_state[bit_array[13]],
-            '(not assigned) 4': a_state[bit_array[14]],
+            'Humidity Water Reservoir Low': state_alarm[bit_array[0]],
+            'Humidity Disabled (temperature out-of-range)': state_alarm[bit_array[1]],
+            'Humidity High Dewpoint Limit': state_alarm[bit_array[2]],
+            'Humidity Low Dewpoint Limit': state_alarm[bit_array[3]],
+            'Door Open': state_alarm[bit_array[4]],
+            '(not assigned) 1': state_alarm[bit_array[5]],
+            '(not assigned) 2': state_alarm[bit_array[6]],
+            '(not assigned) 3': state_alarm[bit_array[7]],
+            'Service Air Circulators': state_alarm[bit_array[8]],
+            'Service Heating/Cooling System': state_alarm[bit_array[9]],
+            'Service Humidity System': state_alarm[bit_array[10]],
+            'Service Purge System': state_alarm[bit_array[11]],
+            'Service Altitude System': state_alarm[bit_array[12]],
+            'Service Transfer Mechanism': state_alarm[bit_array[13]],
+            '(not assigned) 4': state_alarm[bit_array[14]],
         }
         return name, "status:{}".format(response)
 
@@ -1257,11 +1368,11 @@ class ChamberCommandRegisters(object):
         return name, "minute:{}".format(value)
 
     def ezt570i_offline_download_profile(self,name, value):
-        mode = {
+        state = {
             0: 'Online',
             1: 'Offline/Downloading Profile'
         }
-        s = mode.get(value, "{} Not specified in API".format(value))
+        s = state.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
 class ChamberProfileRegisters(object):

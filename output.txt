@@ -44,6 +44,7 @@ INFO	: --------------Line:10 --------------
 INFO	: Send request
 INFO	: Read response
 INFO	: Profile upload complete
+INFO	: register:21, code:1
 INFO	: 
 # =========================================
 # Write Register
@@ -57,7 +58,8 @@ INFO	:
 INFO	: Send request
 INFO	: Read response
 INFO	: quantity:1
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0000, value_human:Status:Off
+INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0001, value_human:Status:on
+INFO	: register:21, code:0
 INFO	: 
 # =========================================
 # Write Register
@@ -71,7 +73,7 @@ INFO	:
 INFO	: Send request
 INFO	: Read response
 INFO	: quantity:1
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0000, value_human:Status:Off
+INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0000, value_human:Status:off
 INFO	: 
 # =========================================
 # Read Registers: reg:0, quanity:200
@@ -79,32 +81,32 @@ INFO	:
 INFO	: Send request
 INFO	: Read response
 INFO	: quantity:200
-INFO	: register:0000, reg_name:OPERATIONAL_MODE                                  , value:0001, value_human:Status:On
+INFO	: register:0000, reg_name:OPERATIONAL_MODE                                  , value:0001, value_human:Status:on
 INFO	: register:0001, reg_name:CLOCK_YY_MM                                       , value:1206, value_human:year: 2018, month:6
 INFO	: register:0002, reg_name:CLOCK_DAY_DOW                                     , value:1403, value_human:DayOfMonth:20, DayOfWeek:3
-INFO	: register:0003, reg_name:CLOCK_HH_MM                                       , value:0c2c, value_human:Hour:12, Minute:44
-INFO	: register:0004, reg_name:CLOCK_SEC                                         , value:0029, value_human:Seconds:41
-INFO	: register:0005, reg_name:POWER_RECOVERY_MODE                               , value:0008, value_human:Status:Resume
+INFO	: register:0003, reg_name:CLOCK_HH_MM                                       , value:0f2f, value_human:Hour:15, Minute:47
+INFO	: register:0004, reg_name:CLOCK_SEC                                         , value:0009, value_human:Seconds:9
+INFO	: register:0005, reg_name:POWER_RECOVERY_MODE                               , value:0008, value_human:Status:resume
 INFO	: register:0006, reg_name:POWER_OUT_TIME                                    , value:003c, value_human:Seconds:60
-INFO	: register:0007, reg_name:DEFROST_OPERATING_MODE                            , value:0000, value_human:Status:Disabled
+INFO	: register:0007, reg_name:DEFROST_OPERATING_MODE                            , value:0000, value_human:Status:disabled
 INFO	: register:0008, reg_name:AUTO_DEFROST_TEMPERATURE_SETPOINT                 , value:0032, value_human:degrees:5.0
 INFO	: register:0009, reg_name:AUTO_DEFROST_TIME_INTERVAL                        , value:02d0, value_human:minutes:720
 INFO	: register:000a, reg_name:DEFROST_STATUS                                    , value:0000, value_human:Status:Not in Defrost
 INFO	: register:000b, reg_name:TIME_REMAINING_UNTIL_NEXT_DEFROST                 , value:0000, value_human:minutes:0
-INFO	: register:000c, reg_name:PRODUCT_CONTROL                                   , value:0000, value_human:Status:Off
+INFO	: register:000c, reg_name:PRODUCT_CONTROL                                   , value:0000, value_human:Status:off
 INFO	: register:000d, reg_name:PRODUCT_CONTROL_UPPER_SETPOINT                    , value:0258, value_human:degrees:60.0
 INFO	: register:000e, reg_name:PRODUCT_CONTROL_LOWER_SETPOINT                    , value:-032, value_human:degrees:-5.0
-INFO	: register:000f, reg_name:CONDENSATION_CONTROL                              , value:0000, value_human:Status:Off
+INFO	: register:000f, reg_name:CONDENSATION_CONTROL                              , value:0000, value_human:Status:off
 INFO	: register:0010, reg_name:CONDENSATION_CONTROL_MONITOR_MODE                 , value:0000, value_human:Status:0 Not specified in API
 INFO	: register:0011, reg_name:CONDENSATION_CONTROL_INPUT_SELECTION              , value:0000, value_human:pv:{'PV1': 0, 'Product': 0, 'PV2': 0, 'PV5': 0, 'PV4': 0, 'PV7': 0, 'PV6': 0, 'PV8': 0, 'PV3': 0}
 INFO	: register:0012, reg_name:CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT  , value:000a, value_human:degrees:1.0
 INFO	: register:0013, reg_name:CONDENSATION_CONTROL_DEUPOINT_LIMIT               , value:0000, value_human:degrees:0.0
-INFO	: register:0014, reg_name:CONDENSATION_CONTROL_DUEPOINT_ACTUAL              , value:0075, value_human:degrees:11.0
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0000, value_human:Status:Off
+INFO	: register:0014, reg_name:CONDENSATION_CONTROL_DUEPOINT_ACTUAL              , value:0072, value_human:degrees:11.0
+INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0000, value_human:Status:off
 INFO	: register:0016, reg_name:CHAMBER_MANUAL_EVENT_CONTROL                      , value:0000, value_human:status:{'Event 13': 'normal', 'Event 12': 'normal', 'Event 11': 'normal', 'Event 10': 'normal', 'Event 15': 'normal', 'Event 14': 'normal', 'Event2': 'normal', 'Event 9': 'normal', 'Event 8': 'normal', 'Event 7': 'normal', 'Event 6': 'normal', 'Event 5': 'normal', 'Event 4': 'normal', 'Event 3': 'normal', 'Event 1': 'normal'}
 INFO	: register:0017, reg_name:CUSTOMER_MANUAL_EVENT_CONTROL                     , value:0000, value_human:status:{'Event 13': 'normal', 'Event 12': 'normal', 'Event 11': 'normal', 'Event 10': 'normal', 'Event 15': 'normal', 'Event 14': 'normal', 'Event2': 'normal', 'Event 9': 'normal', 'Event 8': 'normal', 'Event 7': 'normal', 'Event 6': 'normal', 'Event 5': 'normal', 'Event 4': 'normal', 'Event 3': 'normal', 'Event 1': 'normal'}
 INFO	: register:0018, reg_name:PROFILE_CONTROL_STATUS                            , value:0000, value_human:Status:Stop/Off
-INFO	: register:0019, reg_name:PROFILE_ADVANCED_STEP                             , value:0000, value_human:Mode:0 Not specified in API
+INFO	: register:0019, reg_name:PROFILE_ADVANCE_STEP                              , value:0000, value_human:Non Readable Register
 INFO	: register:001a, reg_name:PROFILE_NAME_CH_1_2                               , value:4147, value_human:A G
 INFO	: register:001b, reg_name:PROFILE_NAME_CH_3_4                               , value:414c, value_human:A L
 INFO	: register:001c, reg_name:PROFILE_NAME_CH_5_6                               , value:5958, value_human:Y X
@@ -133,16 +135,16 @@ INFO	: register:0032, reg_name:PROFILE_LOOP_5_TARGET_SETPOINT                   
 INFO	: register:0033, reg_name:PROFILE_LAST_JUMP_FROM_STEP                       , value:0000, value_human:step:0
 INFO	: register:0034, reg_name:PROFILE_LAST_JUMP_TO_STEP                         , value:0000, value_human:step:0
 INFO	: register:0035, reg_name:PROFILE_TOTAL_JUMPS_MADE                          , value:0000, value_human:jumps:0
-INFO	: register:0036, reg_name:ALARM_ACKNOWLEDGE                                 , value:0000, value_human:Status:0 Not specified in API
+INFO	: register:0036, reg_name:ALARM_ACKNOWLEDGE                                 , value:0000, value_human:Non Readable Register
 INFO	: register:0037, reg_name:EZT570I_ALARM_STATUS                              , value:0000, value_human:status:{'Input1 Sensor Break': 'normal', 'Input8 Sensor Break': 'normal', 'Input12 Sensor Break': 'normal', 'Loop Communications Failure': 'normal', 'Input5 Sensor Break': 'normal', '(not assigned)': 'normal', 'Input7 Sensor Break': 'normal', 'Input2 Sensor Break': 'normal', 'Input4 Sensor Break': 'normal', 'Input10 Sensor Break': 'normal', 'Input9 Sensor Break': 'normal', 'Input3 Sensor Break': 'normal', 'Input11 Sensor Break': 'normal', 'Input6 Sensor Break': 'normal', 'Input13 Sensor Break': 'normal'}
 INFO	: register:0038, reg_name:INPUT_ALARM_STATUS                                , value:0000, value_human:status:{'Input9 Alarm': 'normal', 'Input4 Alarm': 'normal', 'Input1 Alarm': 'normal', 'Input12 Alarm': 'normal', 'Input7 Alarm': 'normal', 'Input5 Alarm': 'normal', 'Input8 Alarm': 'normal', 'Input10 Alarm': 'normal', 'Input13 Alarm': 'normal', '(not assigned 2)': 'normal', 'Input6 Alarm': 'normal', 'Input3 Alarm': 'normal', '(not assigned 1)': 'normal', 'Input2 Alarm': 'normal', 'Input11 Alarm': 'normal'}
 INFO	: register:0039, reg_name:CHAMBER_ALARM_STATUS                              , value:0000, value_human:status:{'Fluid System High Limit (Plenum B Heater High Limit)': 'normal', 'External Product Safety': 'normal', 'Motor Overload (Plenum A)': 'normal', 'Power Failure': 'normal', 'Emergency Stop': 'normal', '(System B Boiler Low Water)': 'normal', 'Transfer Error': 'normal', '(not assigned)': 'normal', 'Boiler Over-Temp (Plenum A)': 'normal', 'Fluid System High Pressure (Plenum B Motor Overload)': 'normal', 'Dehumidifier System Fault (System B Boiler Over-Temp)': 'normal', 'Boiler Low Water (Plenum A)': 'normal', 'Door Open': 'normal', 'Heater High Limit (Plenum A)': 'normal', 'Fluid System Low Flow': 'normal'}
 INFO	: register:003a, reg_name:REFRIGERATION_ALARM_STATUS                        , value:0000, value_human:status:{'System 2(B) High Discharge Temperature': 'normal', 'System 2(B) Low Oil Pressure': 'normal', 'System 1(A) Compressor Protection Module': 'normal', 'Pumpdown Disabled': 'normal', 'System 1(A) High Discharge Temperature': 'normal', 'System 1(A) High/Low Pressure': 'normal', 'System 1(A) Low Oil Pressure': 'normal', 'System 2(B) Compressor Protection Module': 'normal', 'System 1(A) Floodback Monitor': 'normal', 'System 2(B) High/Low Pressure': 'normal', 'System B Floodback Monitor': 'normal', '(not assigned) 2': 'normal', '(not assigned) 3': 'normal', '(not assigned) 1': 'normal', '(not assigned) 4': 'normal'}
 INFO	: register:003b, reg_name:SYSTEM_STATUS_MONITOR                             , value:0000, value_human:status:{'Service Air Circulators': 'normal', 'Service Heating/Cooling System': 'normal', 'Humidity High Dewpoint Limit': 'normal', 'Service Transfer Mechanism': 'normal', 'Service Humidity System': 'normal', 'Humidity Disabled (temperature out-of-range)': 'normal', 'Humidity Water Reservoir Low': 'normal', 'Service Altitude System': 'normal', 'Service Purge System': 'normal', 'Door Open': 'normal', '(not assigned) 2': 'normal', '(not assigned) 3': 'normal', '(not assigned) 1': 'normal', '(not assigned) 4': 'normal', 'Humidity Low Dewpoint Limit': 'normal'}
 INFO	: register:003c, reg_name:LOOP_1_SETPOINT                                   , value:01f4, value_human:degrees:50.0
-INFO	: register:003d, reg_name:LOOP_1_PROCESS_VALUE                              , value:0112, value_human:degrees:27.0
+INFO	: register:003d, reg_name:LOOP_1_PROCESS_VALUE                              , value:0116, value_human:degrees:27.0
 INFO	: register:003e, reg_name:LOOP_1_PERCENT_OUTPUT                             , value:0000, value_human:%out:0
-INFO	: register:003f, reg_name:LOOP_1_AUTOTUNE_STATUS                            , value:0000, value_human:Status:Autotune Off
+INFO	: register:003f, reg_name:LOOP_1_AUTOTUNE_STATUS                            , value:0000, value_human:Status:autotune off
 INFO	: register:0040, reg_name:LOOP_1_UPPER_SETPOINT_LIMIT                       , value:0258, value_human:degrees:60.0
 INFO	: register:0041, reg_name:LOOP_1_LOWER_SETPOINT_LIMIT                       , value:-0c8, value_human:degrees:-20.0
 INFO	: register:0042, reg_name:LOOP_1_ALARM_TYPE                                 , value:0000, value_human:Status:Alarm Off
@@ -152,9 +154,9 @@ INFO	: register:0045, reg_name:LOOP_1_HIGH_ALARM_SETPOINT                       
 INFO	: register:0046, reg_name:LOOP_1_LOW_ALARM_SETPOINT                         , value:-226, value_human:degrees:-55.0
 INFO	: register:0047, reg_name:LOOP_1_ALARM_HYSTERESIS                           , value:000a, value_human:degrees:1.0
 INFO	: register:0048, reg_name:LOOP_2_SETPOINT                                   , value:0000, value_human:degrees:0.0
-INFO	: register:0049, reg_name:LOOP_2_PROCESS_VALUE                              , value:017b, value_human:degrees:37.0
+INFO	: register:0049, reg_name:LOOP_2_PROCESS_VALUE                              , value:016c, value_human:degrees:36.0
 INFO	: register:004a, reg_name:LOOP_2_PERCENT_OUTPUT                             , value:0000, value_human:%out:0
-INFO	: register:004b, reg_name:LOOP_2_AUTOTUNE_STATUS                            , value:0000, value_human:Status:Autotune Off
+INFO	: register:004b, reg_name:LOOP_2_AUTOTUNE_STATUS                            , value:0000, value_human:Status:autotune off
 INFO	: register:004c, reg_name:LOOP_2_UPPER_SETPOINT_LIMIT                       , value:03e8, value_human:degrees:100.0
 INFO	: register:004d, reg_name:LOOP_2_LOWER_SETPOINT_LIMIT                       , value:0000, value_human:degrees:0.0
 INFO	: register:004e, reg_name:LOOP_2_ALARM_TYPE                                 , value:0000, value_human:Status:Alarm Off
@@ -164,9 +166,9 @@ INFO	: register:0051, reg_name:LOOP_2_HIGH_ALARM_SETPOINT                       
 INFO	: register:0052, reg_name:LOOP_2_LOW_ALARM_SETPOINT                         , value:0000, value_human:degrees:0.0
 INFO	: register:0053, reg_name:LOOP_2_ALARM_HYSTERESIS                           , value:000a, value_human:degrees:1.0
 INFO	: register:0054, reg_name:LOOP_3_SETPOINT                                   , value:01f4, value_human:degrees:50.0
-INFO	: register:0055, reg_name:LOOP_3_PROCESS_VALUE                              , value:0103, value_human:degrees:25.0
+INFO	: register:0055, reg_name:LOOP_3_PROCESS_VALUE                              , value:0108, value_human:degrees:26.0
 INFO	: register:0056, reg_name:LOOP_3_PERCENT_OUTPUT                             , value:0000, value_human:%out:0
-INFO	: register:0057, reg_name:LOOP_3_AUTOTUNE_STATUS                            , value:0000, value_human:Status:Autotune Off
+INFO	: register:0057, reg_name:LOOP_3_AUTOTUNE_STATUS                            , value:0000, value_human:Status:autotune off
 INFO	: register:0058, reg_name:LOOP_3_UPPER_SETPOINT_LIMIT                       , value:076c, value_human:degrees:190.0
 INFO	: register:0059, reg_name:LOOP_3_LOWER_SETPOINT_LIMIT                       , value:-1c2, value_human:degrees:-45.0
 INFO	: register:005a, reg_name:LOOP_3_ALARM_TYPE                                 , value:0007, value_human:Status:Process Both
@@ -178,7 +180,7 @@ INFO	: register:005f, reg_name:LOOP_3_ALARM_HYSTERESIS                          
 INFO	: register:0060, reg_name:LOOP_4_SETPOINT                                   , value:0000, value_human:degrees:0.0
 INFO	: register:0061, reg_name:LOOP_4_PROCESS_VALUE                              , value:0000, value_human:degrees:0.0
 INFO	: register:0062, reg_name:LOOP_4_PERCENT_OUTPUT                             , value:0000, value_human:%out:0
-INFO	: register:0063, reg_name:LOOP_4_AUTOTUNE_STATUS                            , value:0000, value_human:Status:Autotune Off
+INFO	: register:0063, reg_name:LOOP_4_AUTOTUNE_STATUS                            , value:0000, value_human:Status:autotune off
 INFO	: register:0064, reg_name:LOOP_4_UPPER_SETPOINT_LIMIT                       , value:7ff8, value_human:degrees:3276.0
 INFO	: register:0065, reg_name:LOOP_4_LOWER_SETPOINT_LIMIT                       , value:-7ff8, value_human:degrees:-3276.0
 INFO	: register:0066, reg_name:LOOP_4_ALARM_TYPE                                 , value:0000, value_human:Status:Alarm Off
@@ -190,7 +192,7 @@ INFO	: register:006b, reg_name:LOOP_4_ALARM_HYSTERESIS                          
 INFO	: register:006c, reg_name:LOOP_5_SETPOINT                                   , value:0000, value_human:degrees:0.0
 INFO	: register:006d, reg_name:LOOP_5_PROCESS_VALUE                              , value:0000, value_human:degrees:0.0
 INFO	: register:006e, reg_name:LOOP_5_PERCENT_OUTPUT                             , value:0000, value_human:%out:0
-INFO	: register:006f, reg_name:LOOP_5_AUTOTUNE_STATUS                            , value:0000, value_human:Status:Autotune Off
+INFO	: register:006f, reg_name:LOOP_5_AUTOTUNE_STATUS                            , value:0000, value_human:Status:autotune off
 INFO	: register:0070, reg_name:LOOP_5_UPPER_SETPOINT_LIMIT                       , value:7ff8, value_human:degrees:3276.0
 INFO	: register:0071, reg_name:LOOP_5_LOWER_SETPOINT_LIMIT                       , value:-7ff8, value_human:degrees:-3276.0
 INFO	: register:0072, reg_name:LOOP_5_ALARM_TYPE                                 , value:0000, value_human:Status:Alarm Off
@@ -259,7 +261,7 @@ INFO	: register:00b0, reg_name:UNDEFINED                                        
 INFO	: register:00b1, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
 INFO	: register:00b2, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
 INFO	: register:00b3, reg_name:PROFILE_STEP_TIME_ADJUSTMENT                      , value:0000, value_human:minute:0
-INFO	: register:00b4, reg_name:EZT570I_OFFLINE_DOWNLOAD_PROFILE                  , value:0000, value_human:Status:Online
+INFO	: register:00b4, reg_name:EZT570I_OFFLINE_DOWNLOAD_PROFILE                  , value:0001, value_human:Status:Offline/Downloading Profile
 INFO	: register:00b5, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
 INFO	: register:00b6, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
 INFO	: register:00b7, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
