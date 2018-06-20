@@ -33,13 +33,13 @@ a_state = {
 int_to_two_bytes = struct.Struct('!h').pack
 
 class ChamberCommandRegisters(object):
-    """Read and Write Registers
+    """Translate between human and modbus register <=> names, and values <=> meaning
     Used in Read Registers Command (0x03) for multi register read.
     Used in Write Register Commnad (0x06) for single register write.
     """
 
-    def __init__(self, log):
-        self.log = log
+    def __init__(self):
+        pass
 
     # Dictionary map registers to function
     ctrl = {

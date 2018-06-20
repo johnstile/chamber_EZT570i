@@ -18,10 +18,10 @@ import modbus_packets
 
 class Chamber(object):
     """"""
-    def __init__(self, log, comm_type):
+    def __init__(self, log, comm_type, comm_params):
         self.log = log
-        self.creg = chamber_commands.ChamberCommandRegisters(log)
-        self.ccomm = chamber_communication.ChamberCommunication(comm_type, log)
+        self.creg = chamber_commands.ChamberCommandRegisters()
+        self.ccomm = chamber_communication.ChamberCommunication(comm_type, comm_params, log)
 
     def connect(self):
         self.ccomm.connect_to_chamber()
@@ -73,7 +73,12 @@ def main():
     log.setLevel(logging.INFO)  # DEBUG,INFO,WARNING,ERROR,CRITICAL
     log.debug("Initialized Logger")
     comm_type="network"
-    chamber = Chamber(log, comm_type)
+    comm_params = {
+        'net_port' : 50000,
+        'net_addr' : '192.168.0.36',
+        'net_timeout' : 20
+    }
+    chamber = Chamber(log, comm_type, comm_params)
 
     # ----------------------------------
     # Open communicaiton

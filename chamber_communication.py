@@ -53,11 +53,12 @@ def int_or_float(s):
 class ChamberCommunication(object):
     """Communication with EZT570i"""
 
-    def __init__(self, comm_type='dummy', log=None, chamber_number=1):
+    def __init__(self, comm_type='dummy', comm_params={}, log=None, chamber_number=1):
         self.log = log
         self.comm = None
         self.crc = None
         self.comm_type = comm_type
+        self.comm_params = comm_params
         self.chamber_number  = chamber_number
         # Factory to abstract how we talk to the chamber
         self.comm_func = {
@@ -98,6 +99,11 @@ class ChamberCommunication(object):
         self.comm_wait_time = 0.203
 
     def connect(self):
+        if self.comm_type == 'network':
+            assert self.comm_params['net_port'] and self.comm_params['net_addr'] and self.comm_params['net_timeout']
+        elif self.comm_type == 'serial':
+            assert self.comm_params['serial_port']
+
         # Get communication
         self.comm_func[self.comm_type]['connect']()
     
@@ -173,7 +179,7 @@ class ChamberCommunication(object):
 
         modbus_response = self.read_response(modbus_write_response)
 
-        self.log.info(
+        self.log.debug(
             (
                 "Modbus Request: {}"
             ).format(
@@ -189,7 +195,7 @@ class ChamberCommunication(object):
         """
         self.log.info(
             (
-                "# =========================================\n"
+                "\n# =========================================\n"
                 "# Read Registers: reg:{}, quanity:{}\n"
                 "# ========================================="
             ).format(
@@ -274,7 +280,7 @@ class ChamberCommunication(object):
         )
 
         # Print structure
-        self.log.info(
+        self.log.debug(
             (
                 "Modbus Response:{}"
             ).format(
@@ -364,7 +370,7 @@ class ChamberCommunication(object):
             modbus_response = self.read_response(modbus_write_profile_response)
 
             # Print structure
-            self.log.info(
+            self.log.debug(
                 (
                     "WriteProfileResponse:{}"
                 ).format(
@@ -482,9 +488,9 @@ class ChamberCommunication(object):
         """Network Setup"""
         self.log.debug("Create tcp scoket communication object")
         self.log.debug("Opening socket")
-        net_port = 50000
-        net_addr = '192.168.0.36'
-        net_timeout = 20
+        net_port = self.comm_params['net_port']
+        net_addr = self.comm_params['net_addr']
+        net_timeout = self.comm_params['net_timeout']
         self.comm = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.comm.connect((net_addr, net_port))
         self.comm.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -494,7 +500,7 @@ class ChamberCommunication(object):
         """Serial Port Setup"""
         self.log.debug("Create serial communication object")
         self.comm = serial.Serial(
-            port='/dev/ttyUSB0',
+            port= self.comm_params['serial_port'],
             baudrate=9600,
             timeout=1,
             parity=serial.PARITY_EVEN,
@@ -655,14 +661,14 @@ if __name__ == '__main__':
     log.debug("Initialized Logger")
 
     from chamber_commands import ChamberCommandRegisters
-    commands = ChamberCommandRegisters(log)
+    commands = ChamberCommandRegisters()
     light_control = commands.ctrl['CHAMBER_LIGHT_CONTROL']
 
     chamber = ChamberCommunication(comm_type='dummy', log=log)
     chamber.connect()
 
     # Chamber "Profile" file
-    project_file = '/home/jstile/chamber/our_files/Profiles_09-01-2017-09-53-40/GALILEO.txt'
+    project_file = 'GALILEO.txt'
 
     chamber.load_profile(project_file)
 
