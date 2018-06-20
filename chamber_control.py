@@ -86,7 +86,6 @@ def main():
     project_file = 'GALAXY.txt'
     chamber.ccomm.load_profile(project_file)
 
-    sys.exit()
     #----------------------------------
     # Write Value
     #-----------------------------------
@@ -96,7 +95,7 @@ def main():
     start_reg = chamber.creg.name_to_reg('CHAMBER_LIGHT_CONTROL')
     quantity_of_reg = 1
     values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
-    log.info("Modbus Response:{}".format(values))
+    log.debug("Modbus Response:{}".format(values))
     print_read_registers(chamber, log, start_reg, values)
 
     register, code = chamber.creg.encode_set_value('CHAMBER_LIGHT_CONTROL', 'off')
@@ -105,24 +104,23 @@ def main():
     start_reg = chamber.creg.name_to_reg('CHAMBER_LIGHT_CONTROL')
     quantity_of_reg = 1
     values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
-    log.info("Modbus Response:{}".format(values))
+    log.debug("Modbus Response:{}".format(values))
     print_read_registers(chamber, log, start_reg, values)
 
     #----------------------------------
     # Read x registers
-    # #----------------------------------
+    #----------------------------------
     start_reg = chamber.creg.name_to_reg('OPERATIONAL_MODE')
     quantity_of_reg = 200
     values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
-    log.info("Modbus Response:{}".format(values))
+    log.debug("Modbus Response:{}".format(values))
 
     print_read_registers(chamber, log, start_reg, values)
 
 def print_read_registers(chamber, log, start_reg, values):
-    # this is the most promising
 
-    log.info("\n\nRead: start_reg:{}, values:{}".format(start_reg, values))
-    log.info("data:{}".format(values.data[:]))
+    log.debug("\n\nRead: start_reg:{}, values:{}".format(start_reg, values))
+    log.debug("data:{}".format(values.data[:]))
     log.info("quantity:{}".format(len(values.data)))
     reg = copy(start_reg)
     for value in values.data[:]:

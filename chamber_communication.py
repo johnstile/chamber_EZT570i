@@ -81,9 +81,9 @@ class ChamberCommunication(object):
             }
         }
         self.command = {
-            "read_regs": 3,
-            "write_reg": 6,
-            "write_profile": 10
+            "read_regs": 0x03,
+            "write_reg": 0x06,
+            "write_profile_reg": 0x10
         }
         # Get crc class
         self.crc = CRC16()
@@ -116,7 +116,7 @@ class ChamberCommunication(object):
             "\n"
             "# =========================================\n"
             "# Write Register\n"
-            "# =========================================\n"
+            "# ========================================="
         )
 
         # --------------------------------------
@@ -131,7 +131,7 @@ class ChamberCommunication(object):
             register,
             value
         )
-        self.log.info(
+        self.log.debug(
             "{:<80}:packed header".format(
                 [hex(a) for a in struct.unpack(fmt, packed_header)]
             )
@@ -141,7 +141,7 @@ class ChamberCommunication(object):
         modbus_msg_as_bytes = self.crc.add_crc(packed_header)
 
         data_hexstring = binascii.hexlify(modbus_msg_as_bytes)
-        self.log.info("{:<20}:message + crc".format(data_hexstring))
+        self.log.debug("{:<20}:message + crc".format(data_hexstring))
 
         # load byte array into structure
         modbus_write_request = modbus_packets.WriteRegister()
@@ -152,7 +152,7 @@ class ChamberCommunication(object):
         )
 
         # Print structure
-        self.log.info(
+        self.log.debug(
             (
                 "Modbus Request: {}"
             ).format(
@@ -177,7 +177,7 @@ class ChamberCommunication(object):
             self.comm_func[self.comm_type]['read'](size_read_response)
 
         data_hexstring = binascii.hexlify(modbus_response_msg_as_bytes)
-        self.log.info("string_read_response hexlify: {}".format(data_hexstring))
+        self.log.debug("string_read_response hexlify: {}".format(data_hexstring))
 
         if self.comm_type is not 'dummy':
             # Validate response
@@ -190,7 +190,7 @@ class ChamberCommunication(object):
             len(modbus_response_msg_as_bytes)
         )
 
-        self.log.info(
+        self.log.debug(
             (
                 "Modbus Request: {}"
             ).format(
@@ -229,7 +229,7 @@ class ChamberCommunication(object):
             register,
             quanity
         )
-        self.log.info(
+        self.log.debug(
             "{:<80}:packed header".format(
                 [hex(a) for a in struct.unpack(fmt, packed_header)]
             )
@@ -239,7 +239,7 @@ class ChamberCommunication(object):
         modbus_msg_as_bytes = self.crc.add_crc(packed_header)
 
         data_hexstring = binascii.hexlify(modbus_msg_as_bytes)
-        self.log.info("{:<20}:message + crc".format(data_hexstring))
+        self.log.debug("{:<20}:message + crc".format(data_hexstring))
 
         # load structure
         modbus_read_request = modbus_packets.ReadRegistersSend()
@@ -248,7 +248,7 @@ class ChamberCommunication(object):
             modbus_msg_as_bytes,
             len(modbus_msg_as_bytes)
         )
-        self.log.info(
+        self.log.debug(
             (
                 "Modbus Request:{}"
             ).format(
@@ -277,7 +277,7 @@ class ChamberCommunication(object):
 
         # Convert string to bytes to string of hex
         modebus_response_msg_as_hex = binascii.hexlify(modbus_response_msg_as_bytes)
-        self.log.info("{:<20} : response msg".format(modebus_response_msg_as_hex))
+        self.log.debug("{:<20} : response msg".format(modebus_response_msg_as_hex))
 
         # Populate the structure
         ctypes.memmove(
@@ -288,7 +288,7 @@ class ChamberCommunication(object):
 
         # Print structure
         # self.log.debug(repr(modbus_read_response))
-        self.log.info(
+        self.log.debug(
             (
                 "Modbus Response:{}"
             ).format(
@@ -330,7 +330,7 @@ class ChamberCommunication(object):
 
             # Read steps from file
             profile_steps = self.read_profile_lines(fh, steps_tot)
-            self.log.info("Profile Steps:{}".format(profile_steps))
+            self.log.info("Steps loaded:{}".format(len(profile_steps)))
             # TODO: print each step in the profile
 
         self.log.info("Convert profile header+steps into list of modbus packets")
@@ -339,170 +339,11 @@ class ChamberCommunication(object):
             profile_header, profile_steps
         )
 
-        self.log.info("Profile Packets")
+        self.log.debug("Profile Packets")
         for i in modebus_packed_profile:
-            self.log.info("Packet:{}".format(i))
+            self.log.debug("Packet:{}".format(i))
 
-        self.log.info("Write packets to modbus")
         self.write_profile_to_modbus(modebus_packed_profile)
-
-
-        self.log.info("Competed loading profile")
-
-        # -------------------------------------------
-        # OLD CODE. HERE FOR REFERENCE ONLY
-        # -------------------------------------------
-        if False:
-
-            register_start = 200  # First Register Address 0x00c8
-            register_count = 15  # number of registers per packet
-            steps_tot = 0  # Steps in profile, read from first line
-            step_counter = 0  # Track when to stop reading file
-
-            line_counter = 0
-            # Read file one line at a time
-            for profile_line in fh:
-                # Only used for log
-                line_counter += 1
-                self.log.info("--------------Line:{} --------------".format(line_counter))
-
-                # --------------------------------------
-                # LINE PARSER CODE:
-                # ---------------------------------------
-
-                # Convert comma separated text to array of int
-                data_int_array = []
-                for index, val in enumerate(profile_line.split(',')[:15]):
-                    # Convert string to int, floats are multiplied by 10
-                    val = int_or_float(val)
-
-                    # Finally add to the array
-                    data_int_array.append(val)
-
-                self.log.info("data_int_array:{}".format(data_int_array))
-
-                # First line of file, harvest number of steps in profile
-                if not steps_tot:
-                    steps_tot = data_int_array[9]
-
-                # Stop reading file after steps are completes
-                # The file has 100 lines, but upload only wants steps_tot.
-                if step_counter > steps_tot:
-                    self.log.info(
-                        "Break: step_counter:{} > steps_tot:{}".format(
-                            step_counter,
-                            steps_tot
-                        )
-                    )
-                    break
-
-                # Handle counter management close to evaluation
-                step_counter += 1
-
-                # Convert array of int to packed data
-                data_bytearray = bytearray()
-                for i in data_int_array:
-                    s = struct.pack('!h', i)
-                    data_bytearray += s
-
-                data_hexstring = binascii.hexlify(data_bytearray)
-                self.log.debug("{:<80}:data_bytearray".format(data_hexstring))
-
-                # --------------------------------------
-                # PACKET HEADER
-                # --------------------------------------
-                # 0x01 0x10 0x00C6 0x000F 0x1E
-                fmt = '!2B2HB'
-                packed_header = struct.pack(
-                    fmt,
-                    0x01,  # Device number
-                    0x10,  # Command
-                    register_start,
-                    0x00F,  # number of registers
-                    0x1E  # bytes of data
-                )
-                self.log.debug(
-                    "{:<80}:packed header".format(
-                        [hex(a) for a in struct.unpack(fmt, packed_header)]
-                    )
-                )
-                # --------------------------------------
-                # JOIN HEADER + DATA
-                # --------------------------------------
-                msg_as_bytes = bytes(packed_header) + bytes(data_bytearray)
-
-                data_hexstring = binascii.hexlify(msg_as_bytes)
-                self.log.debug("{:<80}:msg_as_bytes".format(data_hexstring))
-
-                # --------------------------------------
-                # Add CRC
-                # --------------------------------------
-                modbus_msg_as_bytes = self.crc.add_crc(msg_as_bytes)
-
-                data_hexstring = binascii.hexlify(modbus_msg_as_bytes)
-                self.log.debug("{:<80}:msg_as_bytes + crc".format(data_hexstring))
-
-                # --------------------------------------
-                # Load ctypes.Structure
-                # --------------------------------------
-                modbus_profile_request = modbus_packets.write_profile_factory(register_count)
-                ctypes.memmove(
-                    ctypes.addressof(modbus_profile_request),
-                    modbus_msg_as_bytes,
-                    len(modbus_msg_as_bytes)
-                )
-                self.log.info(
-                    'WriteProfileSend:{}'.format(modbus_profile_request)
-                )
-                # --------------------------------------
-                # Send request
-                # --------------------------------------
-                self.comm_func[self.comm_type]['write'](modbus_profile_request)
-
-                # --------------------------------------
-                # Mandatory 1 second sleep between each write
-                # --------------------------------------
-                time.sleep(1)
-
-                # --------------------------------------
-                # Read response
-                # --------------------------------------
-
-                # Create response Structure sized for expected data
-                modbus_write_response = modbus_packets.WriteProfileResponse()
-                size_read_response = ctypes.sizeof(modbus_write_response)
-
-                # Read response to read request
-                modbus_response_msg_as_bytes = \
-                    self.comm_func[self.comm_type]['read'](size_read_response)
-
-                data_hexstring = binascii.hexlify(modbus_response_msg_as_bytes)
-                self.log.debug(
-                    "string_read_response hexlify: {}".format(data_hexstring)
-                )
-
-                if self.comm_type is not 'dummy':
-                    # Validate response
-                    self.crc.validate_crc(modbus_response_msg_as_bytes)
-
-                # Populate the structure
-                ctypes.memmove(
-                    ctypes.addressof(modbus_write_response),
-                    modbus_response_msg_as_bytes,
-                    len(modbus_response_msg_as_bytes)
-                )
-
-                # Print structure
-                self.log.info(
-                    (
-                        "WriteProfileResponse:{}"
-                    ).format(
-                        modbus_write_response
-                    )
-                )
-
-                # Increment the Register address by 15 for the next line of file
-                register_start += register_count
 
     def write_profile_to_modbus(self, modebus_packed_profile):
         """
@@ -510,50 +351,60 @@ class ChamberCommunication(object):
         :param modebus_packed_profile:
         :return:
         """
-        self.log.info(
-            (
-                "\n"
-                "# =========================================\n"
-                "# WRITE PROFILE TO MODBUS: {}\n"
-                "# ========================================="
-            ).format(
-                modebus_packed_profile
-            )
-        )
-
+        self.log.info("Write profile to Modbus")
 
         for i, packet in enumerate(modebus_packed_profile):
-            self.log.info("packet:{}".format(i))
-
-            # Send packet
+            self.log.info("--------------Line:{} --------------".format(i))
+            self.log.debug(
+                'WriteProfileSend:{}'.format(packet)
+            )
+            # --------------------------------------
+            # Send request
+            # --------------------------------------
             self.comm_func[self.comm_type]['write'](packet)
 
+            # --------------------------------------
+            # Mandatory wait between each write
+            # --------------------------------------
+            time.sleep(self.comm_wait_time)
+
+            # --------------------------------------
             # Read response
+            # --------------------------------------
+
+            # Create response Structure sized for expected data
             modbus_write_response = modbus_packets.WriteProfileResponse()
             size_read_response = ctypes.sizeof(modbus_write_response)
+
+            # Read response to read request
             modbus_response_msg_as_bytes = \
                 self.comm_func[self.comm_type]['read'](size_read_response)
 
-            self.log.info("Validate response")
+            data_hexstring = binascii.hexlify(modbus_response_msg_as_bytes)
+            self.log.debug(
+                "string_read_response hexlify: {}".format(data_hexstring)
+            )
+
             if self.comm_type is not 'dummy':
+                # Validate response
                 self.crc.validate_crc(modbus_response_msg_as_bytes)
 
-
-            self.log.info("Populate the structure")
+            # Populate the structure
             ctypes.memmove(
                 ctypes.addressof(modbus_write_response),
                 modbus_response_msg_as_bytes,
                 len(modbus_response_msg_as_bytes)
             )
-            time.sleep(.2)
+
             # Print structure
-            self.log.info(
+            self.log.debug(
                 (
                     "WriteProfileResponse:{}"
                 ).format(
                     modbus_write_response
                 )
             )
+        self.log.info("Profile upload complete")
 
     def read_profile_lines(self, fh, lines):
         """
@@ -568,14 +419,14 @@ class ChamberCommunication(object):
             # Convert comma separated text to array of int, with 15 elements
             data_int_array = []
             data_list = fh.readline().strip().split(',')[:15]
-            self.log.info("data_str:{}".format(data_list))
+            self.log.debug("data_str:{}".format(data_list))
             for val in data_list:
                 # Convert string to int, floats are multiplied by 10
                 val = int_or_float(val)
                 # Finally add to the array
                 data_int_array.append(val)
 
-            self.log.info("data_int_array:{}".format(data_int_array))
+            self.log.debug("data_int_array:{}".format(data_int_array))
             data_all_lines.append(data_int_array)
         return data_all_lines
 
@@ -617,7 +468,7 @@ class ChamberCommunication(object):
             packed_header = struct.pack(
                 fmt,
                 self.chamber_number,
-                self.command['write_profile'],
+                self.command['write_profile_reg'],
                 register_start,
                 registers_to_write,
                 bytes_written
