@@ -27,6 +27,8 @@ import binascii  # for human readable access to bit packed data
 import ctypes  # to access binary packed data in calibration file
 import struct  # for crc and message packing
 import socket  # for tcp communication
+
+import itertools
 import serial  # for rs232 communication
 import logging  # for log facility
 import time
@@ -51,11 +53,12 @@ def int_or_float(s):
 class ChamberCommunication(object):
     """Communication with EZT570i"""
 
-    def __init__(self, comm_type='dummy', log=None):
+    def __init__(self, comm_type='dummy', log=None, chamber_number=1):
         self.log = log
         self.comm = None
         self.crc = None
         self.comm_type = comm_type
+        self.chamber_number  = chamber_number
         # Factory to abstract how we talk to the chamber
         self.comm_func = {
             'serial': {  # over rs232
@@ -76,6 +79,11 @@ class ChamberCommunication(object):
                 'write': self.write_com_dummy,
                 'read': self.read_com_dummy
             }
+        }
+        self.command = {
+            "read_regs": 3,
+            "write_reg": 6,
+            "write_profile": 10
         }
         # Get crc class
         self.crc = CRC16()
@@ -118,8 +126,8 @@ class ChamberCommunication(object):
         fmt = '!2B2H'
         packed_header = struct.pack(
             fmt,
-            0x01,  # Device number
-            0x06,  # Command
+            self.chamber_number,
+            self.command['write_reg'],
             register,
             value
         )
@@ -216,8 +224,8 @@ class ChamberCommunication(object):
         fmt = '!2B2H'
         packed_header = struct.pack(
             fmt,
-            0x01,  # Device number
-            0x03,  # Command
+            self.chamber_number,
+            self.command['read_regs'],
             register,
             quanity
         )
@@ -295,18 +303,56 @@ class ChamberCommunication(object):
         :param project_file: path to file
         :return:
         """
+        self.log.info(
+            (
+                "\n"
+                "# =========================================\n"
+                "# WRITE PROFILE: {}\n"
+                "# ========================================="
+            ).format(
+                project_file
+            )
+        )
+
+        steps_tot = 0  # Steps in profile, read from first line
+        step_counter = 0  # Track when to stop reading file
+
+        # Read file into list of profile steps
         with open(project_file) as fh:
 
-            self.log.info(
-                (
-                    "\n"
-                    "# =========================================\n"
-                    "# WRITE PROFILE: {}\n"
-                    "# ========================================="
-                ).format(
-                    project_file
-                )
-            )
+            # Harvest the first line
+            profile_header = self.read_profile_lines(fh, 1)
+            self.log.info("Profile Header:{}".format(profile_header))
+
+            # Determine how many steps to read from file
+            steps_tot = profile_header[0][9]
+            self.log.info("Steps in Profile:{}".format(steps_tot))
+
+            # Read steps from file
+            profile_steps = self.read_profile_lines(fh, steps_tot)
+            self.log.info("Profile Steps:{}".format(profile_steps))
+            # TODO: print each step in the profile
+
+        self.log.info("Convert profile header+steps into list of modbus packets")
+        # Convert profile header+steps into list of modbus packets
+        modebus_packed_profile = self.profile_to_modbus_packets(
+            profile_header, profile_steps
+        )
+
+        self.log.info("Profile Packets")
+        for i in modebus_packed_profile:
+            self.log.info("Packet:{}".format(i))
+
+        self.log.info("Write packets to modbus")
+        self.write_profile_to_modbus(modebus_packed_profile)
+
+
+        self.log.info("Competed loading profile")
+
+        # -------------------------------------------
+        # OLD CODE. HERE FOR REFERENCE ONLY
+        # -------------------------------------------
+        if False:
 
             register_start = 200  # First Register Address 0x00c8
             register_count = 15  # number of registers per packet
@@ -457,6 +503,162 @@ class ChamberCommunication(object):
 
                 # Increment the Register address by 15 for the next line of file
                 register_start += register_count
+
+    def write_profile_to_modbus(self, modebus_packed_profile):
+        """
+        Write profile packets to modbus
+        :param modebus_packed_profile:
+        :return:
+        """
+        self.log.info(
+            (
+                "\n"
+                "# =========================================\n"
+                "# WRITE PROFILE TO MODBUS: {}\n"
+                "# ========================================="
+            ).format(
+                modebus_packed_profile
+            )
+        )
+
+
+        for i, packet in enumerate(modebus_packed_profile):
+            self.log.info("packet:{}".format(i))
+
+            # Send packet
+            self.comm_func[self.comm_type]['write'](packet)
+
+            # Read response
+            modbus_write_response = modbus_packets.WriteProfileResponse()
+            size_read_response = ctypes.sizeof(modbus_write_response)
+            modbus_response_msg_as_bytes = \
+                self.comm_func[self.comm_type]['read'](size_read_response)
+
+            self.log.info("Validate response")
+            if self.comm_type is not 'dummy':
+                self.crc.validate_crc(modbus_response_msg_as_bytes)
+
+
+            self.log.info("Populate the structure")
+            ctypes.memmove(
+                ctypes.addressof(modbus_write_response),
+                modbus_response_msg_as_bytes,
+                len(modbus_response_msg_as_bytes)
+            )
+            time.sleep(.2)
+            # Print structure
+            self.log.info(
+                (
+                    "WriteProfileResponse:{}"
+                ).format(
+                    modbus_write_response
+                )
+            )
+
+    def read_profile_lines(self, fh, lines):
+        """
+        Read the profile file, converting to list of int
+        :param fh:
+        :param lines:
+        :return:
+        """
+        self.log.info("Read the profile file, converting to list of int")
+        data_all_lines = []
+        for i in xrange(lines):
+            # Convert comma separated text to array of int, with 15 elements
+            data_int_array = []
+            data_list = fh.readline().strip().split(',')[:15]
+            self.log.info("data_str:{}".format(data_list))
+            for val in data_list:
+                # Convert string to int, floats are multiplied by 10
+                val = int_or_float(val)
+                # Finally add to the array
+                data_int_array.append(val)
+
+            self.log.info("data_int_array:{}".format(data_int_array))
+            data_all_lines.append(data_int_array)
+        return data_all_lines
+
+    def profile_to_modbus_packets(self, profile_header, profile_steps):
+        """
+        Convert list of int to list of modbus packets
+        :param profile_header:
+        :param profile_steps:
+        :return:
+        """
+        self.log.info("Convert list of int to list of modbus packets")
+        modebus_packed_profile = []
+
+        register_start = 200  # First Register Address 0x00c8
+        registers_to_write = 15  # data registers per packet
+        bytes_written = 30   # data bytes in each packet
+
+        for line, data_int_array in enumerate(itertools.chain(profile_header, profile_steps)):
+            # Increment the starting register address by 15 for consecutive elements
+            # First is 200, second is 215, third is 230, ....
+            if line:
+                register_start += registers_to_write
+
+            # --------------------------------------
+            # Convert array of int to packed data
+            # --------------------------------------
+            data_bytearray = bytearray()
+            for i in data_int_array:
+                s = struct.pack('!h', i)
+                data_bytearray += s
+
+            data_hexstring = binascii.hexlify(data_bytearray)
+            self.log.debug("{:<80}:data_bytearray".format(data_hexstring))
+
+            # --------------------------------------
+            # PACKET HEADER
+            # --------------------------------------
+            fmt = '!2B2HB'
+            packed_header = struct.pack(
+                fmt,
+                self.chamber_number,
+                self.command['write_profile'],
+                register_start,
+                registers_to_write,
+                bytes_written
+            )
+            self.log.debug(
+                "{:<80}:packed header".format(
+                    [hex(a) for a in struct.unpack(fmt, packed_header)]
+                )
+            )
+
+            # --------------------------------------
+            # JOIN HEADER + DATA
+            # --------------------------------------
+            msg_as_bytes = bytes(packed_header) + bytes(data_bytearray)
+
+            data_hexstring = binascii.hexlify(msg_as_bytes)
+            self.log.debug("{:<80}:msg_as_bytes".format(data_hexstring))
+
+            # --------------------------------------
+            # Add CRC
+            # --------------------------------------
+            modbus_msg_as_bytes = self.crc.add_crc(msg_as_bytes)
+
+            data_hexstring = binascii.hexlify(modbus_msg_as_bytes)
+            self.log.debug("{:<80}:msg_as_bytes + crc".format(data_hexstring))
+
+            # --------------------------------------
+            # Load ctypes.Structure
+            # --------------------------------------
+            modbus_profile_request = modbus_packets.write_profile_factory(registers_to_write)
+            ctypes.memmove(
+                ctypes.addressof(modbus_profile_request),
+                modbus_msg_as_bytes,
+                len(modbus_msg_as_bytes)
+            )
+            # --------------------------------------
+            # Append to list of packed data
+            # --------------------------------------
+            modebus_packed_profile.append(modbus_profile_request)
+
+        return modebus_packed_profile
 
     def create_com_network(self):
         """Network Setup"""
