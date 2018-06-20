@@ -120,7 +120,7 @@ class ChamberCommunication(object):
         )
 
         # --------------------------------------
-        # PACKET HEADER
+        # PACKET HEADER FOR WRITE REGISTER
         # --------------------------------------
         # e.g. 0x01 0x06 0x0015 0x0001
         fmt = '!2B2H'
@@ -170,31 +170,14 @@ class ChamberCommunication(object):
 
         # Create response Structure sized for expected data
         modbus_write_response = modbus_packets.WriteRegister()
-        size_read_response = ctypes.sizeof(modbus_write_response)
 
-        # Read response to read request
-        modbus_response_msg_as_bytes = \
-            self.comm_func[self.comm_type]['read'](size_read_response)
+        modbus_response = self.read_response(modbus_write_response)
 
-        data_hexstring = binascii.hexlify(modbus_response_msg_as_bytes)
-        self.log.debug("string_read_response hexlify: {}".format(data_hexstring))
-
-        if self.comm_type is not 'dummy':
-            # Validate response
-            self.crc.validate_crc(modbus_response_msg_as_bytes)
-
-        # Populate the structure
-        ctypes.memmove(
-            ctypes.addressof(modbus_write_response),
-            modbus_response_msg_as_bytes,
-            len(modbus_response_msg_as_bytes)
-        )
-
-        self.log.debug(
+        self.log.info(
             (
                 "Modbus Request: {}"
             ).format(
-                modbus_write_response
+                modbus_response
             )
         )
 
@@ -206,7 +189,6 @@ class ChamberCommunication(object):
         """
         self.log.info(
             (
-                "\n"
                 "# =========================================\n"
                 "# Read Registers: reg:{}, quanity:{}\n"
                 "# ========================================="
@@ -217,10 +199,9 @@ class ChamberCommunication(object):
         )
 
         # --------------------------------------
-        # PACKET HEADER
+        # PACKET HEADER READ REGISTERS
         # --------------------------------------
         # e.g. 0x01 0x03 0x003D 0x0001
-
         fmt = '!2B2H'
         packed_header = struct.pack(
             fmt,
@@ -230,7 +211,9 @@ class ChamberCommunication(object):
             quanity
         )
         self.log.debug(
-            "{:<80}:packed header".format(
+            (
+                "{:<80}:packed header"
+            ).format(
                 [hex(a) for a in struct.unpack(fmt, packed_header)]
             )
         )
@@ -256,18 +239,22 @@ class ChamberCommunication(object):
             )
         )
 
-        # --------------------------------------
-        # Send request
-        # --------------------------------------
+        # Send modbus request
         self.comm_func[self.comm_type]['write'](modbus_read_request)
 
         # Create response Structure sized for expected data
         modbus_read_response = modbus_packets.read_response_factory(quanity)
-        size_read_response = ctypes.sizeof(modbus_read_response)
 
-        # --------------------------------------
-        # Read response
-        # --------------------------------------
+        # Read modbus response
+        modbus_response = self.read_response(modbus_read_response)
+
+        return modbus_response
+
+    def read_response(self, modbus_response):
+
+        size_read_response = ctypes.sizeof(modbus_response)
+
+        # Read response to read request
         modbus_response_msg_as_bytes = \
             self.comm_func[self.comm_type]['read'](size_read_response)
 
@@ -281,21 +268,20 @@ class ChamberCommunication(object):
 
         # Populate the structure
         ctypes.memmove(
-            ctypes.addressof(modbus_read_response),
+            ctypes.addressof(modbus_response),
             modbus_response_msg_as_bytes,
             len(modbus_response_msg_as_bytes)
         )
 
         # Print structure
-        # self.log.debug(repr(modbus_read_response))
-        self.log.debug(
+        self.log.info(
             (
                 "Modbus Response:{}"
             ).format(
-                modbus_read_response
+                modbus_response
             )
         )
-        return modbus_read_response
+        return modbus_response
 
     def load_profile(self, project_file):
         """
@@ -373,35 +359,16 @@ class ChamberCommunication(object):
             # --------------------------------------
 
             # Create response Structure sized for expected data
-            modbus_write_response = modbus_packets.WriteProfileResponse()
-            size_read_response = ctypes.sizeof(modbus_write_response)
+            modbus_write_profile_response = modbus_packets.WriteProfileResponse()
 
-            # Read response to read request
-            modbus_response_msg_as_bytes = \
-                self.comm_func[self.comm_type]['read'](size_read_response)
-
-            data_hexstring = binascii.hexlify(modbus_response_msg_as_bytes)
-            self.log.debug(
-                "string_read_response hexlify: {}".format(data_hexstring)
-            )
-
-            if self.comm_type is not 'dummy':
-                # Validate response
-                self.crc.validate_crc(modbus_response_msg_as_bytes)
-
-            # Populate the structure
-            ctypes.memmove(
-                ctypes.addressof(modbus_write_response),
-                modbus_response_msg_as_bytes,
-                len(modbus_response_msg_as_bytes)
-            )
+            modbus_response = self.read_response(modbus_write_profile_response)
 
             # Print structure
-            self.log.debug(
+            self.log.info(
                 (
                     "WriteProfileResponse:{}"
                 ).format(
-                    modbus_write_response
+                    modbus_response
                 )
             )
         self.log.info("Profile upload complete")
@@ -462,7 +429,7 @@ class ChamberCommunication(object):
             self.log.debug("{:<80}:data_bytearray".format(data_hexstring))
 
             # --------------------------------------
-            # PACKET HEADER
+            # PACKET HEADER FOR PROFILE WRITE
             # --------------------------------------
             fmt = '!2B2HB'
             packed_header = struct.pack(
