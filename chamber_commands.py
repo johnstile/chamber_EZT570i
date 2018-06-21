@@ -57,6 +57,18 @@ state_get_loop_autotune_status = {
     4: 'cancel autotune'
 }
 
+state_profile_control_status = {
+    0: 'stop/off',
+    1: 'stop/all off',
+    2: 'hold',
+    4: 'run/resume',
+    8: 'autostart',
+    16: 'wait',
+    32: 'ramp',
+    64: 'soak',
+    128: 'guaranteed soak'
+}
+
 state_product_control = {
     0: 'off',
     1: 'deviation',
@@ -668,23 +680,15 @@ class ChamberCommandRegisters(object):
         pass
 
     def profile_control_status(self, name, value):
-        state = {
-            0: 'Stop/Off',
-            1: 'Stop/All Off',
-            2: 'Hold',
-            4: 'Run/Resume',
-            8: 'Autostart',
-            16: 'Wait',
-            32: 'Ramp',
-            64: 'Soak',
-            128: 'Guaranteed Soak'
-        }
-        s = state.get(value, "{} Not specified in API".format(value))
+        s = state_profile_control_status.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
     def set_profile_control_status(self, value):
-        # TODO
-        pass
+        value = value.lower()
+        for state_value, state_name in state_profile_control_status.iteritems():
+            if state_name == value:
+                return state_value
+        return "NOMATCH"
 
     def set_profile_advance_step(self, value):
         state = {

@@ -91,6 +91,11 @@ def main():
     project_file = 'GALAXY.txt'
     chamber.ccomm.load_profile(project_file)
 
+    # ---------------------------------
+    # Start the profile
+    # ---------------------------------
+    start_profile(chamber, log)
+
     #----------------------------------
     # Write Value
     #-----------------------------------
@@ -112,6 +117,13 @@ def main():
     log.debug("Modbus Response:{}".format(values))
     print_read_registers(chamber, log, start_reg, values)
 
+    start_reg = chamber.creg.name_to_reg('CHAMBER_LIGHT_CONTROL')
+    quantity_of_reg = 1
+    values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
+    log.debug("Modbus Response:{}".format(values))
+    print_read_registers(chamber, log, start_reg, values)
+
+
     #----------------------------------
     # Read x registers
     #----------------------------------
@@ -121,6 +133,33 @@ def main():
     log.debug("Modbus Response:{}".format(values))
 
     print_read_registers(chamber, log, start_reg, values)
+
+
+def start_profile(chamber, log):
+    # ---------------------------------
+    # Start the profile
+    # ---------------------------------
+    # is the system ready to start?  0 = Yes
+    start_reg = chamber.creg.name_to_reg('EZT570I_OFFLINE_DOWNLOAD_PROFILE')
+    quantity_of_reg = 1
+    values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
+    log.debug("Modbus Response:{}".format(values))
+    print_read_registers(chamber, log, start_reg, values)
+    register, code = chamber.creg.encode_set_value('PROFILE_START_STEP', 1)
+    chamber.ccomm.write_register(register, code)
+    start_reg = chamber.creg.name_to_reg('PROFILE_START_STEP')
+    quantity_of_reg = 1
+    values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
+    log.debug("Modbus Response:{}".format(values))
+    print_read_registers(chamber, log, start_reg, values)
+    register, code = chamber.creg.encode_set_value('PROFILE_CONTROL_STATUS', 'run/resume')
+    chamber.ccomm.write_register(register, code)
+    start_reg = chamber.creg.name_to_reg('PROFILE_CONTROL_STATUS')
+    quantity_of_reg = 1
+    values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
+    log.debug("Modbus Response:{}".format(values))
+    print_read_registers(chamber, log, start_reg, values)
+
 
 def print_read_registers(chamber, log, start_reg, values):
 
