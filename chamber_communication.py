@@ -53,13 +53,16 @@ def int_or_float(s):
 class ChamberCommunication(object):
     """Communication with EZT570i"""
 
-    def __init__(self, comm_type='dummy', comm_params={}, log=None, chamber_number=1):
+    def __init__(self, comm_type='dummy', comm_params=None, log=None, chamber_number=1):
         self.log = log
         self.comm = None
         self.crc = None
         self.comm_type = comm_type
-        self.comm_params = comm_params
-        self.chamber_number  = chamber_number
+        if not comm_params:
+            self.comm_params = {}
+        else:
+            self.comm_params = comm_params
+        self.chamber_number = chamber_number
         # Factory to abstract how we talk to the chamber
         self.comm_func = {
             'serial': {  # over rs232
@@ -306,9 +309,6 @@ class ChamberCommunication(object):
             )
         )
 
-        steps_tot = 0  # Steps in profile, read from first line
-        step_counter = 0  # Track when to stop reading file
-
         # Read file into list of profile steps
         with open(project_file) as fh:
 
@@ -325,7 +325,6 @@ class ChamberCommunication(object):
             self.log.info("Steps loaded:{}".format(len(profile_steps)))
             # TODO: print each step in the profile
 
-        self.log.info("Convert profile header+steps into list of modbus packets")
         # Convert profile header+steps into list of modbus packets
         modebus_packed_profile = self.profile_to_modbus_packets(
             profile_header, profile_steps
@@ -335,6 +334,7 @@ class ChamberCommunication(object):
         for i in modebus_packed_profile:
             self.log.debug("Packet:{}".format(i))
 
+        # Send over the wire
         self.write_profile_to_modbus(modebus_packed_profile)
 
     def write_profile_to_modbus(self, modebus_packed_profile):
@@ -408,7 +408,7 @@ class ChamberCommunication(object):
         Convert list of int to list of modbus packets
         :param profile_header:
         :param profile_steps:
-        :return:
+        :return: list of WriteProfileSend
         """
         self.log.info("Convert list of int to list of modbus packets")
         modebus_packed_profile = []
@@ -500,7 +500,7 @@ class ChamberCommunication(object):
         """Serial Port Setup"""
         self.log.debug("Create serial communication object")
         self.comm = serial.Serial(
-            port= self.comm_params['serial_port'],
+            port=self.comm_params['serial_port'],
             baudrate=9600,
             timeout=1,
             parity=serial.PARITY_EVEN,
@@ -539,7 +539,7 @@ class ChamberCommunication(object):
         self.comm.sendall(buffer)
         time.sleep(self.comm_wait_time)
 
-    def write_com_dummy(self,buffer):
+    def write_com_dummy(self, buffer):
         """Send request over Ethernet"""
         self.log.info("Send request")
         time.sleep(self.comm_wait_time)
@@ -568,6 +568,7 @@ class ChamberCommunication(object):
         """Read nothing, return empty"""
         return ''
 
+
 class CRC16(object):
     """
     Working with CRC16
@@ -579,7 +580,6 @@ class CRC16(object):
 
     def generate_look_up_table(self):
         """ Generate look up table.
-
         :return: List
         """
         poly = 0xA001
