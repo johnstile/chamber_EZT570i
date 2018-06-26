@@ -1,8 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""EZT570i Command Register Reference"""
+"""EZT570i Command Register Reference
+Translate between human and modbus register <=> names, and values <=> meaning
+Used in Read Registers Command (0x03) for multi register read.
+Used in Write Register Commnad (0x06) for single register write.
+"""
+
+import sys
 import struct
 import ctypes
+
+thismodule = sys.modules[__name__]
 
 # Dictionary map registers to function
 ctrl_registers = {
@@ -208,17 +216,22 @@ class BitFields(ctypes.BigEndianStructure):
         ("bit16", ctypes.c_uint8, 1),  # asByte & 65536
     ]
 
+
 int_to_two_bytes = struct.Struct('!h').pack
+
 
 state_alarm = {
     0: 'normal',
     1: 'Alarm'
 }
 
+
 state_on_off = {
     0: 'off',
     1: 'on'
 }
+
+
 state_power_recovery_mode = {
     0: 'continue',
     1: 'hold',
@@ -227,11 +240,13 @@ state_power_recovery_mode = {
     8: 'resume'
 }
 
+
 state_defrost_operating_mode = {
     0: 'disabled',
     1: 'manual mode selected',
     3: 'auto mode selected'
 }
+
 
 state_get_loop_autotune_status = {
     0: 'autotune off',
@@ -239,6 +254,7 @@ state_get_loop_autotune_status = {
     2: 'autotune in progress',
     4: 'cancel autotune'
 }
+
 
 state_get_loop_alarm_type = {
     0: 'Alarm Off',
@@ -249,6 +265,7 @@ state_get_loop_alarm_type = {
     40: 'Deviation Low',
     56: 'Deviation Both'
 }
+
 
 state_get_loop_alarm_output_assignment = {
     0: 'No Output Selected',
@@ -269,6 +286,7 @@ state_get_loop_alarm_output_assignment = {
     16384: 'Digital Output (Customer Event) 15 Selected'
 }
 
+
 state_profile_wait_for_status = {
     0: 'Not Waiting',
     1: 'Input 1',
@@ -287,6 +305,7 @@ state_profile_wait_for_status = {
     8192: 'Digital Input'
 }
 
+
 state_profile_control_status = {
     0: 'stop/off',
     1: 'stop/all off',
@@ -299,6 +318,7 @@ state_profile_control_status = {
     128: 'guaranteed soak'
 }
 
+
 state_product_control = {
     0: 'off',
     1: 'deviation',
@@ -308,12 +328,14 @@ state_product_control = {
     6: 'process using event for enable'
 }
 
+
 state_condensation_control_monitor_mode = {
     1: "Use Single Input",
     2: "Use Lowest Input",
     4: "Use Highest Input",
     8: "Use Average of all Inputs"
 }
+
 
 state_get_monitor_input_alarm_type = {
     0: 'Alarm Off',
@@ -322,1495 +344,1804 @@ state_get_monitor_input_alarm_type = {
     7: 'Process Both'
 }
 
-class ChamberCommandRegisters(object):
-    """Translate between human and modbus register <=> names, and values <=> meaning
-    Used in Read Registers Command (0x03) for multi register read.
-    Used in Write Register Commnad (0x06) for single register write.
+
+def encode_set_value(name, value):
     """
-
-    def __init__(self):
-        pass
-
-
-    def encode_set_value(self, name, value):
-        """
-        For setting values, translate human readable to EZT570i protocol.
-        :param name: Register name
-        :param value: Human understandable value
-        :return: 1) EZT570i register, 2) value to write
-        """
-        reg = self.name_to_reg(name)
-        if not reg:
-            return (None, None)
-
-        setter = "set_{}".format(name.lower())
-
-        try:
-            operation = getattr(self, setter)
-        except AttributeError:
-            return name, "Non Writeable Register"
-
-        if not callable(operation):
-            return name, "NO MATCH"
-
-        return reg, operation(value)
-
-    def decode_read_value(self, reg, value):
-        """Run method that matches the register name"""
-        name = self.reg_value_to_name(reg)
-
-        if not name:
-            return "UNDEFINED", "NO MATCH"
-
-        try:
-            operation = getattr(self, name.lower())
-        except AttributeError:
-            return name, "Non Readable Register"
-
-        if not callable(operation):
-            return name, "NO MATCH"
-
-        return operation(name, value)
-
-    def bitfield(self, raw):
-        """Convert int to array of bits"""
-        bits_fields = BitFields(raw)
-        response = [
-            bits_fields.bit1,
-            bits_fields.bit2,
-            bits_fields.bit3,
-            bits_fields.bit4,
-            bits_fields.bit5,
-            bits_fields.bit6,
-            bits_fields.bit7,
-            bits_fields.bit8,
-            bits_fields.bit9,
-            bits_fields.bit10,
-            bits_fields.bit11,
-            bits_fields.bit12,
-            bits_fields.bit13,
-            bits_fields.bit14,
-            bits_fields.bit15,
-            bits_fields.bit16
-        ]
-        return response
-
-    def reg_value_to_name(self, search_reg):
-        for name, reg in ctrl_registers.iteritems():
-            if reg == search_reg:
-                return name
-
-    def name_to_reg(self, search_name):
-        return ctrl_registers.get(search_name)
-
-    def get_loop_autotune_status(self, name, value):
-
-        s = state_get_loop_autotune_status.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-
-    def set_loop_autotune_status(self, value):
-
-        value = value.lower()
-        for mode_state, mode_name in state_get_loop_autotune_status.iteritems():
-            if mode_name == value:
-                return mode_state
-        return "NOMATCH"
-
-    def get_loop_alarm_type(self, name, value):
-
-        s = state_get_loop_alarm_type.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def set_loop_alarm_type(self, value):
-        value = value.lower()
-        for mode_state, mode_name in state_get_loop_alarm_type.iteritems():
-            if mode_name == value:
-                return mode_state
-        return "NOMATCH"
-
-    def get_monitor_input_alarm_type(self, name, value):
-        s = state_get_monitor_input_alarm_type.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def set_monitor_input_alarm_type(self, value):
-        value = value.lower()
-        for mode_state, mode_name in state_get_monitor_input_alarm_type.iteritems():
-            if mode_name == value:
-                return mode_state
-        return "NOMATCH"
-
-    def get_signed_int_tens_decimal(self, name, value):
-        """
-         -32768 – 32767 (-3276.8 – 3276.7)
-         """
-        response = value / 10
-        return name, "degrees:{:.1f}".format(float(response))
-
-    def set_signed_int_tens_decimal(self, value):
-        """
-         -32768 – 32767 (-3276.8 – 3276.7)
-         """
-        response = value * 10
-        assert 0 <= response < 2 ** 16
-        return response
-
-    def get_event_control(self, name, value):
-        bit_array = self.bitfield(value)
-        response = {
-            'Event 1': state_alarm[bit_array[0]],
-            'Event2': state_alarm[bit_array[1]],
-            'Event 3': state_alarm[bit_array[2]],
-            'Event 4': state_alarm[bit_array[3]],
-            'Event 5': state_alarm[bit_array[4]],
-            'Event 6': state_alarm[bit_array[5]],
-            'Event 7': state_alarm[bit_array[6]],
-            'Event 8': state_alarm[bit_array[7]],
-            'Event 9': state_alarm[bit_array[8]],
-            'Event 10': state_alarm[bit_array[9]],
-            'Event 11': state_alarm[bit_array[10]],
-            'Event 12': state_alarm[bit_array[11]],
-            'Event 13': state_alarm[bit_array[12]],
-            'Event 14': state_alarm[bit_array[13]],
-            'Event 15': state_alarm[bit_array[14]]
-        }
-        return name, "status:{}".format(response)
-
-    def get_loop_alarm_output_assignment(self, name, value):
-        s = state_get_loop_alarm_output_assignment.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def set_loop_alarm_output_assignment(self, value):
-        value = value.lower()
-        for mode_state, mode_name in state_get_loop_alarm_output_assignment.iteritems():
-            if mode_name == value:
-                return mode_state
-        return "NOMATCH"
-
-    def get_loop_alarm_mode(self, name, value):
-        bit_array = self.bitfield(value)
-        bit0 = {
-            0: 'Alarm Self Clears',
-            1: 'Alarm Latches'
-        }
-        bit1 = {
-            0: 'Close on Alarm',
-            1: 'Open on Alarm'
-        }
-        bit4 = {
-            0: 'Audible Alarm Off',
-            1: 'Audible Alarm On'
-        }
-        bit5 = {
-            0: 'Chamber Continues On Alarm',
-            1: 'Chamber Shuts Down On Alarm'
-        }
-        response = {
-            'step': bit0[bit_array[0]],
-            'door': bit1[bit_array[1]],
-            'audible': bit4[bit_array[4]],
-            'profile': bit5[bit_array[5]]
-        }
-        return name, ("status:{}").format(response)
-
-    def set_loop_alarm_mode(self, value):
-        # TODO: Figure out what to do here.
-        # TODO: Takes in what we return above.
-        # Packs into ctypes.struct and returns.
-        assert 'step' in value \
-            and 'door' in value \
-            and 'audible' in value \
-            and 'profile' in value
-
-        return 0
-
-    def get_loop_percent_output(self, name, value):
-        """
-        -10000 – 10000 (-100.00 – 100.00)
-        """
-        response = value / 100
-        return name, "%out:{}".format(response)
-
-    def set_loop_percent_output(self, value):
-        """
-        -10000 – 10000 (-100.00 – 100.00)
-        """
-        response = value * 100
-        return response
-
-    def get_minutes(self, name, value):
-        """
-            0 - 32767 minutes
-        """
-        return name, "minutes:{}".format(value)
-
-    def set_minutes(self, value):
-        assert 0 <= value <= 32767
-        return value
-
-    #-------------------------------
-    # Start register methods
-    #-------------------------------
-    def operational_mode(self, name, value):
-        s = state_on_off.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def clock_yy_mm(self, name, value):
-        """
-        high byte: Year: 0 to 99
-        low byte: Month: 1=Jan, ... 12=Dec
-        """
-        b_year, b_month = int_to_two_bytes(value & 0xFFFF)
-        year = struct.unpack('B', b_year)[0]
-        month = struct.unpack('B', b_month)[0]
-        return name, "year: 20{}, month:{}".format(year, month)
-
-    def clock_day_dow(self, name, value):
-        """
-        high byte: Day of Month: 1 to 31
-        low byte: Day  of Week: 0=Sun, ... 6=Sat
-        """
-        b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
-        dom = struct.unpack('B', b_dom)[0]
-        dow = struct.unpack('B', b_dow)[0]
-        return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
-
-    def clock_hh_mm(self, name, value):
-        """
-        high byte: Hours: 1 to 23
-        low byte: Minutes: 0 to 59
-        """
-        b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
-        hour = struct.unpack('B', b_hour)[0]
-        minutes = struct.unpack('B', b_minutes)[0]
-        return name, "Hour:{}, Minute:{}".format(hour, minutes)
-
-    def clock_sec(self, name, value):
-        """
-        2 bytes: seconds: 0 to 59
-        """
-        return name, "Seconds:{}".format(value)
-
-    def power_recovery_mode(self, name, value):
-        s = state_power_recovery_mode.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def set_power_recovery_mode(self, value):
-        value = value.lower()
-        for mode_state, mode_name in state_power_recovery_mode.iteritems():
-            if mode_name == value:
-                return mode_state
-        return "NOMATCH"
-
-    def power_out_time(self, name, value):
-        """
-        0 - 32767 seconds
-        """
-        return name, "Seconds:{}".format(value)
-
-    def set_power_out_time(self, value):
-        """
-        0 - 32767 seconds
-        """
-        assert 0 <= value <= 32767
-        return value
-
-    def defrost_operating_mode(self, name, value):
-        s = state_defrost_operating_mode.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def set_defrost_operating_mode(self, name, value):
-        value = value.lower()
-        for mode_state, mode_name in state_defrost_operating_mode.iteritems():
-            if mode_name == value:
-                return mode_state
-        return "NOMATCH"
-
-    def auto_defrost_temperature_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_auto_defrost_temperature_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def auto_defrost_time_interval(self, name, value):
-        return self.get_minutes(name, value)
-
-    def set_auto_defrost_time_interval(self, value):
-        return self.set_minutes(value)
-
-    def defrost_status(self, name, value):
-        state = {
-            0: 'Not in Defrost',
-            1: 'In Defrost',
-            3: 'In Prechill'
-        }
-        s = state.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def time_remaining_until_next_defrost(self, name, value):
-        return self.get_minutes(name, value)
-
-    def product_control(self, name, value):
-        s = state_product_control.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def set_product_control(self, value):
-        value = value.lower()
-        for mode_state, mode_name in state_product_control.iteritems():
-            if mode_name == value:
-                return mode_state
-        return "NOMATCH"
-
-    def product_control_upper_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_product_control_upper_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def product_control_lower_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_product_control_lower_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def condensation_control(self, name, value):
-        s = state_on_off.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def set_condensation_control(self, value):
-        value = value.lower()
-        for mode_state, mode_name in state_on_off.iteritems():
-            if mode_name == value:
-                return mode_state
-        return "NOMATCH"
-
-    def condensation_control_monitor_mode(self, name, value):
-        s = state_condensation_control_monitor_mode.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def set_condensation_control_monitor_mode(self, value):
-        value = value.lower()
-        for mode_state, mode_name in state_condensation_control_monitor_mode.iteritems():
-            if mode_name == value:
-                return mode_state
-        return "NOMATCH"
-
-    def condensation_control_input_selection(self, name, value):
-        bit_array = self.bitfield(value)
-        response_condensation_control_input_selection = {
-            'Product': 0,
-            'PV1': bit_array[0],
-            'PV2': bit_array[1],
-            'PV3': bit_array[2],
-            'PV4': bit_array[3],
-            'PV5': bit_array[4],
-            'PV6': bit_array[5],
-            'PV7': bit_array[6],
-            'PV8': bit_array[7],
-        }
-        return name, "pv:{}".format(response_condensation_control_input_selection)
-
-    def set_condensation_control_input_selection(self, value):
-        # TODO
-        pass
-
-    def condensation_control_temperatore_ramp_rate_limit(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_condensation_control_temperatore_ramp_rate_limit(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def condensation_control_deupoint_limit(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def condensation_control_duepoint_actual(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def chamber_light_control(self, name, value):
-        s = state_on_off.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def set_chamber_light_control(self, value):
-        value = value.lower()
-        for state_value, state_name in state_on_off.iteritems():
-            if state_name == value:
-                return state_value
-        return "NOMATCH"
-
-    def chamber_manual_event_control(self, name, value):
-        return self.get_event_control(name, value)
-
-    def set_chamber_manual_event_control(self, value):
-        # TODO
-        pass
-
-    def customer_manual_event_control(self, name, value):
-        return self.get_event_control(name, value)
-
-    def set_customer_manual_event_control(self, name, value):
-        # TODO
-        pass
-
-    def profile_control_status(self, name, value):
-        s = state_profile_control_status.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def set_profile_control_status(self, value):
-        value = value.lower()
-        for state_value, state_name in state_profile_control_status.iteritems():
-            if state_name == value:
-                return state_value
-        return "NOMATCH"
-
-    def set_profile_advance_step(self, value):
-        state = {
-            1: 'advance previous step',
-            2: 'advance next step'
-        }
-        value = value.lower()
-        for state_value, state_name in state.iteritems():
-            if state_name == value:
-                return state_value
-        return "NOMATCH"
-
-    def profile_name_ch_1_2(self, name, value):
-        """
-        32 – 126 (high byte)
-        32 – 126 (low byte)
-        """
-        b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-        hch = struct.unpack('B', b_hch)[0]
-        lch = struct.unpack('B', b_lch)[0]
-        return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
-
-    def profile_name_ch_3_4(self, name, value):
-        """
-        32 – 126 (high byte)
-        32 – 126 (low byte)
-        """
-        b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-        hch = struct.unpack('B', b_hch)[0]
-        lch = struct.unpack('B', b_lch)[0]
-        return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
-
-    def profile_name_ch_5_6(self, name, value):
-        """
-        32 – 126 (high byte)
-        32 – 126 (low byte)
-        """
-        b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-        hch = struct.unpack('B', b_hch)[0]
-        lch = struct.unpack('B', b_lch)[0]
-        return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
-
-    def profile_name_ch_7_8(self, name, value):
-        """
-        32 – 126 (high byte)
-        32 – 126 (low byte)
-        """
-        b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-        hch = struct.unpack('B', b_hch)[0]
-        lch = struct.unpack('B', b_lch)[0]
-        return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
-
-    def profile_name_ch_9_10(self, name, value):
-        """
-        32 – 126 (high byte)
-        32 – 126 (low byte)
-        """
-        b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-        hch = struct.unpack('B', b_hch)[0]
-        lch = struct.unpack('B', b_lch)[0]
-        return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
-
-    def profile_start_date_yy_mm(self, name, value):
-        """
-        high byte: Year: 0 to 99
-        low byte: Month: 1=Jan, ... 12=Dec
-        """
-        b_year, b_month = int_to_two_bytes(value & 0xFFFF)
-        year = struct.unpack('B', b_year)[0]
-        month = struct.unpack('B', b_month)[0]
-        return name, "year: 20{}, month:{}".format(year, month)
-
-    def profile_stop_date_yy_mm(self, name, value):
-        """
-        high byte: Year: 0 to 99
-        low byte: Month: 1=Jan, ... 12=Dec
-        """
-        b_year, b_month = int_to_two_bytes(value & 0xFFFF)
-        year = struct.unpack('B', b_year)[0]
-        month = struct.unpack('B', b_month)[0]
-        return name, "year: 20{}, month:{}".format(year, month)
-
-    def profile_start_date_day_dow(self, name, value):
-        """
-        high byte: Day of Month: 1 to 31
-        low byte: Day  of Week: 0=Sun, ... 6=Sat
-        """
-        b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
-        dom = struct.unpack('B', b_dom)[0]
-        dow = struct.unpack('B', b_dow)[0]
-        return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
-
-    def profile_stop_date_day_dow(self, name, value):
-        """
-        high byte: Day of Month: 1 to 31
-        low byte: Day  of Week: 0=Sun, ... 6=Sat
-        """
-        b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
-        dom = struct.unpack('B', b_dom)[0]
-        dow = struct.unpack('B', b_dow)[0]
-        return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
-
-    def profile_start_date_hh_mm(self, name, value):
-        """
-        high byte: Hours: 1 to 23
-        low byte: Minutes: 0 to 59
-        """
-        b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
-        hour = struct.unpack('B', b_hour)[0]
-        minutes = struct.unpack('B', b_minutes)[0]
-        return name, "Hour:{}, Minute:{}".format(hour, minutes)
-
-    def profile_stop_date_hh_mm(self, name, value):
-        """
-        high byte: Hours: 1 to 23
-        low byte: Minutes: 0 to 59
-        """
-        b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
-        hour = struct.unpack('B', b_hour)[0]
-        minutes = struct.unpack('B', b_minutes)[0]
-        return name, "Hour:{}, Minute:{}".format(hour, minutes)
-
-    def profile_start_step(self, name, value):
-        """0 - 99"""
-        return name, "step:{}".format(value)
-
-    def set_profile_start_step(self, value):
-        """0 - 99"""
-        assert 0 <= value <= 99
-        return value
-
-    def profile_current_step(self, name, value):
-        """0 - 99"""
-        return name, "step:{}".format(value)
-
-    def profile_last_step(self, name, value):
-        """0 - 99"""
-        return name, "step:{}".format(value)
-
-    def profile_time_left_in_current_step_hhh(self, name, value):
-        """1 – 999 Hours"""
-        return name, "hours:{}".format(value)
-
-    def profile_time_left_in_current_step_mm_ss(self, name, value):
-        """
-         high byte: Minutes: 0 to 59
-         low byte: Seconds: 0 to 59
-         """
-        b_minutes, b_seconds = int_to_two_bytes(value & 0xFFFF)
-        minutes = struct.unpack('B', b_minutes)[0]
-        seconds = struct.unpack('B', b_seconds)[0]
-        return name, "Minute:{}, Seconds:{}".format(minutes, seconds)
-
-    def profile_wait_for_status(self, name, value):
-        s = state_profile_wait_for_status.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-    def profile_wait_for_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def profile_current_jump_step(self, name, value):
-        """0 - 99"""
-        return name, "step:{}".format(value)
-
-    def profile_jumps_remaining_in_current_step(self, name, value):
-        """0 - 99"""
-        return name, "jumps:{}".format(value)
-
-    def profile_loop_1_target_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def profile_loop_2_target_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def profile_loop_3_target_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def profile_loop_4_target_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def profile_loop_5_target_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def profile_last_jump_from_step(self, name, value):
-        """0 - 99"""
-        return name, "step:{}".format(value)
-
-    def profile_last_jump_to_step(self, name, value):
-        """0 - 99"""
-        return name, "step:{}".format(value)
-
-    def profile_total_jumps_made(self, name, value):
-        """0 – 32767"""
-        return name, "jumps:{}".format(value)
-
-    def set_alarm_acknowledge(self, value):
-        state = {
-            1: 'alarm silence',
-            2: 'pumpdown reset'
-        }
-        value = value.lower()
-        for state_value, state_name in state.iteritems():
-            if state_name == value:
-                return state_value
-        return "NOMATCH"
-
-    def ezt570i_alarm_status(self, name, value):
-        bit_array = self.bitfield(value)
-        response = {
-            'Input1 Sensor Break': state_alarm[bit_array[0]],
-            'Input2 Sensor Break': state_alarm[bit_array[1]],
-            'Input3 Sensor Break': state_alarm[bit_array[2]],
-            'Input4 Sensor Break': state_alarm[bit_array[3]],
-            'Input5 Sensor Break': state_alarm[bit_array[4]],
-            'Input6 Sensor Break': state_alarm[bit_array[5]],
-            'Input7 Sensor Break': state_alarm[bit_array[6]],
-            'Input8 Sensor Break': state_alarm[bit_array[7]],
-            'Input9 Sensor Break': state_alarm[bit_array[8]],
-            'Input10 Sensor Break': state_alarm[bit_array[9]],
-            'Input11 Sensor Break': state_alarm[bit_array[10]],
-            'Input12 Sensor Break': state_alarm[bit_array[11]],
-            'Input13 Sensor Break': state_alarm[bit_array[12]],
-            '(not assigned)': state_alarm[bit_array[13]],
-            'Loop Communications Failure': state_alarm[bit_array[14]],
-        }
-        return name, "status:{}".format(response)
-
-    def input_alarm_status(self, name, value):
-        bit_array = self.bitfield(value)
-        response = {
-            'Input1 Alarm':   state_alarm[bit_array[0]],
-            'Input2 Alarm':   state_alarm[bit_array[1]],
-            'Input3 Alarm':   state_alarm[bit_array[2]],
-            'Input4 Alarm':   state_alarm[bit_array[3]],
-            'Input5 Alarm':   state_alarm[bit_array[4]],
-            'Input6 Alarm':   state_alarm[bit_array[5]],
-            'Input7 Alarm':   state_alarm[bit_array[6]],
-            'Input8 Alarm':   state_alarm[bit_array[7]],
-            'Input9 Alarm':   state_alarm[bit_array[8]],
-            'Input10 Alarm':  state_alarm[bit_array[9]],
-            'Input11 Alarm':  state_alarm[bit_array[10]],
-            'Input12 Alarm':  state_alarm[bit_array[11]],
-            'Input13 Alarm':  state_alarm[bit_array[12]],
-            '(not assigned 1)': state_alarm[bit_array[13]],
-            '(not assigned 2)': state_alarm[bit_array[14]]
-        }
-        return name, "status:{}".format(response)
-
-    def chamber_alarm_status(self, name, value):
-        bit_array = self.bitfield(value)
-        response = {
-            'Heater High Limit (Plenum A)': state_alarm[bit_array[0]],
-            'External Product Safety': state_alarm[bit_array[1]],
-            'Boiler Over-Temp (Plenum A)': state_alarm[bit_array[2]],
-            'Boiler Low Water (Plenum A)': state_alarm[bit_array[3]],
-            'Dehumidifier System Fault (System B Boiler Over-Temp)': state_alarm[bit_array[4]],
-            'Motor Overload (Plenum A)': state_alarm[bit_array[5]],
-            'Fluid System High Limit (Plenum B Heater High Limit)': state_alarm[bit_array[6]],
-            'Fluid System High Pressure (Plenum B Motor Overload)': state_alarm[bit_array[7]],
-            'Fluid System Low Flow': state_alarm[bit_array[8]],
-            'Door Open': state_alarm[bit_array[9]],
-            '(System B Boiler Low Water)': state_alarm[bit_array[10]],
-            '(not assigned)': state_alarm[bit_array[11]],
-            'Emergency Stop': state_alarm[bit_array[12]],
-            'Power Failure': state_alarm[bit_array[13]],
-            'Transfer Error': state_alarm[bit_array[14]],
-        }
-        return name, "status:{}".format(response)
-
-    def refrigeration_alarm_status(self, name, value):
-        bit_array = self.bitfield(value)
-        response = {
-            'System 1(A) High/Low Pressure': state_alarm[bit_array[0]],
-            'System 1(A) Low Oil Pressure': state_alarm[bit_array[1]],
-            'System 1(A) High Discharge Temperature': state_alarm[bit_array[2]],
-            'System 1(A) Compressor Protection Module': state_alarm[bit_array[3]],
-            'Pumpdown Disabled': state_alarm[bit_array[4]],
-            'System 1(A) Floodback Monitor': state_alarm[bit_array[5]],
-            '(not assigned) 1': state_alarm[bit_array[6]],
-            '(not assigned) 2': state_alarm[bit_array[7]],
-            'System 2(B) High/Low Pressure': state_alarm[bit_array[8]],
-            'System 2(B) Low Oil Pressure': state_alarm[bit_array[9]],
-            'System 2(B) High Discharge Temperature': state_alarm[bit_array[10]],
-            'System 2(B) Compressor Protection Module': state_alarm[bit_array[11]],
-            '(not assigned) 3': state_alarm[bit_array[12]],
-            'System B Floodback Monitor': state_alarm[bit_array[13]],
-            '(not assigned) 4': state_alarm[bit_array[14]],
-        }
-        return name, "status:{}".format(response)
-
-    def system_status_monitor(self, name, value):
-        bit_array = self.bitfield(value)
-        response = {
-            'Humidity Water Reservoir Low': state_alarm[bit_array[0]],
-            'Humidity Disabled (temperature out-of-range)': state_alarm[bit_array[1]],
-            'Humidity High Dewpoint Limit': state_alarm[bit_array[2]],
-            'Humidity Low Dewpoint Limit': state_alarm[bit_array[3]],
-            'Door Open': state_alarm[bit_array[4]],
-            '(not assigned) 1': state_alarm[bit_array[5]],
-            '(not assigned) 2': state_alarm[bit_array[6]],
-            '(not assigned) 3': state_alarm[bit_array[7]],
-            'Service Air Circulators': state_alarm[bit_array[8]],
-            'Service Heating/Cooling System': state_alarm[bit_array[9]],
-            'Service Humidity System': state_alarm[bit_array[10]],
-            'Service Purge System': state_alarm[bit_array[11]],
-            'Service Altitude System': state_alarm[bit_array[12]],
-            'Service Transfer Mechanism': state_alarm[bit_array[13]],
-            '(not assigned) 4': state_alarm[bit_array[14]],
-        }
-        return name, "status:{}".format(response)
-
-    def loop_1_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_1_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_2_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_2_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_3_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_3_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_4_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_4_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_5_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_5_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_1_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_1_process_value(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_2_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_2_process_value(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_3_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_3_process_value(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_4_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_4_process_value(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_5_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_5_process_value(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_1_percent_output(self, name, value):
-        return self.get_loop_percent_output(name, value)
-
-    def set_loop_1_percent_output(self, value):
-        return self.set_loop_percent_output(value)
-
-    def loop_2_percent_output(self, name, value):
-        return self.get_loop_percent_output(name, value)
-
-    def set_loop_2_percent_output(self, value):
-        return self.set_loop_percent_output(value)
-
-    def loop_3_percent_output(self, name, value):
-        return self.get_loop_percent_output(name, value)
-
-    def set_loop_3_percent_output(self, value):
-        return self.set_loop_percent_output(value)
-
-    def loop_4_percent_output(self, name, value):
-        return self.get_loop_percent_output(name, value)
-
-    def set_loop_4_percent_output(self, value):
-        return self.set_loop_percent_output(value)
-
-    def loop_5_percent_output(self, name, value):
-        return self.get_loop_percent_output(name, value)
-
-    def set_loop_5_percent_output(self, value):
-        return self.set_loop_percent_output(value)
-
-    def loop_1_autotune_status(self, name, value):
-        return self.get_loop_autotune_status(name, value)
-
-    def set_loop_1_autotune_status(self, value):
-        return self.set_loop_autotune_status(value)
-
-    def loop_2_autotune_status(self, name, value):
-        return self.get_loop_autotune_status(name, value)
-
-    def set_loop_2_autotune_status(self, value):
-        return self.set_loop_autotune_status(value)
-
-    def loop_3_autotune_status(self, name, value):
-        return self.get_loop_autotune_status(name, value)
-
-    def set_loop_3_autotune_status(self, value):
-        return self.set_loop_autotune_status(value)
-
-    def loop_4_autotune_status(self, name, value):
-        return self.get_loop_autotune_status(name, value)
-
-    def set_loop_4_autotune_status(self, value):
-        return self.set_loop_autotune_status(value)
-
-    def loop_5_autotune_status(self, name, value):
-        return self.get_loop_autotune_status(name, value)
-
-    def set_loop_5_autotune_status(self, value):
-        return self.set_loop_autotune_status(value)
-
-    def loop_1_upper_setpoint_limit(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_1_upper_setpoint_limit(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_2_upper_setpoint_limit(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_2_upper_setpoint_limit(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_3_upper_setpoint_limit(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_3_upper_setpoint_limit(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_4_upper_setpoint_limit(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_4_upper_setpoint_limit(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_5_upper_setpoint_limit(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_5_upper_setpoint_limit(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_1_lower_setpoint_limit(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_1_lower_setpoint_limit(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_2_lower_setpoint_limit(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_2_lower_setpoint_limit(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_3_lower_setpoint_limit(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_3_lower_setpoint_limit(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_4_lower_setpoint_limit(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_4_lower_setpoint_limit(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_5_lower_setpoint_limit(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_5_lower_setpoint_limit(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_1_alarm_type(self, name, value):
-        return self.get_loop_alarm_type(name, value)
-
-    def set_loop_1_alarm_type(self, value):
-        return self.set_loop_alarm_type(value)
-
-    def loop_2_alarm_type(self, name, value):
-        return self.get_loop_alarm_type(name, value)
-
-    def set_loop_2_alarm_type(self, value):
-        return self.set_loop_alarm_type(value)
-
-    def loop_3_alarm_type(self, name, value):
-        return self.get_loop_alarm_type(name, value)
-
-    def set_loop_3_alarm_type(self, value):
-        return self.set_loop_alarm_type(value)
-
-    def loop_4_alarm_type(self, name, value):
-        return self.get_loop_alarm_type(name, value)
-
-    def set_loop_4_alarm_type(self, value):
-        return self.set_loop_alarm_type(value)
-
-    def loop_5_alarm_type(self, name, value):
-        return self.get_loop_alarm_type(name, value)
-
-    def set_loop_5_alarm_type(self, value):
-        return self.set_loop_alarm_type(value)
-
-    def loop_1_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_loop_1_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def loop_2_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_loop_2_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def loop_3_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_loop_3_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def loop_4_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_loop_4_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def loop_5_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_loop_5_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def loop_1_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_loop_1_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def loop_2_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_loop_2_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def loop_3_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_loop_3_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def loop_4_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_loop_4_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def loop_5_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_loop_5_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def loop_1_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_1_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_2_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_2_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_3_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_3_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_4_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_4_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_5_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_5_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_1_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_1_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_2_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_2_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_3_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_3_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_4_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_4_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_5_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_5_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_1_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_1_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_2_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_2_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_3_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_3_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_4_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_4_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def loop_5_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_loop_5_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_1_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def monitor_input_2_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def monitor_input_3_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def monitor_input_4_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def monitor_input_5_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def monitor_input_6_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def monitor_input_7_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def monitor_input_8_process_value(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def monitor_input_1_alarm_type(self, name, value):
-        return self.get_monitor_input_alarm_type(name, value)
-
-    def set_monitor_input_1_alarm_type(self, value):
-        return self.set_monitor_input_alarm_type(value)
-
-    def monitor_input_2_alarm_type(self, name, value):
-        return self.get_monitor_input_alarm_type(name, value)
-
-    def set_monitor_input_2_alarm_type(self, value):
-        return self.set_monitor_input_alarm_type(value)
-
-    def monitor_input_3_alarm_type(self, name, value):
-        return self.get_monitor_input_alarm_type(name, value)
-
-    def set_monitor_input_3_alarm_type(self, value):
-        return self.set_monitor_input_alarm_type(value)
-
-    def monitor_input_4_alarm_type(self, name, value):
-        return self.get_monitor_input_alarm_type(name, value)
-
-    def set_monitor_input_4_alarm_type(self, value):
-        return self.set_monitor_input_alarm_type(value)
-
-    def monitor_input_5_alarm_type(self, name, value):
-        return self.get_monitor_input_alarm_type(name, value)
-
-    def set_monitor_input_5_alarm_type(self, value):
-        return self.set_monitor_input_alarm_type(value)
-
-    def monitor_input_6_alarm_type(self, name, value):
-        return self.get_monitor_input_alarm_type(name, value)
-
-    def set_monitor_input_6_alarm_type(self, value):
-        return self.set_monitor_input_alarm_type(value)
-
-    def monitor_input_7_alarm_type(self, name, value):
-        return self.get_monitor_input_alarm_type(name, value)
-
-    def set_monitor_input_7_alarm_type(self, value):
-        return self.set_monitor_input_alarm_type(value)
-
-    def monitor_input_8_alarm_type(self, name, value):
-        return self.get_monitor_input_alarm_type(name, value)
-
-    def set_monitor_input_8_alarm_type(self, value):
-        return self.set_monitor_input_alarm_type(value)
-
-    def monitor_input_1_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_monitor_input_1_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def monitor_input_2_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_monitor_input_2_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def monitor_input_3_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_monitor_input_3_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def monitor_input_4_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_monitor_input_4_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def monitor_input_5_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_monitor_input_5_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def monitor_input_6_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_monitor_input_6_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def monitor_input_7_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_monitor_input_7_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def monitor_input_8_alarm_mode(self, name, value):
-        return self.get_loop_alarm_mode(name, value)
-
-    def set_monitor_input_8_alarm_mode(self, value):
-        return self.set_loop_alarm_mode(value)
-
-    def monitor_input_1_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_monitor_input_1_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def monitor_input_2_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_monitor_input_2_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def monitor_input_3_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_monitor_input_3_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def monitor_input_4_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_monitor_input_4_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def monitor_input_5_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_monitor_input_5_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def monitor_input_6_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_monitor_input_6_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def monitor_input_7_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_monitor_input_7_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def monitor_input_8_alarm_output_assignment(self, name, value):
-        return self.get_loop_alarm_output_assignment(name, value)
-
-    def set_monitor_input_8_alarm_output_assignment(self, value):
-        return self.set_loop_alarm_output_assignment(value)
-
-    def monitor_input_1_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_1_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_2_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_2_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_3_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_3_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_4_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_4_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_5_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_5_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_6_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_6_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_7_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_7_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_8_high_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_8_high_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_1_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_1_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_2_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_2_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_3_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_3_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_4_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_4_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_5_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_5_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_6_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_6_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_7_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_7_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_8_low_alarm_setpoint(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_8_low_alarm_setpoint(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_1_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_1_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_2_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_2_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_3_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_3_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_4_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_4_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_5_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_5_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_6_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_6_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_7_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_7_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def monitor_input_8_alarm_hysteresis(self, name, value):
-        return self.get_signed_int_tens_decimal(name, value)
-
-    def set_monitor_input_8_alarm_hysteresis(self, value):
-        return self.set_signed_int_tens_decimal(value)
-
-    def set_profile_step_time_adjustment(self, value):
-        """
-        0 – 32767 minutes
-        """
-        assert 0 <= value <= 32767
-        return value
-
-    def ezt570i_offline_download_profile(self,name, value):
-        state = {
-            0: 'Online',
-            1: 'Offline/Downloading Profile'
-        }
-        s = state.get(value, "{} Not specified in API".format(value))
-        return name, "Status:{}".format(s)
-
-class ChamberProfileRegisters(object):
-    """Write Registers used in,
-    Write Register Commnad (0x10) for profile upload only.
+    For setting values, translate human readable to EZT570i protocol.
+    :param name: Register name
+    :param value: Human understandable value
+    :return: 1) EZT570i register, 2) value to write
     """
-    def __init__(self):
-        pass
+    reg = name_to_reg(name)
+    if not reg:
+        return None, None
 
-    # Dictionary map bytes to function
-    ctrl = {
-        'AUTOSTART': 200,  # w,
-        'AUTOSTART_TIME_YY_MM': 201,  # w,
-        'AUTOSTART_TIME_DAY_DOW': 202,  # w,
-        'AUTOSTART_TIME_HH_MM': 203,  # w,
-        'PROFILE_NAME_CH_1_2': 204,  # w,
-        'PROFILE_NAME_CH_3_4': 205,  # w,
-        'PROFILE_NAME_CH_5_6': 206,  # w,
-        'PROFILE_NAME_CH_7_8': 207,  # w,
-        'PROFILE_NAME_CH_9_10': 208,  # w,
-        'TOTAL_NUMBER_OF_STEPS_IN_PROFILE': 209,  # w,
-        'GUARANTEED_SOAK_BAND_LOOP_1': 210,  # w,
-        'GUARANTEED_SOAK_BAND_LOOP_2': 211,  # w,
-        'GUARANTEED_SOAK_BAND_LOOP_3': 212,  # w,
-        'GUARANTEED_SOAK_BAND_LOOP_4': 213,  # w,
-        'GUARANTEED_SOAK_BAND_LOOP_5': 214,  # w,
+    setter = "set_{}".format(name.lower())
+
+    try:
+        operation = getattr(thismodule, setter)
+    except AttributeError:
+        return name, "Non Writeable Register"
+
+    if not callable(operation):
+        return name, "NO MATCH"
+
+    return reg, operation(value)
+
+
+def decode_read_value(reg, value):
+    """Run method that matches the register name"""
+    name = reg_value_to_name(reg)
+
+    if not name:
+        return "UNDEFINED", "NO MATCH"
+
+    try:
+        operation = getattr(thismodule, name.lower())
+    except AttributeError:
+        return name, "Non Readable Register"
+
+    if not callable(operation):
+        return name, "NO MATCH"
+
+    return operation(name, value)
+
+
+def bitfield(raw):
+    """Convert int to array of bits"""
+    bits_fields = BitFields(raw)
+    response = [
+        bits_fields.bit1,
+        bits_fields.bit2,
+        bits_fields.bit3,
+        bits_fields.bit4,
+        bits_fields.bit5,
+        bits_fields.bit6,
+        bits_fields.bit7,
+        bits_fields.bit8,
+        bits_fields.bit9,
+        bits_fields.bit10,
+        bits_fields.bit11,
+        bits_fields.bit12,
+        bits_fields.bit13,
+        bits_fields.bit14,
+        bits_fields.bit15,
+        bits_fields.bit16
+    ]
+    return response
+
+
+def reg_value_to_name(search_reg):
+    for name, reg in ctrl_registers.iteritems():
+        if reg == search_reg:
+            return name
+
+
+def name_to_reg(search_name):
+    return ctrl_registers.get(search_name)
+
+
+def get_loop_autotune_status(name, value):
+
+    s = state_get_loop_autotune_status.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def set_loop_autotune_status(value):
+
+    value = value.lower()
+    for mode_state, mode_name in state_get_loop_autotune_status.iteritems():
+        if mode_name == value:
+            return mode_state
+    return "NOMATCH"
+
+
+def get_loop_alarm_type(name, value):
+
+    s = state_get_loop_alarm_type.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def set_loop_alarm_type(value):
+    value = value.lower()
+    for mode_state, mode_name in state_get_loop_alarm_type.iteritems():
+        if mode_name == value:
+            return mode_state
+    return "NOMATCH"
+
+
+def get_monitor_input_alarm_type(name, value):
+    s = state_get_monitor_input_alarm_type.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def set_monitor_input_alarm_type(value):
+    value = value.lower()
+    for mode_state, mode_name in state_get_monitor_input_alarm_type.iteritems():
+        if mode_name == value:
+            return mode_state
+    return "NOMATCH"
+
+
+def get_signed_int_tens_decimal(name, value):
+    """
+     -32768 – 32767 (-3276.8 – 3276.7)
+     """
+    response = value / 10
+    return name, "degrees:{:.1f}".format(float(response))
+
+
+def set_signed_int_tens_decimal(value):
+    """
+     -32768 – 32767 (-3276.8 – 3276.7)
+     """
+    response = value * 10
+    assert 0 <= response < 2 ** 16
+    return response
+
+
+def get_event_control(name, value):
+    bit_array = bitfield(value)
+    response = {
+        'Event 1': state_alarm[bit_array[0]],
+        'Event2': state_alarm[bit_array[1]],
+        'Event 3': state_alarm[bit_array[2]],
+        'Event 4': state_alarm[bit_array[3]],
+        'Event 5': state_alarm[bit_array[4]],
+        'Event 6': state_alarm[bit_array[5]],
+        'Event 7': state_alarm[bit_array[6]],
+        'Event 8': state_alarm[bit_array[7]],
+        'Event 9': state_alarm[bit_array[8]],
+        'Event 10': state_alarm[bit_array[9]],
+        'Event 11': state_alarm[bit_array[10]],
+        'Event 12': state_alarm[bit_array[11]],
+        'Event 13': state_alarm[bit_array[12]],
+        'Event 14': state_alarm[bit_array[13]],
+        'Event 15': state_alarm[bit_array[14]]
     }
+    return name, "status:{}".format(response)
 
-    @staticmethod
-    def get_step_regs(step):
-        """Send back an ever incrementing Step, stop after 99.
-        Each step consists of 15 registers.
-        Step 1 has registers 215 to 229
-        Step 2 has registers 230 to 244
-        Step 3 has registers 245 to 259
-        ...
-        Step 99 has registers 1685 to 1699
-        """
-        assert 1 <= step <= 99
-        offset = 15 * (step - 1)
-        return     {
-            'PROFILE_STEP_TIME_HOURS': 215 + offset,  # w,
-            'PROFILE_STEP_TIME_MM_SS': 216 + offset,  # w,
-            'PROFILE_STEP_CHAMBER_EVENTS': 217 + offset,  # w,
-            'PROFILE_STEP_CUSTOMER_EVENTS': 218 + offset,  # w,
-            'PROFILE_STEP_GUARANTEED': 219 + offset,  # w,
-            'PROFILE_STEP_WAIT_FOR_LOOP_EVENTS': 220 + offset,  # w,
-            'PROFILE_STEP_WAIT_FOR_MONITOR_EVENTS': 221 + offset,  # w,
-            'PROFILE_STEP_WAIT_FOR_SETPOINT': 222 + offset,  # w,
-            'PROFILE_STEP_JUMP_STEP_NUMBER': 223 + offset,  # w,
-            'PROFILE_STEP_JUMP_COUNT': 224 + offset,  # w,
-            'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_1': 225 + offset,  # w,
-            'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_2': 226 + offset,  # w,
-            'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_3': 227 + offset,  # w,
-            'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_4': 228 + offset,  # w,
-            'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_5': 229 + offset,  # w,
-        }
+
+def get_loop_alarm_output_assignment(name, value):
+    s = state_get_loop_alarm_output_assignment.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def set_loop_alarm_output_assignment(value):
+    value = value.lower()
+    for mode_state, mode_name in state_get_loop_alarm_output_assignment.iteritems():
+        if mode_name == value:
+            return mode_state
+    return "NOMATCH"
+
+
+def get_loop_alarm_mode(name, value):
+    bit_array = bitfield(value)
+    bit0 = {
+        0: 'Alarm Self Clears',
+        1: 'Alarm Latches'
+    }
+    bit1 = {
+        0: 'Close on Alarm',
+        1: 'Open on Alarm'
+    }
+    bit4 = {
+        0: 'Audible Alarm Off',
+        1: 'Audible Alarm On'
+    }
+    bit5 = {
+        0: 'Chamber Continues On Alarm',
+        1: 'Chamber Shuts Down On Alarm'
+    }
+    response = {
+        'step': bit0[bit_array[0]],
+        'door': bit1[bit_array[1]],
+        'audible': bit4[bit_array[4]],
+        'profile': bit5[bit_array[5]]
+    }
+    return name, "status:{}".format(response)
+
+
+def set_loop_alarm_mode(value):
+    # TODO: Figure out what to do here.
+    # TODO: Takes in what we return above.
+    # Packs into ctypes.struct and returns.
+    assert 'step' in value \
+        and 'door' in value \
+        and 'audible' in value \
+        and 'profile' in value
+
+    return 0
+
+
+def get_loop_percent_output(name, value):
+    """
+    -10000 – 10000 (-100.00 – 100.00)
+    """
+    response = value / 100
+    return name, "%out:{}".format(response)
+
+
+def set_loop_percent_output(value):
+    """
+    -10000 – 10000 (-100.00 – 100.00)
+    """
+    response = value * 100
+    return response
+
+
+def get_minutes(name, value):
+    """
+        0 - 32767 minutes
+    """
+    return name, "minutes:{}".format(value)
+
+
+def set_minutes(value):
+    assert 0 <= value <= 32767
+    return value
+
+# -------------------------------
+# Start register methods
+# -------------------------------
+
+
+def operational_mode(name, value):
+    s = state_on_off.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def clock_yy_mm(name, value):
+    """
+    high byte: Year: 0 to 99
+    low byte: Month: 1=Jan, ... 12=Dec
+    """
+    b_year, b_month = int_to_two_bytes(value & 0xFFFF)
+    year = struct.unpack('B', b_year)[0]
+    month = struct.unpack('B', b_month)[0]
+    return name, "year: 20{}, month:{}".format(year, month)
+
+
+def clock_day_dow(name, value):
+    """
+    high byte: Day of Month: 1 to 31
+    low byte: Day  of Week: 0=Sun, ... 6=Sat
+    """
+    b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
+    dom = struct.unpack('B', b_dom)[0]
+    dow = struct.unpack('B', b_dow)[0]
+    return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
+
+
+def clock_hh_mm(name, value):
+    """
+    high byte: Hours: 1 to 23
+    low byte: Minutes: 0 to 59
+    """
+    b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
+    hour = struct.unpack('B', b_hour)[0]
+    minutes = struct.unpack('B', b_minutes)[0]
+    return name, "Hour:{}, Minute:{}".format(hour, minutes)
+
+
+def clock_sec(name, value):
+    """
+    2 bytes: seconds: 0 to 59
+    """
+    return name, "Seconds:{}".format(value)
+
+
+def power_recovery_mode(name, value):
+    s = state_power_recovery_mode.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def set_power_recovery_mode(value):
+    value = value.lower()
+    for mode_state, mode_name in state_power_recovery_mode.iteritems():
+        if mode_name == value:
+            return mode_state
+    return "NOMATCH"
+
+
+def power_out_time(name, value):
+    """
+    0 - 32767 seconds
+    """
+    return name, "Seconds:{}".format(value)
+
+
+def set_power_out_time(value):
+    """
+    0 - 32767 seconds
+    """
+    assert 0 <= value <= 32767
+    return value
+
+
+def defrost_operating_mode(name, value):
+    s = state_defrost_operating_mode.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def set_defrost_operating_mode(value):
+    value = value.lower()
+    for mode_state, mode_name in state_defrost_operating_mode.iteritems():
+        if mode_name == value:
+            return mode_state
+    return "NOMATCH"
+
+
+def auto_defrost_temperature_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_auto_defrost_temperature_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def auto_defrost_time_interval(name, value):
+    return get_minutes(name, value)
+
+
+def set_auto_defrost_time_interval(value):
+    return set_minutes(value)
+
+
+def defrost_status(name, value):
+    state = {
+        0: 'Not in Defrost',
+        1: 'In Defrost',
+        3: 'In Prechill'
+    }
+    s = state.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def time_remaining_until_next_defrost(name, value):
+    return get_minutes(name, value)
+
+
+def product_control(name, value):
+    s = state_product_control.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def set_product_control(value):
+    value = value.lower()
+    for mode_state, mode_name in state_product_control.iteritems():
+        if mode_name == value:
+            return mode_state
+    return "NOMATCH"
+
+
+def product_control_upper_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_product_control_upper_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def product_control_lower_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_product_control_lower_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def condensation_control(name, value):
+    s = state_on_off.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def set_condensation_control(value):
+    value = value.lower()
+    for mode_state, mode_name in state_on_off.iteritems():
+        if mode_name == value:
+            return mode_state
+    return "NOMATCH"
+
+
+def condensation_control_monitor_mode(name, value):
+    s = state_condensation_control_monitor_mode.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def set_condensation_control_monitor_mode(value):
+    value = value.lower()
+    for mode_state, mode_name in state_condensation_control_monitor_mode.iteritems():
+        if mode_name == value:
+            return mode_state
+    return "NOMATCH"
+
+
+def condensation_control_input_selection(name, value):
+    bit_array = bitfield(value)
+    response_condensation_control_input_selection = {
+        'Product': 0,
+        'PV1': bit_array[0],
+        'PV2': bit_array[1],
+        'PV3': bit_array[2],
+        'PV4': bit_array[3],
+        'PV5': bit_array[4],
+        'PV6': bit_array[5],
+        'PV7': bit_array[6],
+        'PV8': bit_array[7],
+    }
+    return name, "pv:{}".format(response_condensation_control_input_selection)
+
+
+def set_condensation_control_input_selection(value):
+    # TODO
+    pass
+
+
+def condensation_control_temperatore_ramp_rate_limit(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_condensation_control_temperatore_ramp_rate_limit(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def condensation_control_deupoint_limit(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def condensation_control_duepoint_actual(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def chamber_light_control(name, value):
+    s = state_on_off.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def set_chamber_light_control(value):
+    value = value.lower()
+    for state_value, state_name in state_on_off.iteritems():
+        if state_name == value:
+            return state_value
+    return "NOMATCH"
+
+
+def chamber_manual_event_control(name, value):
+    return get_event_control(name, value)
+
+
+def set_chamber_manual_event_control(value):
+    # TODO
+    pass
+
+
+def customer_manual_event_control(name, value):
+    return get_event_control(name, value)
+
+
+def set_customer_manual_event_control(value):
+    # TODO
+    pass
+
+
+def profile_control_status(name, value):
+    s = state_profile_control_status.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def set_profile_control_status(value):
+    value = value.lower()
+    for state_value, state_name in state_profile_control_status.iteritems():
+        if state_name == value:
+            return state_value
+    return "NOMATCH"
+
+
+def set_profile_advance_step(value):
+    state = {
+        1: 'advance previous step',
+        2: 'advance next step'
+    }
+    value = value.lower()
+    for state_value, state_name in state.iteritems():
+        if state_name == value:
+            return state_value
+    return "NOMATCH"
+
+
+def profile_name_ch_1_2(name, value):
+    """
+    32 – 126 (high byte)
+    32 – 126 (low byte)
+    """
+    b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+    hch = struct.unpack('B', b_hch)[0]
+    lch = struct.unpack('B', b_lch)[0]
+    return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+
+def profile_name_ch_3_4(name, value):
+    """
+    32 – 126 (high byte)
+    32 – 126 (low byte)
+    """
+    b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+    hch = struct.unpack('B', b_hch)[0]
+    lch = struct.unpack('B', b_lch)[0]
+    return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+
+def profile_name_ch_5_6(name, value):
+    """
+    32 – 126 (high byte)
+    32 – 126 (low byte)
+    """
+    b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+    hch = struct.unpack('B', b_hch)[0]
+    lch = struct.unpack('B', b_lch)[0]
+    return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+
+def profile_name_ch_7_8(name, value):
+    """
+    32 – 126 (high byte)
+    32 – 126 (low byte)
+    """
+    b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+    hch = struct.unpack('B', b_hch)[0]
+    lch = struct.unpack('B', b_lch)[0]
+    return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+
+def profile_name_ch_9_10(name, value):
+    """
+    32 – 126 (high byte)
+    32 – 126 (low byte)
+    """
+    b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
+    hch = struct.unpack('B', b_hch)[0]
+    lch = struct.unpack('B', b_lch)[0]
+    return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+
+
+def profile_start_date_yy_mm(name, value):
+    """
+    high byte: Year: 0 to 99
+    low byte: Month: 1=Jan, ... 12=Dec
+    """
+    b_year, b_month = int_to_two_bytes(value & 0xFFFF)
+    year = struct.unpack('B', b_year)[0]
+    month = struct.unpack('B', b_month)[0]
+    return name, "year: 20{}, month:{}".format(year, month)
+
+
+def profile_stop_date_yy_mm(name, value):
+    """
+    high byte: Year: 0 to 99
+    low byte: Month: 1=Jan, ... 12=Dec
+    """
+    b_year, b_month = int_to_two_bytes(value & 0xFFFF)
+    year = struct.unpack('B', b_year)[0]
+    month = struct.unpack('B', b_month)[0]
+    return name, "year: 20{}, month:{}".format(year, month)
+
+
+def profile_start_date_day_dow(name, value):
+    """
+    high byte: Day of Month: 1 to 31
+    low byte: Day  of Week: 0=Sun, ... 6=Sat
+    """
+    b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
+    dom = struct.unpack('B', b_dom)[0]
+    dow = struct.unpack('B', b_dow)[0]
+    return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
+
+
+def profile_stop_date_day_dow(name, value):
+    """
+    high byte: Day of Month: 1 to 31
+    low byte: Day  of Week: 0=Sun, ... 6=Sat
+    """
+    b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
+    dom = struct.unpack('B', b_dom)[0]
+    dow = struct.unpack('B', b_dow)[0]
+    return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
+
+
+def profile_start_date_hh_mm(name, value):
+    """
+    high byte: Hours: 1 to 23
+    low byte: Minutes: 0 to 59
+    """
+    b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
+    hour = struct.unpack('B', b_hour)[0]
+    minutes = struct.unpack('B', b_minutes)[0]
+    return name, "Hour:{}, Minute:{}".format(hour, minutes)
+
+
+def profile_stop_date_hh_mm(name, value):
+    """
+    high byte: Hours: 1 to 23
+    low byte: Minutes: 0 to 59
+    """
+    b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
+    hour = struct.unpack('B', b_hour)[0]
+    minutes = struct.unpack('B', b_minutes)[0]
+    return name, "Hour:{}, Minute:{}".format(hour, minutes)
+
+
+def profile_start_step(name, value):
+    """0 - 99"""
+    return name, "step:{}".format(value)
+
+
+def set_profile_start_step(value):
+    """0 - 99"""
+    assert 0 <= value <= 99
+    return value
+
+
+def profile_current_step(name, value):
+    """0 - 99"""
+    return name, "step:{}".format(value)
+
+
+def profile_last_step(name, value):
+    """0 - 99"""
+    return name, "step:{}".format(value)
+
+
+def profile_time_left_in_current_step_hhh(name, value):
+    """1 – 999 Hours"""
+    return name, "hours:{}".format(value)
+
+
+def profile_time_left_in_current_step_mm_ss(name, value):
+    """
+     high byte: Minutes: 0 to 59
+     low byte: Seconds: 0 to 59
+     """
+    b_minutes, b_seconds = int_to_two_bytes(value & 0xFFFF)
+    minutes = struct.unpack('B', b_minutes)[0]
+    seconds = struct.unpack('B', b_seconds)[0]
+    return name, "Minute:{}, Seconds:{}".format(minutes, seconds)
+
+
+def profile_wait_for_status(name, value):
+    s = state_profile_wait_for_status.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+def profile_wait_for_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def profile_current_jump_step(name, value):
+    """0 - 99"""
+    return name, "step:{}".format(value)
+
+
+def profile_jumps_remaining_in_current_step(name, value):
+    """0 - 99"""
+    return name, "jumps:{}".format(value)
+
+
+def profile_loop_1_target_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def profile_loop_2_target_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def profile_loop_3_target_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def profile_loop_4_target_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def profile_loop_5_target_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def profile_last_jump_from_step(name, value):
+    """0 - 99"""
+    return name, "step:{}".format(value)
+
+
+def profile_last_jump_to_step(name, value):
+    """0 - 99"""
+    return name, "step:{}".format(value)
+
+
+def profile_total_jumps_made(name, value):
+    """0 – 32767"""
+    return name, "jumps:{}".format(value)
+
+
+def set_alarm_acknowledge(value):
+    state = {
+        1: 'alarm silence',
+        2: 'pumpdown reset'
+    }
+    value = value.lower()
+    for state_value, state_name in state.iteritems():
+        if state_name == value:
+            return state_value
+    return "NOMATCH"
+
+
+def ezt570i_alarm_status(name, value):
+    bit_array = bitfield(value)
+    response = {
+        'Input1 Sensor Break': state_alarm[bit_array[0]],
+        'Input2 Sensor Break': state_alarm[bit_array[1]],
+        'Input3 Sensor Break': state_alarm[bit_array[2]],
+        'Input4 Sensor Break': state_alarm[bit_array[3]],
+        'Input5 Sensor Break': state_alarm[bit_array[4]],
+        'Input6 Sensor Break': state_alarm[bit_array[5]],
+        'Input7 Sensor Break': state_alarm[bit_array[6]],
+        'Input8 Sensor Break': state_alarm[bit_array[7]],
+        'Input9 Sensor Break': state_alarm[bit_array[8]],
+        'Input10 Sensor Break': state_alarm[bit_array[9]],
+        'Input11 Sensor Break': state_alarm[bit_array[10]],
+        'Input12 Sensor Break': state_alarm[bit_array[11]],
+        'Input13 Sensor Break': state_alarm[bit_array[12]],
+        '(not assigned)': state_alarm[bit_array[13]],
+        'Loop Communications Failure': state_alarm[bit_array[14]],
+    }
+    return name, "status:{}".format(response)
+
+
+def input_alarm_status(name, value):
+    bit_array = bitfield(value)
+    response = {
+        'Input1 Alarm': state_alarm[bit_array[0]],
+        'Input2 Alarm': state_alarm[bit_array[1]],
+        'Input3 Alarm': state_alarm[bit_array[2]],
+        'Input4 Alarm': state_alarm[bit_array[3]],
+        'Input5 Alarm': state_alarm[bit_array[4]],
+        'Input6 Alarm': state_alarm[bit_array[5]],
+        'Input7 Alarm': state_alarm[bit_array[6]],
+        'Input8 Alarm': state_alarm[bit_array[7]],
+        'Input9 Alarm': state_alarm[bit_array[8]],
+        'Input10 Alarm': state_alarm[bit_array[9]],
+        'Input11 Alarm': state_alarm[bit_array[10]],
+        'Input12 Alarm': state_alarm[bit_array[11]],
+        'Input13 Alarm': state_alarm[bit_array[12]],
+        '(not assigned 1)': state_alarm[bit_array[13]],
+        '(not assigned 2)': state_alarm[bit_array[14]]
+    }
+    return name, "status:{}".format(response)
+
+
+def chamber_alarm_status(name, value):
+    bit_array = bitfield(value)
+    response = {
+        'Heater High Limit (Plenum A)': state_alarm[bit_array[0]],
+        'External Product Safety': state_alarm[bit_array[1]],
+        'Boiler Over-Temp (Plenum A)': state_alarm[bit_array[2]],
+        'Boiler Low Water (Plenum A)': state_alarm[bit_array[3]],
+        'Dehumidifier System Fault (System B Boiler Over-Temp)': state_alarm[bit_array[4]],
+        'Motor Overload (Plenum A)': state_alarm[bit_array[5]],
+        'Fluid System High Limit (Plenum B Heater High Limit)': state_alarm[bit_array[6]],
+        'Fluid System High Pressure (Plenum B Motor Overload)': state_alarm[bit_array[7]],
+        'Fluid System Low Flow': state_alarm[bit_array[8]],
+        'Door Open': state_alarm[bit_array[9]],
+        '(System B Boiler Low Water)': state_alarm[bit_array[10]],
+        '(not assigned)': state_alarm[bit_array[11]],
+        'Emergency Stop': state_alarm[bit_array[12]],
+        'Power Failure': state_alarm[bit_array[13]],
+        'Transfer Error': state_alarm[bit_array[14]],
+    }
+    return name, "status:{}".format(response)
+
+
+def refrigeration_alarm_status(name, value):
+    bit_array = bitfield(value)
+    response = {
+        'System 1(A) High/Low Pressure': state_alarm[bit_array[0]],
+        'System 1(A) Low Oil Pressure': state_alarm[bit_array[1]],
+        'System 1(A) High Discharge Temperature': state_alarm[bit_array[2]],
+        'System 1(A) Compressor Protection Module': state_alarm[bit_array[3]],
+        'Pumpdown Disabled': state_alarm[bit_array[4]],
+        'System 1(A) Floodback Monitor': state_alarm[bit_array[5]],
+        '(not assigned) 1': state_alarm[bit_array[6]],
+        '(not assigned) 2': state_alarm[bit_array[7]],
+        'System 2(B) High/Low Pressure': state_alarm[bit_array[8]],
+        'System 2(B) Low Oil Pressure': state_alarm[bit_array[9]],
+        'System 2(B) High Discharge Temperature': state_alarm[bit_array[10]],
+        'System 2(B) Compressor Protection Module': state_alarm[bit_array[11]],
+        '(not assigned) 3': state_alarm[bit_array[12]],
+        'System B Floodback Monitor': state_alarm[bit_array[13]],
+        '(not assigned) 4': state_alarm[bit_array[14]],
+    }
+    return name, "status:{}".format(response)
+
+
+def system_status_monitor(name, value):
+    bit_array = bitfield(value)
+    response = {
+        'Humidity Water Reservoir Low': state_alarm[bit_array[0]],
+        'Humidity Disabled (temperature out-of-range)': state_alarm[bit_array[1]],
+        'Humidity High Dewpoint Limit': state_alarm[bit_array[2]],
+        'Humidity Low Dewpoint Limit': state_alarm[bit_array[3]],
+        'Door Open': state_alarm[bit_array[4]],
+        '(not assigned) 1': state_alarm[bit_array[5]],
+        '(not assigned) 2': state_alarm[bit_array[6]],
+        '(not assigned) 3': state_alarm[bit_array[7]],
+        'Service Air Circulators': state_alarm[bit_array[8]],
+        'Service Heating/Cooling System': state_alarm[bit_array[9]],
+        'Service Humidity System': state_alarm[bit_array[10]],
+        'Service Purge System': state_alarm[bit_array[11]],
+        'Service Altitude System': state_alarm[bit_array[12]],
+        'Service Transfer Mechanism': state_alarm[bit_array[13]],
+        '(not assigned) 4': state_alarm[bit_array[14]],
+    }
+    return name, "status:{}".format(response)
+
+
+def loop_1_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_1_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_2_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_2_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_3_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_3_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_4_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_4_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_5_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_5_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_1_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_1_process_value(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_2_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_2_process_value(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_3_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_3_process_value(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_4_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_4_process_value(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_5_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_5_process_value(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_1_percent_output(name, value):
+    return get_loop_percent_output(name, value)
+
+
+def set_loop_1_percent_output(value):
+    return set_loop_percent_output(value)
+
+
+def loop_2_percent_output(name, value):
+    return get_loop_percent_output(name, value)
+
+
+def set_loop_2_percent_output(value):
+    return set_loop_percent_output(value)
+
+
+def loop_3_percent_output(name, value):
+    return get_loop_percent_output(name, value)
+
+
+def set_loop_3_percent_output(value):
+    return set_loop_percent_output(value)
+
+
+def loop_4_percent_output(name, value):
+    return get_loop_percent_output(name, value)
+
+
+def set_loop_4_percent_output(value):
+    return set_loop_percent_output(value)
+
+
+def loop_5_percent_output(name, value):
+    return get_loop_percent_output(name, value)
+
+
+def set_loop_5_percent_output(value):
+    return set_loop_percent_output(value)
+
+
+def loop_1_autotune_status(name, value):
+    return get_loop_autotune_status(name, value)
+
+
+def set_loop_1_autotune_status(value):
+    return set_loop_autotune_status(value)
+
+
+def loop_2_autotune_status(name, value):
+    return get_loop_autotune_status(name, value)
+
+
+def set_loop_2_autotune_status(value):
+    return set_loop_autotune_status(value)
+
+
+def loop_3_autotune_status(name, value):
+    return get_loop_autotune_status(name, value)
+
+
+def set_loop_3_autotune_status(value):
+    return set_loop_autotune_status(value)
+
+
+def loop_4_autotune_status(name, value):
+    return get_loop_autotune_status(name, value)
+
+
+def set_loop_4_autotune_status(value):
+    return set_loop_autotune_status(value)
+
+
+def loop_5_autotune_status(name, value):
+    return get_loop_autotune_status(name, value)
+
+
+def set_loop_5_autotune_status(value):
+    return set_loop_autotune_status(value)
+
+
+def loop_1_upper_setpoint_limit(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_1_upper_setpoint_limit(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_2_upper_setpoint_limit(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_2_upper_setpoint_limit(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_3_upper_setpoint_limit(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_3_upper_setpoint_limit(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_4_upper_setpoint_limit(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_4_upper_setpoint_limit(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_5_upper_setpoint_limit(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_5_upper_setpoint_limit(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_1_lower_setpoint_limit(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_1_lower_setpoint_limit(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_2_lower_setpoint_limit(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_2_lower_setpoint_limit(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_3_lower_setpoint_limit(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_3_lower_setpoint_limit(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_4_lower_setpoint_limit(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_4_lower_setpoint_limit(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_5_lower_setpoint_limit(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_5_lower_setpoint_limit(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_1_alarm_type(name, value):
+    return get_loop_alarm_type(name, value)
+
+
+def set_loop_1_alarm_type(value):
+    return set_loop_alarm_type(value)
+
+
+def loop_2_alarm_type(name, value):
+    return get_loop_alarm_type(name, value)
+
+
+def set_loop_2_alarm_type(value):
+    return set_loop_alarm_type(value)
+
+
+def loop_3_alarm_type(name, value):
+    return get_loop_alarm_type(name, value)
+
+
+def set_loop_3_alarm_type(value):
+    return set_loop_alarm_type(value)
+
+
+def loop_4_alarm_type(name, value):
+    return get_loop_alarm_type(name, value)
+
+
+def set_loop_4_alarm_type(value):
+    return set_loop_alarm_type(value)
+
+
+def loop_5_alarm_type(name, value):
+    return get_loop_alarm_type(name, value)
+
+
+def set_loop_5_alarm_type(value):
+    return set_loop_alarm_type(value)
+
+
+def loop_1_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_loop_1_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def loop_2_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_loop_2_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def loop_3_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_loop_3_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def loop_4_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_loop_4_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def loop_5_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_loop_5_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def loop_1_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_loop_1_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def loop_2_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_loop_2_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def loop_3_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_loop_3_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def loop_4_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_loop_4_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def loop_5_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_loop_5_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def loop_1_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_1_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_2_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_2_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_3_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_3_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_4_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_4_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_5_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_5_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_1_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_1_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_2_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_2_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_3_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_3_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_4_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_4_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_5_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_5_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_1_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_1_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_2_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_2_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_3_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_3_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_4_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_4_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def loop_5_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_loop_5_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_1_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def monitor_input_2_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def monitor_input_3_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def monitor_input_4_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def monitor_input_5_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def monitor_input_6_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def monitor_input_7_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def monitor_input_8_process_value(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def monitor_input_1_alarm_type(name, value):
+    return get_monitor_input_alarm_type(name, value)
+
+
+def set_monitor_input_1_alarm_type(value):
+    return set_monitor_input_alarm_type(value)
+
+
+def monitor_input_2_alarm_type(name, value):
+    return get_monitor_input_alarm_type(name, value)
+
+
+def set_monitor_input_2_alarm_type(value):
+    return set_monitor_input_alarm_type(value)
+
+
+def monitor_input_3_alarm_type(name, value):
+    return get_monitor_input_alarm_type(name, value)
+
+
+def set_monitor_input_3_alarm_type(value):
+    return set_monitor_input_alarm_type(value)
+
+
+def monitor_input_4_alarm_type(name, value):
+    return get_monitor_input_alarm_type(name, value)
+
+
+def set_monitor_input_4_alarm_type(value):
+    return set_monitor_input_alarm_type(value)
+
+
+def monitor_input_5_alarm_type(name, value):
+    return get_monitor_input_alarm_type(name, value)
+
+
+def set_monitor_input_5_alarm_type(value):
+    return set_monitor_input_alarm_type(value)
+
+
+def monitor_input_6_alarm_type(name, value):
+    return get_monitor_input_alarm_type(name, value)
+
+
+def set_monitor_input_6_alarm_type(value):
+    return set_monitor_input_alarm_type(value)
+
+
+def monitor_input_7_alarm_type(name, value):
+    return get_monitor_input_alarm_type(name, value)
+
+
+def set_monitor_input_7_alarm_type(value):
+    return set_monitor_input_alarm_type(value)
+
+
+def monitor_input_8_alarm_type(name, value):
+    return get_monitor_input_alarm_type(name, value)
+
+
+def set_monitor_input_8_alarm_type(value):
+    return set_monitor_input_alarm_type(value)
+
+
+def monitor_input_1_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_monitor_input_1_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def monitor_input_2_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_monitor_input_2_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def monitor_input_3_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_monitor_input_3_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def monitor_input_4_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_monitor_input_4_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def monitor_input_5_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_monitor_input_5_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def monitor_input_6_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_monitor_input_6_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def monitor_input_7_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_monitor_input_7_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def monitor_input_8_alarm_mode(name, value):
+    return get_loop_alarm_mode(name, value)
+
+
+def set_monitor_input_8_alarm_mode(value):
+    return set_loop_alarm_mode(value)
+
+
+def monitor_input_1_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_monitor_input_1_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def monitor_input_2_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_monitor_input_2_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def monitor_input_3_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_monitor_input_3_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def monitor_input_4_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_monitor_input_4_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def monitor_input_5_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_monitor_input_5_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def monitor_input_6_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_monitor_input_6_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def monitor_input_7_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_monitor_input_7_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def monitor_input_8_alarm_output_assignment(name, value):
+    return get_loop_alarm_output_assignment(name, value)
+
+
+def set_monitor_input_8_alarm_output_assignment(value):
+    return set_loop_alarm_output_assignment(value)
+
+
+def monitor_input_1_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_1_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_2_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_2_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_3_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_3_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_4_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_4_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_5_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_5_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_6_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_6_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_7_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_7_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_8_high_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_8_high_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_1_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_1_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_2_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_2_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_3_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_3_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_4_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_4_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_5_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_5_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_6_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_6_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_7_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_7_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_8_low_alarm_setpoint(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_8_low_alarm_setpoint(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_1_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_1_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_2_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_2_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_3_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_3_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_4_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_4_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_5_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_5_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_6_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_6_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_7_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_7_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def monitor_input_8_alarm_hysteresis(name, value):
+    return get_signed_int_tens_decimal(name, value)
+
+
+def set_monitor_input_8_alarm_hysteresis(value):
+    return set_signed_int_tens_decimal(value)
+
+
+def set_profile_step_time_adjustment(value):
+    """
+    0 – 32767 minutes
+    """
+    assert 0 <= value <= 32767
+    return value
+
+
+def ezt570i_offline_download_profile(name, value):
+    state = {
+        0: 'Online',
+        1: 'Offline/Downloading Profile'
+    }
+    s = state.get(value, "{} Not specified in API".format(value))
+    return name, "Status:{}".format(s)
+
+
+# Dictionary map bytes to function
+ctrl_profile_headr_registers = {
+    'AUTOSTART': 200,  # w,
+    'AUTOSTART_TIME_YY_MM': 201,  # w,
+    'AUTOSTART_TIME_DAY_DOW': 202,  # w,
+    'AUTOSTART_TIME_HH_MM': 203,  # w,
+    'PROFILE_NAME_CH_1_2': 204,  # w,
+    'PROFILE_NAME_CH_3_4': 205,  # w,
+    'PROFILE_NAME_CH_5_6': 206,  # w,
+    'PROFILE_NAME_CH_7_8': 207,  # w,
+    'PROFILE_NAME_CH_9_10': 208,  # w,
+    'TOTAL_NUMBER_OF_STEPS_IN_PROFILE': 209,  # w,
+    'GUARANTEED_SOAK_BAND_LOOP_1': 210,  # w,
+    'GUARANTEED_SOAK_BAND_LOOP_2': 211,  # w,
+    'GUARANTEED_SOAK_BAND_LOOP_3': 212,  # w,
+    'GUARANTEED_SOAK_BAND_LOOP_4': 213,  # w,
+    'GUARANTEED_SOAK_BAND_LOOP_5': 214,  # w,
+}
+
+
+def get_profile_step_regs(step):
+    """Send back an ever incrementing Step, stop after 99.
+    Each step consists of 15 registers.
+    Step 1 has registers 215 to 229
+    Step 2 has registers 230 to 244
+    Step 3 has registers 245 to 259
+    ...
+    Step 99 has registers 1685 to 1699
+    """
+    assert 1 <= step <= 99
+    offset = 15 * (step - 1)
+    return {
+        'PROFILE_STEP_TIME_HOURS': 215 + offset,  # w,
+        'PROFILE_STEP_TIME_MM_SS': 216 + offset,  # w,
+        'PROFILE_STEP_CHAMBER_EVENTS': 217 + offset,  # w,
+        'PROFILE_STEP_CUSTOMER_EVENTS': 218 + offset,  # w,
+        'PROFILE_STEP_GUARANTEED': 219 + offset,  # w,
+        'PROFILE_STEP_WAIT_FOR_LOOP_EVENTS': 220 + offset,  # w,
+        'PROFILE_STEP_WAIT_FOR_MONITOR_EVENTS': 221 + offset,  # w,
+        'PROFILE_STEP_WAIT_FOR_SETPOINT': 222 + offset,  # w,
+        'PROFILE_STEP_JUMP_STEP_NUMBER': 223 + offset,  # w,
+        'PROFILE_STEP_JUMP_COUNT': 224 + offset,  # w,
+        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_1': 225 + offset,  # w,
+        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_2': 226 + offset,  # w,
+        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_3': 227 + offset,  # w,
+        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_4': 228 + offset,  # w,
+        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_5': 229 + offset,  # w,
+    }

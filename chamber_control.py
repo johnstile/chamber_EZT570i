@@ -20,7 +20,6 @@ class Chamber(object):
     """"""
     def __init__(self, log, comm_type, comm_params):
         self.log = log
-        self.creg = chamber_commands.ChamberCommandRegisters()
         self.ccomm = chamber_communication.ChamberCommunication(comm_type, comm_params, log)
 
     def connect(self):
@@ -62,32 +61,32 @@ class Chamber(object):
         # Start the profile
         # ---------------------------------
         # is the system ready to start?  0 = Yes
-        start_reg = self.creg.name_to_reg('EZT570I_OFFLINE_DOWNLOAD_PROFILE')
+        start_reg = chamber_commands.name_to_reg('EZT570I_OFFLINE_DOWNLOAD_PROFILE')
         quantity_of_reg = 1
         values = self.ccomm.read_registers(start_reg, quantity_of_reg)
         self.log.debug("Modbus Response:{}".format(values))
         self.print_read_registers(start_reg, values)
 
-        register, code = self.creg.encode_set_value('PROFILE_START_STEP', 1)
+        register, code = chamber_commands.encode_set_value('PROFILE_START_STEP', 1)
         self.ccomm.write_register(register, code)
-        start_reg = self.creg.name_to_reg('PROFILE_START_STEP')
+        start_reg = chamber_commands.name_to_reg('PROFILE_START_STEP')
         quantity_of_reg = 1
         values = self.ccomm.read_registers(start_reg, quantity_of_reg)
         self.log.debug("Modbus Response:{}".format(values))
         self.print_read_registers(start_reg, values)
 
-        register, code = self.creg.encode_set_value('PROFILE_CONTROL_STATUS', 'run/resume')
+        register, code = chamber_commands.encode_set_value('PROFILE_CONTROL_STATUS', 'run/resume')
         self.ccomm.write_register(register, code)
-        start_reg = self.creg.name_to_reg('PROFILE_CONTROL_STATUS')
+        start_reg = chamber_commands.name_to_reg('PROFILE_CONTROL_STATUS')
         quantity_of_reg = 1
         values = self.ccomm.read_registers(start_reg, quantity_of_reg)
         self.log.debug("Modbus Response:{}".format(values))
         self.print_read_registers(start_reg, values)
 
     def stop_profile(self):
-        register, code = self.creg.encode_set_value('PROFILE_CONTROL_STATUS', 'stop/all off')
+        register, code = chamber_commands.encode_set_value('PROFILE_CONTROL_STATUS', 'stop/all off')
         self.ccomm.write_register(register, code)
-        start_reg = self.creg.name_to_reg('PROFILE_CONTROL_STATUS')
+        start_reg = chamber_commands.name_to_reg('PROFILE_CONTROL_STATUS')
         quantity_of_reg = 1
         values = self.ccomm.read_registers(start_reg, quantity_of_reg)
         self.log.debug("Modbus Response:{}".format(values))
@@ -103,7 +102,7 @@ class Chamber(object):
             if value is None:
                 self.log.info("value is none")
 
-            reg_name, value_human = self.creg.decode_read_value(reg, value)
+            reg_name, value_human = chamber_commands.decode_read_value(reg, value)
             self.log.info(
                 (
                     "register:{:04x}, reg_name:{:<50}, value:{:04x}, value_human:{}"
@@ -122,9 +121,9 @@ class Chamber(object):
         :param state: on|off
         :return:
         """
-        register, code = self.creg.encode_set_value('CHAMBER_LIGHT_CONTROL', state)
+        register, code = chamber_commands.encode_set_value('CHAMBER_LIGHT_CONTROL', state)
         self.ccomm.write_register(register, code)
-        start_reg = self.creg.name_to_reg('CHAMBER_LIGHT_CONTROL')
+        start_reg = chamber_commands.name_to_reg('CHAMBER_LIGHT_CONTROL')
         values = self.ccomm.read_registers(start_reg, 1)
         self.log.debug("Modbus Response:{}".format(values))
         self.print_read_registers(start_reg, values)

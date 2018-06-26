@@ -660,9 +660,8 @@ if __name__ == '__main__':
     log.setLevel(logging.INFO)  # DEBUG,INFO,WARNING,ERROR,CRITICAL
     log.debug("Initialized Logger")
 
-    from chamber_commands import ChamberCommandRegisters
-    commands = ChamberCommandRegisters()
-    light_control = commands.ctrl_registers['CHAMBER_LIGHT_CONTROL']
+    import chamber_commands
+    light_control = chamber_commands.ctrl_registers['CHAMBER_LIGHT_CONTROL']
 
     chamber = ChamberCommunication(comm_type='dummy', log=log)
     chamber.connect()
