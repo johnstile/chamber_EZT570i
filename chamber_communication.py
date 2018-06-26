@@ -662,7 +662,7 @@ if __name__ == '__main__':
 
     from chamber_commands import ChamberCommandRegisters
     commands = ChamberCommandRegisters()
-    light_control = commands.ctrl['CHAMBER_LIGHT_CONTROL']
+    light_control = commands.ctrl_registers['CHAMBER_LIGHT_CONTROL']
 
     chamber = ChamberCommunication(comm_type='dummy', log=log)
     chamber.connect()

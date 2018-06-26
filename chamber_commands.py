@@ -4,6 +4,189 @@
 import struct
 import ctypes
 
+# Dictionary map registers to function
+ctrl_registers = {
+    'OPERATIONAL_MODE': 0,  # r,
+    'CLOCK_YY_MM': 1,  # r, Clock (Year, Month)
+    'CLOCK_DAY_DOW': 2,  # r, Clock (Day, DOE)
+    'CLOCK_HH_MM': 3,  # r, Clock (Hours, Min)
+    'CLOCK_SEC': 4,  # r, Clock (Seconds)
+    'POWER_RECOVERY_MODE': 5,  # r/w, Power Recovery Mode
+    'POWER_OUT_TIME': 6,  # r/w,
+    'DEFROST_OPERATING_MODE': 7,  # r/w,
+    'AUTO_DEFROST_TEMPERATURE_SETPOINT': 8,  # r/w
+    'AUTO_DEFROST_TIME_INTERVAL': 9,  # r/w
+    'DEFROST_STATUS': 10,  # r,
+    'TIME_REMAINING_UNTIL_NEXT_DEFROST': 11,  # r,
+    'PRODUCT_CONTROL': 12,  # r/w
+    'PRODUCT_CONTROL_UPPER_SETPOINT': 13,  # r/w,
+    'PRODUCT_CONTROL_LOWER_SETPOINT': 14,  # r/w,
+    'CONDENSATION_CONTROL': 15,  # r/w,
+    'CONDENSATION_CONTROL_MONITOR_MODE': 16,  # r/w,
+    'CONDENSATION_CONTROL_INPUT_SELECTION': 17,  # r/w,
+    'CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT': 18,  # r/w,
+    'CONDENSATION_CONTROL_DEUPOINT_LIMIT': 19,  # r,
+    'CONDENSATION_CONTROL_DUEPOINT_ACTUAL': 20,  # r,
+    'CHAMBER_LIGHT_CONTROL': 21,  # r/w,
+    'CHAMBER_MANUAL_EVENT_CONTROL': 22,  # r/w,
+    'CUSTOMER_MANUAL_EVENT_CONTROL': 23,  # r/w,
+    'PROFILE_CONTROL_STATUS': 24,  # r/w,
+    'PROFILE_ADVANCE_STEP': 25,  # w,
+    'PROFILE_NAME_CH_1_2': 26,  # r,
+    'PROFILE_NAME_CH_3_4': 27,  # r,
+    'PROFILE_NAME_CH_5_6': 28,  # r,
+    'PROFILE_NAME_CH_7_8': 29,  # r,
+    'PROFILE_NAME_CH_9_10': 30,  # r,
+    'PROFILE_START_DATE_YY_MM': 31,  # r,
+    'PROFILE_STOP_DATE_YY_MM': 34,  # r,
+    'PROFILE_START_DATE_DAY_DOW': 32,  # r,
+    'PROFILE_STOP_DATE_DAY_DOW': 35,  # r,
+    'PROFILE_START_DATE_HH_MM': 33,  # r,
+    'PROFILE_STOP_DATE_HH_MM': 36,  # r,
+    'PROFILE_START_STEP': 37,  # r/w,
+    'PROFILE_CURRENT_STEP': 38,  # r,
+    'PROFILE_LAST_STEP': 39,  # r,
+    'PROFILE_TIME_LEFT_IN_CURRENT_STEP_HHH': 40,  # r,
+    'PROFILE_TIME_LEFT_IN_CURRENT_STEP_MM_SS': 41,  # r,
+    'PROFILE_WAIT_FOR_STATUS': 42,  # r,
+    'PROFILE_WAIT_FOR_SETPOINT': 43,  # r,
+    'PROFILE_CURRENT_JUMP_STEP': 44,  # r,
+    'PROFILE_JUMPS_REMAINING_IN_CURRENT_STEP': 45,  # r,
+    'PROFILE_LOOP_1_TARGET_SETPOINT': 46,  # r,
+    'PROFILE_LOOP_2_TARGET_SETPOINT': 47,  # r,
+    'PROFILE_LOOP_3_TARGET_SETPOINT': 48,  # r,
+    'PROFILE_LOOP_4_TARGET_SETPOINT': 49,  # r,
+    'PROFILE_LOOP_5_TARGET_SETPOINT': 50,  # r,
+    'PROFILE_LAST_JUMP_FROM_STEP': 51,  # r,
+    'PROFILE_LAST_JUMP_TO_STEP': 52,  # r,
+    'PROFILE_TOTAL_JUMPS_MADE': 53,  # r,
+    'ALARM_ACKNOWLEDGE': 54,  # w,
+    'EZT570I_ALARM_STATUS': 55,  # r,
+    'INPUT_ALARM_STATUS': 56,  # r,
+    'CHAMBER_ALARM_STATUS': 57,  # r,
+    'REFRIGERATION_ALARM_STATUS': 58,  # r,
+    'SYSTEM_STATUS_MONITOR': 59,  # r,
+    'LOOP_1_SETPOINT': 60,  # r/w,
+    'LOOP_2_SETPOINT': 72,  # r/w,
+    'LOOP_3_SETPOINT': 84,  # r/w,
+    'LOOP_4_SETPOINT': 96,  # r/w,
+    'LOOP_5_SETPOINT': 108,  # r/w,
+    'LOOP_1_PROCESS_VALUE': 61,  # r,
+    'LOOP_2_PROCESS_VALUE': 73,  # r,
+    'LOOP_3_PROCESS_VALUE': 85,  # r,
+    'LOOP_4_PROCESS_VALUE': 97,  # r,
+    'LOOP_5_PROCESS_VALUE': 109,  # r,
+    'LOOP_1_PERCENT_OUTPUT': 62,  # r,
+    'LOOP_2_PERCENT_OUTPUT': 74,  # r,
+    'LOOP_3_PERCENT_OUTPUT': 86,  # r,
+    'LOOP_4_PERCENT_OUTPUT': 98,  # r,
+    'LOOP_5_PERCENT_OUTPUT': 110,  # r,
+    'LOOP_1_AUTOTUNE_STATUS': 63,  # r/w,
+    'LOOP_2_AUTOTUNE_STATUS': 75,  # r/w,
+    'LOOP_3_AUTOTUNE_STATUS': 87,  # r/w,
+    'LOOP_4_AUTOTUNE_STATUS': 99,  # r/w,
+    'LOOP_5_AUTOTUNE_STATUS': 111,  # r/w,
+    'LOOP_1_UPPER_SETPOINT_LIMIT': 64,  # r/w,
+    'LOOP_2_UPPER_SETPOINT_LIMIT': 76,  # r/w,
+    'LOOP_3_UPPER_SETPOINT_LIMIT': 88,  # r/w,
+    'LOOP_4_UPPER_SETPOINT_LIMIT': 100,  # r/w,
+    'LOOP_5_UPPER_SETPOINT_LIMIT': 112,  # r/w,
+    'LOOP_1_LOWER_SETPOINT_LIMIT': 65,  # r/w,
+    'LOOP_2_LOWER_SETPOINT_LIMIT': 77,  # r/w,
+    'LOOP_3_LOWER_SETPOINT_LIMIT': 89,  # r/w,
+    'LOOP_4_LOWER_SETPOINT_LIMIT': 101,  # r/w,
+    'LOOP_5_LOWER_SETPOINT_LIMIT': 113,  # r/w,
+    'LOOP_1_ALARM_TYPE': 66,  # r/w,
+    'LOOP_2_ALARM_TYPE': 78,  # r/w,
+    'LOOP_3_ALARM_TYPE': 90,  # r/w,
+    'LOOP_4_ALARM_TYPE': 102,  # r/w,
+    'LOOP_5_ALARM_TYPE': 114,  # r/w,
+    'LOOP_1_ALARM_MODE': 67,  # r/w,
+    'LOOP_2_ALARM_MODE': 79,  # r/w,
+    'LOOP_3_ALARM_MODE': 91,  # r/w,
+    'LOOP_4_ALARM_MODE': 103,  # r/w,
+    'LOOP_5_ALARM_MODE': 115,  # r/w,
+    'LOOP_1_ALARM_OUTPUT_ASSIGNMENT': 68,  # r/w,
+    'LOOP_2_ALARM_OUTPUT_ASSIGNMENT': 80,  # r/w,
+    'LOOP_3_ALARM_OUTPUT_ASSIGNMENT': 92,  # r/w,
+    'LOOP_4_ALARM_OUTPUT_ASSIGNMENT': 104,  # r/w,
+    'LOOP_5_ALARM_OUTPUT_ASSIGNMENT': 116,  # r/w,
+    'LOOP_1_HIGH_ALARM_SETPOINT': 69,  # r/w,
+    'LOOP_2_HIGH_ALARM_SETPOINT': 81,  # r/w,
+    'LOOP_3_HIGH_ALARM_SETPOINT': 93,  # r/w,
+    'LOOP_4_HIGH_ALARM_SETPOINT': 105,  # r/w,
+    'LOOP_5_HIGH_ALARM_SETPOINT': 117,  # r/w,
+    'LOOP_1_LOW_ALARM_SETPOINT': 70,  # r/w,
+    'LOOP_2_LOW_ALARM_SETPOINT': 82,  # r/w,
+    'LOOP_3_LOW_ALARM_SETPOINT': 94,  # r/w,
+    'LOOP_4_LOW_ALARM_SETPOINT': 106,  # r/w,
+    'LOOP_5_LOW_ALARM_SETPOINT': 118,  # r/w,
+    'LOOP_1_ALARM_HYSTERESIS': 71,  # r/w,
+    'LOOP_2_ALARM_HYSTERESIS': 83,  # r/w,
+    'LOOP_3_ALARM_HYSTERESIS': 95,  # r/w,
+    'LOOP_4_ALARM_HYSTERESIS': 107,  # r/w,
+    'LOOP_5_ALARM_HYSTERESIS': 119,  # r/w,
+    'MONITOR_INPUT_1_PROCESS_VALUE': 120,  # r,
+    'MONITOR_INPUT_2_PROCESS_VALUE': 127,  # r,
+    'MONITOR_INPUT_3_PROCESS_VALUE': 134,  # r,
+    'MONITOR_INPUT_4_PROCESS_VALUE': 141,  # r,
+    'MONITOR_INPUT_5_PROCESS_VALUE': 148,  # r,
+    'MONITOR_INPUT_6_PROCESS_VALUE': 155,  # r,
+    'MONITOR_INPUT_7_PROCESS_VALUE': 162,  # r,
+    'MONITOR_INPUT_8_PROCESS_VALUE': 169,  # r,
+    'MONITOR_INPUT_1_ALARM_TYPE': 121,  # r/w
+    'MONITOR_INPUT_2_ALARM_TYPE': 128,  # r/w
+    'MONITOR_INPUT_3_ALARM_TYPE': 135,  # r/w
+    'MONITOR_INPUT_4_ALARM_TYPE': 142,  # r/w
+    'MONITOR_INPUT_5_ALARM_TYPE': 149,  # r/w
+    'MONITOR_INPUT_6_ALARM_TYPE': 156,  # r/w
+    'MONITOR_INPUT_7_ALARM_TYPE': 163,  # r/w
+    'MONITOR_INPUT_8_ALARM_TYPE': 170,  # r/w
+    'MONITOR_INPUT_1_ALARM_MODE': 122,  # r/w
+    'MONITOR_INPUT_2_ALARM_MODE': 129,  # r/w
+    'MONITOR_INPUT_3_ALARM_MODE': 136,  # r/w
+    'MONITOR_INPUT_4_ALARM_MODE': 143,  # r/w
+    'MONITOR_INPUT_5_ALARM_MODE': 150,  # r/w
+    'MONITOR_INPUT_6_ALARM_MODE': 157,  # r/w
+    'MONITOR_INPUT_7_ALARM_MODE': 164,  # r/w
+    'MONITOR_INPUT_8_ALARM_MODE': 171,  # r/w
+    'MONITOR_INPUT_1_ALARM_OUTPUT_ASSIGNMENT': 123,  # r/w
+    'MONITOR_INPUT_2_ALARM_OUTPUT_ASSIGNMENT': 130,  # r/w
+    'MONITOR_INPUT_3_ALARM_OUTPUT_ASSIGNMENT': 137,  # r/w
+    'MONITOR_INPUT_4_ALARM_OUTPUT_ASSIGNMENT': 144,  # r/w
+    'MONITOR_INPUT_5_ALARM_OUTPUT_ASSIGNMENT': 151,  # r/w
+    'MONITOR_INPUT_6_ALARM_OUTPUT_ASSIGNMENT': 158,  # r/w
+    'MONITOR_INPUT_7_ALARM_OUTPUT_ASSIGNMENT': 165,  # r/w
+    'MONITOR_INPUT_8_ALARM_OUTPUT_ASSIGNMENT': 172,  # r/w
+    'MONITOR_INPUT_1_HIGH_ALARM_SETPOINT': 124,  # r/w,
+    'MONITOR_INPUT_2_HIGH_ALARM_SETPOINT': 131,  # r/w,
+    'MONITOR_INPUT_3_HIGH_ALARM_SETPOINT': 138,  # r/w,
+    'MONITOR_INPUT_4_HIGH_ALARM_SETPOINT': 145,  # r/w,
+    'MONITOR_INPUT_5_HIGH_ALARM_SETPOINT': 152,  # r/w,
+    'MONITOR_INPUT_6_HIGH_ALARM_SETPOINT': 159,  # r/w,
+    'MONITOR_INPUT_7_HIGH_ALARM_SETPOINT': 166,  # r/w,
+    'MONITOR_INPUT_8_HIGH_ALARM_SETPOINT': 173,  # r/w,
+    'MONITOR_INPUT_1_LOW_ALARM_SETPOINT': 125,  # r/w,
+    'MONITOR_INPUT_2_LOW_ALARM_SETPOINT': 132,  # r/w,
+    'MONITOR_INPUT_3_LOW_ALARM_SETPOINT': 139,  # r/w,
+    'MONITOR_INPUT_4_LOW_ALARM_SETPOINT': 146,  # r/w,
+    'MONITOR_INPUT_5_LOW_ALARM_SETPOINT': 153,  # r/w,
+    'MONITOR_INPUT_6_LOW_ALARM_SETPOINT': 160,  # r/w,
+    'MONITOR_INPUT_7_LOW_ALARM_SETPOINT': 167,  # r/w,
+    'MONITOR_INPUT_8_LOW_ALARM_SETPOINT': 174,  # r/w,
+    'MONITOR_INPUT_1_ALARM_HYSTERESIS': 126,  # r/w,
+    'MONITOR_INPUT_2_ALARM_HYSTERESIS': 133,  # r/w,
+    'MONITOR_INPUT_3_ALARM_HYSTERESIS': 140,  # r/w,
+    'MONITOR_INPUT_4_ALARM_HYSTERESIS': 147,  # r/w,
+    'MONITOR_INPUT_5_ALARM_HYSTERESIS': 154,  # r/w,
+    'MONITOR_INPUT_6_ALARM_HYSTERESIS': 161,  # r/w,
+    'MONITOR_INPUT_7_ALARM_HYSTERESIS': 168,  # r/w,
+    'MONITOR_INPUT_8_ALARM_HYSTERESIS': 175,  # r/w,
+    'PROFILE_STEP_TIME_ADJUSTMENT': 179,  # w,
+    'EZT570I_OFFLINE_DOWNLOAD_PROFILE': 180  # r,
+}
+
+
 class BitFields(ctypes.BigEndianStructure):
     """Several registers hold bit-oriented data"""
     _fields_ = [
@@ -148,187 +331,6 @@ class ChamberCommandRegisters(object):
     def __init__(self):
         pass
 
-    # Dictionary map registers to function
-    ctrl = {
-        'OPERATIONAL_MODE': 0,  # r,
-        'CLOCK_YY_MM': 1,  # r, Clock (Year, Month)
-        'CLOCK_DAY_DOW': 2,  # r, Clock (Day, DOE)
-        'CLOCK_HH_MM': 3,  # r, Clock (Hours, Min)
-        'CLOCK_SEC': 4,  # r, Clock (Seconds)
-        'POWER_RECOVERY_MODE': 5,  # r/w, Power Recovery Mode
-        'POWER_OUT_TIME': 6,  # r/w,
-        'DEFROST_OPERATING_MODE': 7,  # r/w,
-        'AUTO_DEFROST_TEMPERATURE_SETPOINT': 8,  # r/w
-        'AUTO_DEFROST_TIME_INTERVAL': 9,  # r/w
-        'DEFROST_STATUS': 10,  # r,
-        'TIME_REMAINING_UNTIL_NEXT_DEFROST': 11,  # r,
-        'PRODUCT_CONTROL': 12,  # r/w
-        'PRODUCT_CONTROL_UPPER_SETPOINT': 13,  # r/w,
-        'PRODUCT_CONTROL_LOWER_SETPOINT': 14,  # r/w,
-        'CONDENSATION_CONTROL': 15,  # r/w,
-        'CONDENSATION_CONTROL_MONITOR_MODE': 16,  # r/w,
-        'CONDENSATION_CONTROL_INPUT_SELECTION': 17,  # r/w,
-        'CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT': 18,  # r/w,
-        'CONDENSATION_CONTROL_DEUPOINT_LIMIT': 19,  # r,
-        'CONDENSATION_CONTROL_DUEPOINT_ACTUAL': 20,  # r,
-        'CHAMBER_LIGHT_CONTROL': 21,  # r/w,
-        'CHAMBER_MANUAL_EVENT_CONTROL': 22,  # r/w,
-        'CUSTOMER_MANUAL_EVENT_CONTROL': 23,  # r/w,
-        'PROFILE_CONTROL_STATUS': 24,  # r/w,
-        'PROFILE_ADVANCE_STEP': 25,  # w,
-        'PROFILE_NAME_CH_1_2': 26,  # r,
-        'PROFILE_NAME_CH_3_4': 27,  # r,
-        'PROFILE_NAME_CH_5_6': 28,  # r,
-        'PROFILE_NAME_CH_7_8': 29,  # r,
-        'PROFILE_NAME_CH_9_10': 30,  # r,
-        'PROFILE_START_DATE_YY_MM': 31,  # r,
-        'PROFILE_STOP_DATE_YY_MM': 34,  # r,
-        'PROFILE_START_DATE_DAY_DOW': 32,  # r,
-        'PROFILE_STOP_DATE_DAY_DOW': 35,  # r,
-        'PROFILE_START_DATE_HH_MM': 33,  # r,
-        'PROFILE_STOP_DATE_HH_MM': 36,  # r,
-        'PROFILE_START_STEP': 37,  # r/w,
-        'PROFILE_CURRENT_STEP': 38,  # r,
-        'PROFILE_LAST_STEP': 39,  # r,
-        'PROFILE_TIME_LEFT_IN_CURRENT_STEP_HHH': 40,  # r,
-        'PROFILE_TIME_LEFT_IN_CURRENT_STEP_MM_SS': 41,  # r,
-        'PROFILE_WAIT_FOR_STATUS': 42,  # r,
-        'PROFILE_WAIT_FOR_SETPOINT': 43,  # r,
-        'PROFILE_CURRENT_JUMP_STEP': 44,  # r,
-        'PROFILE_JUMPS_REMAINING_IN_CURRENT_STEP': 45,  # r,
-        'PROFILE_LOOP_1_TARGET_SETPOINT': 46,  # r,
-        'PROFILE_LOOP_2_TARGET_SETPOINT': 47,  # r,
-        'PROFILE_LOOP_3_TARGET_SETPOINT': 48,  # r,
-        'PROFILE_LOOP_4_TARGET_SETPOINT': 49,  # r,
-        'PROFILE_LOOP_5_TARGET_SETPOINT': 50,  # r,
-        'PROFILE_LAST_JUMP_FROM_STEP': 51,  # r,
-        'PROFILE_LAST_JUMP_TO_STEP': 52,  # r,
-        'PROFILE_TOTAL_JUMPS_MADE': 53,  # r,
-        'ALARM_ACKNOWLEDGE': 54,  # w,
-        'EZT570I_ALARM_STATUS': 55,  # r,
-        'INPUT_ALARM_STATUS': 56,  # r,
-        'CHAMBER_ALARM_STATUS': 57,  # r,
-        'REFRIGERATION_ALARM_STATUS': 58,  # r,
-        'SYSTEM_STATUS_MONITOR': 59,  # r,
-        'LOOP_1_SETPOINT': 60,  # r/w,
-        'LOOP_2_SETPOINT': 72,  # r/w,
-        'LOOP_3_SETPOINT': 84,  # r/w,
-        'LOOP_4_SETPOINT': 96,  # r/w,
-        'LOOP_5_SETPOINT': 108,  # r/w,
-        'LOOP_1_PROCESS_VALUE': 61,  # r,
-        'LOOP_2_PROCESS_VALUE': 73,  # r,
-        'LOOP_3_PROCESS_VALUE': 85,  # r,
-        'LOOP_4_PROCESS_VALUE': 97,  # r,
-        'LOOP_5_PROCESS_VALUE': 109,  # r,
-        'LOOP_1_PERCENT_OUTPUT': 62,  # r,
-        'LOOP_2_PERCENT_OUTPUT': 74,  # r,
-        'LOOP_3_PERCENT_OUTPUT': 86,  # r,
-        'LOOP_4_PERCENT_OUTPUT': 98,  # r,
-        'LOOP_5_PERCENT_OUTPUT': 110,  # r,
-        'LOOP_1_AUTOTUNE_STATUS': 63,  # r/w,
-        'LOOP_2_AUTOTUNE_STATUS': 75,  # r/w,
-        'LOOP_3_AUTOTUNE_STATUS': 87,  # r/w,
-        'LOOP_4_AUTOTUNE_STATUS': 99,  # r/w,
-        'LOOP_5_AUTOTUNE_STATUS': 111,  # r/w,
-        'LOOP_1_UPPER_SETPOINT_LIMIT': 64,  # r/w,
-        'LOOP_2_UPPER_SETPOINT_LIMIT': 76,  # r/w,
-        'LOOP_3_UPPER_SETPOINT_LIMIT': 88,  # r/w,
-        'LOOP_4_UPPER_SETPOINT_LIMIT': 100,  # r/w,
-        'LOOP_5_UPPER_SETPOINT_LIMIT': 112,  # r/w,
-        'LOOP_1_LOWER_SETPOINT_LIMIT': 65,  # r/w,
-        'LOOP_2_LOWER_SETPOINT_LIMIT': 77,  # r/w,
-        'LOOP_3_LOWER_SETPOINT_LIMIT': 89,  # r/w,
-        'LOOP_4_LOWER_SETPOINT_LIMIT': 101,  # r/w,
-        'LOOP_5_LOWER_SETPOINT_LIMIT': 113,  # r/w,
-        'LOOP_1_ALARM_TYPE': 66,  # r/w,
-        'LOOP_2_ALARM_TYPE': 78,  # r/w,
-        'LOOP_3_ALARM_TYPE': 90,  # r/w,
-        'LOOP_4_ALARM_TYPE': 102,  # r/w,
-        'LOOP_5_ALARM_TYPE': 114,  # r/w,
-        'LOOP_1_ALARM_MODE': 67,  # r/w,
-        'LOOP_2_ALARM_MODE': 79,  # r/w,
-        'LOOP_3_ALARM_MODE': 91,  # r/w,
-        'LOOP_4_ALARM_MODE': 103,  # r/w,
-        'LOOP_5_ALARM_MODE': 115,  # r/w,
-        'LOOP_1_ALARM_OUTPUT_ASSIGNMENT': 68,  # r/w,
-        'LOOP_2_ALARM_OUTPUT_ASSIGNMENT': 80,  # r/w,
-        'LOOP_3_ALARM_OUTPUT_ASSIGNMENT': 92,  # r/w,
-        'LOOP_4_ALARM_OUTPUT_ASSIGNMENT': 104,  # r/w,
-        'LOOP_5_ALARM_OUTPUT_ASSIGNMENT': 116,  # r/w,
-        'LOOP_1_HIGH_ALARM_SETPOINT': 69,  # r/w,
-        'LOOP_2_HIGH_ALARM_SETPOINT': 81,  # r/w,
-        'LOOP_3_HIGH_ALARM_SETPOINT': 93,  # r/w,
-        'LOOP_4_HIGH_ALARM_SETPOINT': 105,  # r/w,
-        'LOOP_5_HIGH_ALARM_SETPOINT': 117,  # r/w,
-        'LOOP_1_LOW_ALARM_SETPOINT': 70,  # r/w,
-        'LOOP_2_LOW_ALARM_SETPOINT': 82,  # r/w,
-        'LOOP_3_LOW_ALARM_SETPOINT': 94,  # r/w,
-        'LOOP_4_LOW_ALARM_SETPOINT': 106,  # r/w,
-        'LOOP_5_LOW_ALARM_SETPOINT': 118,  # r/w,
-        'LOOP_1_ALARM_HYSTERESIS': 71,  # r/w,
-        'LOOP_2_ALARM_HYSTERESIS': 83,  # r/w,
-        'LOOP_3_ALARM_HYSTERESIS': 95,  # r/w,
-        'LOOP_4_ALARM_HYSTERESIS': 107,  # r/w,
-        'LOOP_5_ALARM_HYSTERESIS': 119,  # r/w,
-        'MONITOR_INPUT_1_PROCESS_VALUE': 120,  # r,
-        'MONITOR_INPUT_2_PROCESS_VALUE': 127,  # r,
-        'MONITOR_INPUT_3_PROCESS_VALUE': 134,  # r,
-        'MONITOR_INPUT_4_PROCESS_VALUE': 141,  # r,
-        'MONITOR_INPUT_5_PROCESS_VALUE': 148,  # r,
-        'MONITOR_INPUT_6_PROCESS_VALUE': 155,  # r,
-        'MONITOR_INPUT_7_PROCESS_VALUE': 162,  # r,
-        'MONITOR_INPUT_8_PROCESS_VALUE': 169,  # r,
-        'MONITOR_INPUT_1_ALARM_TYPE': 121,  # r/w
-        'MONITOR_INPUT_2_ALARM_TYPE': 128,  # r/w
-        'MONITOR_INPUT_3_ALARM_TYPE': 135,  # r/w
-        'MONITOR_INPUT_4_ALARM_TYPE': 142,  # r/w
-        'MONITOR_INPUT_5_ALARM_TYPE': 149,  # r/w
-        'MONITOR_INPUT_6_ALARM_TYPE': 156,  # r/w
-        'MONITOR_INPUT_7_ALARM_TYPE': 163,  # r/w
-        'MONITOR_INPUT_8_ALARM_TYPE': 170,  # r/w
-        'MONITOR_INPUT_1_ALARM_MODE': 122,  # r/w
-        'MONITOR_INPUT_2_ALARM_MODE': 129,  # r/w
-        'MONITOR_INPUT_3_ALARM_MODE': 136,  # r/w
-        'MONITOR_INPUT_4_ALARM_MODE': 143,  # r/w
-        'MONITOR_INPUT_5_ALARM_MODE': 150,  # r/w
-        'MONITOR_INPUT_6_ALARM_MODE': 157,  # r/w
-        'MONITOR_INPUT_7_ALARM_MODE': 164,  # r/w
-        'MONITOR_INPUT_8_ALARM_MODE': 171,  # r/w
-        'MONITOR_INPUT_1_ALARM_OUTPUT_ASSIGNMENT': 123,  # r/w
-        'MONITOR_INPUT_2_ALARM_OUTPUT_ASSIGNMENT': 130,  # r/w
-        'MONITOR_INPUT_3_ALARM_OUTPUT_ASSIGNMENT': 137,  # r/w
-        'MONITOR_INPUT_4_ALARM_OUTPUT_ASSIGNMENT': 144,  # r/w
-        'MONITOR_INPUT_5_ALARM_OUTPUT_ASSIGNMENT': 151,  # r/w
-        'MONITOR_INPUT_6_ALARM_OUTPUT_ASSIGNMENT': 158,  # r/w
-        'MONITOR_INPUT_7_ALARM_OUTPUT_ASSIGNMENT': 165,  # r/w
-        'MONITOR_INPUT_8_ALARM_OUTPUT_ASSIGNMENT': 172,  # r/w
-        'MONITOR_INPUT_1_HIGH_ALARM_SETPOINT': 124,  # r/w,
-        'MONITOR_INPUT_2_HIGH_ALARM_SETPOINT': 131,  # r/w,
-        'MONITOR_INPUT_3_HIGH_ALARM_SETPOINT': 138,  # r/w,
-        'MONITOR_INPUT_4_HIGH_ALARM_SETPOINT': 145,  # r/w,
-        'MONITOR_INPUT_5_HIGH_ALARM_SETPOINT': 152,  # r/w,
-        'MONITOR_INPUT_6_HIGH_ALARM_SETPOINT': 159,  # r/w,
-        'MONITOR_INPUT_7_HIGH_ALARM_SETPOINT': 166,  # r/w,
-        'MONITOR_INPUT_8_HIGH_ALARM_SETPOINT': 173,  # r/w,
-        'MONITOR_INPUT_1_LOW_ALARM_SETPOINT': 125,  # r/w,
-        'MONITOR_INPUT_2_LOW_ALARM_SETPOINT': 132,  # r/w,
-        'MONITOR_INPUT_3_LOW_ALARM_SETPOINT': 139,  # r/w,
-        'MONITOR_INPUT_4_LOW_ALARM_SETPOINT': 146,  # r/w,
-        'MONITOR_INPUT_5_LOW_ALARM_SETPOINT': 153,  # r/w,
-        'MONITOR_INPUT_6_LOW_ALARM_SETPOINT': 160,  # r/w,
-        'MONITOR_INPUT_7_LOW_ALARM_SETPOINT': 167,  # r/w,
-        'MONITOR_INPUT_8_LOW_ALARM_SETPOINT': 174,  # r/w,
-        'MONITOR_INPUT_1_ALARM_HYSTERESIS': 126,  # r/w,
-        'MONITOR_INPUT_2_ALARM_HYSTERESIS': 133,  # r/w,
-        'MONITOR_INPUT_3_ALARM_HYSTERESIS': 140,  # r/w,
-        'MONITOR_INPUT_4_ALARM_HYSTERESIS': 147,  # r/w,
-        'MONITOR_INPUT_5_ALARM_HYSTERESIS': 154,  # r/w,
-        'MONITOR_INPUT_6_ALARM_HYSTERESIS': 161,  # r/w,
-        'MONITOR_INPUT_7_ALARM_HYSTERESIS': 168,  # r/w,
-        'MONITOR_INPUT_8_ALARM_HYSTERESIS': 175,  # r/w,
-        'PROFILE_STEP_TIME_ADJUSTMENT': 179,  # w,
-        'EZT570I_OFFLINE_DOWNLOAD_PROFILE': 180  # r,
-    }
 
     def encode_set_value(self, name, value):
         """
@@ -394,12 +396,12 @@ class ChamberCommandRegisters(object):
         return response
 
     def reg_value_to_name(self, search_reg):
-        for name, reg in self.ctrl.iteritems():
+        for name, reg in ctrl_registers.iteritems():
             if reg == search_reg:
                 return name
 
     def name_to_reg(self, search_name):
-        return self.ctrl.get(search_name)
+        return ctrl_registers.get(search_name)
 
     def get_loop_autotune_status(self, name, value):
 

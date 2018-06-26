@@ -46,7 +46,7 @@ class Chamber(object):
         'CLOCK_HH_MM': 3,  # r, Clock (Hours, Min)
         'CLOCK_SEC': 4,  # r, Clock (Seconds)
         """
-        value = self.ccomm.read_registers(self.creg.ctrl[ 'CLOCK_YY_MM'], 4)
+        value = self.ccomm.read_registers(self.creg.ctrl_registers['CLOCK_YY_MM'], 4)
         # Break into 4x 2 byte chunks
         yy_mm, day_doe, hh_mm, sec = memoryview(value).cast('H')
         # split into 1 byte parts
