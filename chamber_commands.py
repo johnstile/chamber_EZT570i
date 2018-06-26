@@ -57,6 +57,53 @@ state_get_loop_autotune_status = {
     4: 'cancel autotune'
 }
 
+state_get_loop_alarm_type = {
+    0: 'Alarm Off',
+    3: 'Porcess High',
+    5: 'Process Low',
+    7: 'Process Both',
+    24: 'Deviation High',
+    40: 'Deviation Low',
+    56: 'Deviation Both'
+}
+
+state_get_loop_alarm_output_assignment = {
+    0: 'No Output Selected',
+    1: 'Digital Output (Customer Event) 1 Selected',
+    2: 'Digital Output (Customer Event) 2 Selected',
+    4: 'Digital Output (Customer Event) 3 Selected',
+    8: 'Digital Output (Customer Event) 4 Selected',
+    16: 'Digital Output (Customer Event) 5 Selected',
+    32: 'Digital Output (Customer Event) 6 Selected',
+    64: 'Digital Output (Customer Event) 7 Selected',
+    128: 'Digital Output (Customer Event) 8 Selected',
+    256: 'Digital Output (Customer Event) 9 Selected',
+    512: 'Digital Output (Customer Event) 10 Selected',
+    1024: 'Digital Output (Customer Event) 11 Selected',
+    2048: 'Digital Output (Customer Event) 12 Selected',
+    4096: 'Digital Output (Customer Event) 13 Selected',
+    8192: 'Digital Output (Customer Event) 14 Selected',
+    16384: 'Digital Output (Customer Event) 15 Selected'
+}
+
+state_profile_wait_for_status = {
+    0: 'Not Waiting',
+    1: 'Input 1',
+    2: 'Input 2',
+    4: 'Input 3',
+    8: 'Input 4',
+    16: 'Input 5',
+    32: 'Input 6',
+    64: 'Input 7',
+    128: 'Input 8',
+    256: 'Input 9',
+    512: 'Input 10',
+    1024: 'Input 11',
+    2048: 'Input 12',
+    4096: 'Input 13',
+    8192: 'Digital Input'
+}
+
 state_profile_control_status = {
     0: 'stop/off',
     1: 'stop/all off',
@@ -83,6 +130,13 @@ state_condensation_control_monitor_mode = {
     2: "Use Lowest Input",
     4: "Use Highest Input",
     8: "Use Average of all Inputs"
+}
+
+state_get_monitor_input_alarm_type = {
+    0: 'Alarm Off',
+    3: 'Process High',
+    5: 'Process Low',
+    7: 'Process Both'
 }
 
 class ChamberCommandRegisters(object):
@@ -352,28 +406,37 @@ class ChamberCommandRegisters(object):
         s = state_get_loop_autotune_status.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
+
+    def set_loop_autotune_status(self, value):
+
+        value = value.lower()
+        for mode_state, mode_name in state_get_loop_autotune_status.iteritems():
+            if mode_name == value:
+                return mode_state
+        return "NOMATCH"
+
     def get_loop_alarm_type(self, name, value):
-        state = {
-            0: 'Alarm Off',
-            3: 'Porcess High',
-            5: 'Process Low',
-            7: 'Process Both',
-            24: 'Deviation High',
-            40: 'Deviation Low',
-            56: 'Deviation Both'
-        }
-        s = state.get(value, "{} Not specified in API".format(value))
+
+        s = state_get_loop_alarm_type.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
+    def set_loop_alarm_type(self, value):
+        value = value.lower()
+        for mode_state, mode_name in state_get_loop_alarm_type.iteritems():
+            if mode_name == value:
+                return mode_state
+        return "NOMATCH"
+
     def get_monitor_input_alarm_type(self, name, value):
-        state = {
-            0: 'Alarm Off',
-            3: 'Process High',
-            5: 'Process Low',
-            7: 'Process Both'
-        }
-        s = state.get(value, "{} Not specified in API".format(value))
+        s = state_get_monitor_input_alarm_type.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
+
+    def set_monitor_input_alarm_type(self, value):
+        value = value.lower()
+        for mode_state, mode_name in state_get_monitor_input_alarm_type.iteritems():
+            if mode_name == value:
+                return mode_state
+        return "NOMATCH"
 
     def get_signed_int_tens_decimal(self, name, value):
         """
@@ -412,26 +475,15 @@ class ChamberCommandRegisters(object):
         return name, "status:{}".format(response)
 
     def get_loop_alarm_output_assignment(self, name, value):
-        state = {
-            0: 'No Output Selected',
-            1: 'Digital Output (Customer Event) 1 Selected',
-            2: 'Digital Output (Customer Event) 2 Selected',
-            4: 'Digital Output (Customer Event) 3 Selected',
-            8: 'Digital Output (Customer Event) 4 Selected',
-            16: 'Digital Output (Customer Event) 5 Selected',
-            32: 'Digital Output (Customer Event) 6 Selected',
-            64: 'Digital Output (Customer Event) 7 Selected',
-            128: 'Digital Output (Customer Event) 8 Selected',
-            256: 'Digital Output (Customer Event) 9 Selected',
-            512: 'Digital Output (Customer Event) 10 Selected',
-            1024: 'Digital Output (Customer Event) 11 Selected',
-            2048: 'Digital Output (Customer Event) 12 Selected',
-            4096: 'Digital Output (Customer Event) 13 Selected',
-            8192: 'Digital Output (Customer Event) 14 Selected',
-            16384: 'Digital Output (Customer Event) 15 Selected'
-        }
-        s = state.get(value, "{} Not specified in API".format(value))
+        s = state_get_loop_alarm_output_assignment.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
+
+    def set_loop_alarm_output_assignment(self, value):
+        value = value.lower()
+        for mode_state, mode_name in state_get_loop_alarm_output_assignment.iteritems():
+            if mode_name == value:
+                return mode_state
+        return "NOMATCH"
 
     def get_loop_alarm_mode(self, name, value):
         bit_array = self.bitfield(value)
@@ -452,12 +504,23 @@ class ChamberCommandRegisters(object):
             1: 'Chamber Shuts Down On Alarm'
         }
         response = {
-            'Step': bit0[bit_array[0]],
-            'Door': bit1[bit_array[1]],
-            'Audible': bit4[bit_array[4]],
-            'Profile': bit5[bit_array[5]]
+            'step': bit0[bit_array[0]],
+            'door': bit1[bit_array[1]],
+            'audible': bit4[bit_array[4]],
+            'profile': bit5[bit_array[5]]
         }
         return name, ("status:{}").format(response)
+
+    def set_loop_alarm_mode(self, value):
+        # TODO: Figure out what to do here.
+        # TODO: Takes in what we return above.
+        # Packs into ctypes.struct and returns.
+        assert 'step' in value \
+            and 'door' in value \
+            and 'audible' in value \
+            and 'profile' in value
+
+        return 0
 
     def get_loop_percent_output(self, name, value):
         """
@@ -465,6 +528,13 @@ class ChamberCommandRegisters(object):
         """
         response = value / 100
         return name, "%out:{}".format(response)
+
+    def set_loop_percent_output(self, value):
+        """
+        -10000 – 10000 (-100.00 – 100.00)
+        """
+        response = value * 100
+        return response
 
     def get_minutes(self, name, value):
         """
@@ -843,24 +913,7 @@ class ChamberCommandRegisters(object):
         return name, "Minute:{}, Seconds:{}".format(minutes, seconds)
 
     def profile_wait_for_status(self, name, value):
-        state = {
-            0:    'Not Waiting',
-            1:    'Input 1',
-            2:    'Input 2',
-            4:    'Input 3',
-            8:    'Input 4',
-            16:   'Input 5',
-            32:   'Input 6',
-            64:   'Input 7',
-            128:  'Input 8',
-            256:  'Input 9',
-            512:  'Input 10',
-            1024: 'Input 11',
-            2048: 'Input 12',
-            4096: 'Input 13',
-            8192: 'Digital Input'
-        }
-        s = state.get(value, "{} Not specified in API".format(value))
+        s = state_profile_wait_for_status.get(value, "{} Not specified in API".format(value))
         return name, "Status:{}".format(s)
 
     def profile_wait_for_setpoint(self, name, value):
@@ -1020,182 +1073,362 @@ class ChamberCommandRegisters(object):
     def loop_1_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_1_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_2_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_2_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_3_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_3_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_4_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_4_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_5_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_5_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_1_process_value(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_1_process_value(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_2_process_value(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_2_process_value(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_3_process_value(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_3_process_value(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_4_process_value(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_4_process_value(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_5_process_value(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_5_process_value(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_1_percent_output(self, name, value):
         return self.get_loop_percent_output(name, value)
 
+    def set_loop_1_percent_output(self, value):
+        return self.set_loop_percent_output(value)
+
     def loop_2_percent_output(self, name, value):
         return self.get_loop_percent_output(name, value)
+
+    def set_loop_2_percent_output(self, value):
+        return self.set_loop_percent_output(value)
 
     def loop_3_percent_output(self, name, value):
         return self.get_loop_percent_output(name, value)
 
+    def set_loop_3_percent_output(self, value):
+        return self.set_loop_percent_output(value)
+
     def loop_4_percent_output(self, name, value):
         return self.get_loop_percent_output(name, value)
+
+    def set_loop_4_percent_output(self, value):
+        return self.set_loop_percent_output(value)
 
     def loop_5_percent_output(self, name, value):
         return self.get_loop_percent_output(name, value)
 
+    def set_loop_5_percent_output(self, value):
+        return self.set_loop_percent_output(value)
+
     def loop_1_autotune_status(self, name, value):
         return self.get_loop_autotune_status(name, value)
+
+    def set_loop_1_autotune_status(self, value):
+        return self.set_loop_autotune_status(value)
 
     def loop_2_autotune_status(self, name, value):
         return self.get_loop_autotune_status(name, value)
 
+    def set_loop_2_autotune_status(self, value):
+        return self.set_loop_autotune_status(value)
+
     def loop_3_autotune_status(self, name, value):
         return self.get_loop_autotune_status(name, value)
+
+    def set_loop_3_autotune_status(self, value):
+        return self.set_loop_autotune_status(value)
 
     def loop_4_autotune_status(self, name, value):
         return self.get_loop_autotune_status(name, value)
 
+    def set_loop_4_autotune_status(self, value):
+        return self.set_loop_autotune_status(value)
+
     def loop_5_autotune_status(self, name, value):
         return self.get_loop_autotune_status(name, value)
+
+    def set_loop_5_autotune_status(self, value):
+        return self.set_loop_autotune_status(value)
 
     def loop_1_upper_setpoint_limit(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_1_upper_setpoint_limit(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_2_upper_setpoint_limit(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_2_upper_setpoint_limit(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_3_upper_setpoint_limit(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_3_upper_setpoint_limit(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_4_upper_setpoint_limit(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_4_upper_setpoint_limit(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_5_upper_setpoint_limit(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_5_upper_setpoint_limit(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_1_lower_setpoint_limit(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_1_lower_setpoint_limit(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_2_lower_setpoint_limit(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_2_lower_setpoint_limit(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_3_lower_setpoint_limit(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_3_lower_setpoint_limit(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_4_lower_setpoint_limit(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_4_lower_setpoint_limit(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_5_lower_setpoint_limit(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_5_lower_setpoint_limit(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_1_alarm_type(self, name, value):
         return self.get_loop_alarm_type(name, value)
 
+    def set_loop_1_alarm_type(self, value):
+        return self.set_loop_alarm_type(value)
+
     def loop_2_alarm_type(self, name, value):
         return self.get_loop_alarm_type(name, value)
+
+    def set_loop_2_alarm_type(self, value):
+        return self.set_loop_alarm_type(value)
 
     def loop_3_alarm_type(self, name, value):
         return self.get_loop_alarm_type(name, value)
 
+    def set_loop_3_alarm_type(self, value):
+        return self.set_loop_alarm_type(value)
+
     def loop_4_alarm_type(self, name, value):
         return self.get_loop_alarm_type(name, value)
+
+    def set_loop_4_alarm_type(self, value):
+        return self.set_loop_alarm_type(value)
 
     def loop_5_alarm_type(self, name, value):
         return self.get_loop_alarm_type(name, value)
 
+    def set_loop_5_alarm_type(self, value):
+        return self.set_loop_alarm_type(value)
+
     def loop_1_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
+
+    def set_loop_1_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
 
     def loop_2_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
 
+    def set_loop_2_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
+
     def loop_3_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
+
+    def set_loop_3_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
 
     def loop_4_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
 
+    def set_loop_4_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
+
     def loop_5_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
+
+    def set_loop_5_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
 
     def loop_1_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
 
+    def set_loop_1_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
+
     def loop_2_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
+
+    def set_loop_2_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
 
     def loop_3_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
 
+    def set_loop_3_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
+
     def loop_4_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
+
+    def set_loop_4_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
 
     def loop_5_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
 
+    def set_loop_5_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
+
     def loop_1_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_1_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_2_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_2_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_3_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_3_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_4_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_4_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_5_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_5_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_1_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_1_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_2_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_2_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_3_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_3_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_4_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_4_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_5_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_5_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_1_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_1_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_2_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_2_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_3_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_3_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def loop_4_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_loop_4_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def loop_5_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_loop_5_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def monitor_input_1_process_value(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
@@ -1224,152 +1457,297 @@ class ChamberCommandRegisters(object):
     def monitor_input_1_alarm_type(self, name, value):
         return self.get_monitor_input_alarm_type(name, value)
 
+    def set_monitor_input_1_alarm_type(self, value):
+        return self.set_monitor_input_alarm_type(value)
+
     def monitor_input_2_alarm_type(self, name, value):
         return self.get_monitor_input_alarm_type(name, value)
+
+    def set_monitor_input_2_alarm_type(self, value):
+        return self.set_monitor_input_alarm_type(value)
 
     def monitor_input_3_alarm_type(self, name, value):
         return self.get_monitor_input_alarm_type(name, value)
 
+    def set_monitor_input_3_alarm_type(self, value):
+        return self.set_monitor_input_alarm_type(value)
+
     def monitor_input_4_alarm_type(self, name, value):
         return self.get_monitor_input_alarm_type(name, value)
+
+    def set_monitor_input_4_alarm_type(self, value):
+        return self.set_monitor_input_alarm_type(value)
 
     def monitor_input_5_alarm_type(self, name, value):
         return self.get_monitor_input_alarm_type(name, value)
 
+    def set_monitor_input_5_alarm_type(self, value):
+        return self.set_monitor_input_alarm_type(value)
+
     def monitor_input_6_alarm_type(self, name, value):
         return self.get_monitor_input_alarm_type(name, value)
+
+    def set_monitor_input_6_alarm_type(self, value):
+        return self.set_monitor_input_alarm_type(value)
 
     def monitor_input_7_alarm_type(self, name, value):
         return self.get_monitor_input_alarm_type(name, value)
 
+    def set_monitor_input_7_alarm_type(self, value):
+        return self.set_monitor_input_alarm_type(value)
+
     def monitor_input_8_alarm_type(self, name, value):
         return self.get_monitor_input_alarm_type(name, value)
+
+    def set_monitor_input_8_alarm_type(self, value):
+        return self.set_monitor_input_alarm_type(value)
 
     def monitor_input_1_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
 
+    def set_monitor_input_1_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
+
     def monitor_input_2_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
+
+    def set_monitor_input_2_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
 
     def monitor_input_3_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
 
+    def set_monitor_input_3_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
+
     def monitor_input_4_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
+
+    def set_monitor_input_4_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
 
     def monitor_input_5_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
 
+    def set_monitor_input_5_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
+
     def monitor_input_6_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
+
+    def set_monitor_input_6_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
 
     def monitor_input_7_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
 
+    def set_monitor_input_7_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
+
     def monitor_input_8_alarm_mode(self, name, value):
         return self.get_loop_alarm_mode(name, value)
+
+    def set_monitor_input_8_alarm_mode(self, value):
+        return self.set_loop_alarm_mode(value)
 
     def monitor_input_1_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
 
+    def set_monitor_input_1_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
+
     def monitor_input_2_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
+
+    def set_monitor_input_2_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
 
     def monitor_input_3_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
 
+    def set_monitor_input_3_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
+
     def monitor_input_4_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
+
+    def set_monitor_input_4_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
 
     def monitor_input_5_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
 
+    def set_monitor_input_5_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
+
     def monitor_input_6_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
+
+    def set_monitor_input_6_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
 
     def monitor_input_7_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
 
+    def set_monitor_input_7_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
+
     def monitor_input_8_alarm_output_assignment(self, name, value):
         return self.get_loop_alarm_output_assignment(name, value)
+
+    def set_monitor_input_8_alarm_output_assignment(self, value):
+        return self.set_loop_alarm_output_assignment(value)
 
     def monitor_input_1_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_monitor_input_1_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def monitor_input_2_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_monitor_input_2_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def monitor_input_3_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_monitor_input_3_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def monitor_input_4_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_monitor_input_4_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def monitor_input_5_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_monitor_input_5_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def monitor_input_6_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_monitor_input_6_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def monitor_input_7_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_monitor_input_7_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def monitor_input_8_high_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_monitor_input_8_high_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def monitor_input_1_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_monitor_input_1_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def monitor_input_2_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_monitor_input_2_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def monitor_input_3_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_monitor_input_3_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def monitor_input_4_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_monitor_input_4_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def monitor_input_5_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_monitor_input_5_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def monitor_input_6_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_monitor_input_6_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def monitor_input_7_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_monitor_input_7_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def monitor_input_8_low_alarm_setpoint(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_monitor_input_8_low_alarm_setpoint(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def monitor_input_1_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_monitor_input_1_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def monitor_input_2_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_monitor_input_2_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def monitor_input_3_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_monitor_input_3_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def monitor_input_4_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_monitor_input_4_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def monitor_input_5_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_monitor_input_5_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def monitor_input_6_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
+
+    def set_monitor_input_6_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
 
     def monitor_input_7_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
+    def set_monitor_input_7_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
     def monitor_input_8_alarm_hysteresis(self, name, value):
         return self.get_signed_int_tens_decimal(name, value)
 
-    def profile_step_time_adjustment(self,name, value):
+    def set_monitor_input_8_alarm_hysteresis(self, value):
+        return self.set_signed_int_tens_decimal(value)
+
+    def set_profile_step_time_adjustment(self, value):
         """
         0 – 32767 minutes
         """
-        return name, "minute:{}".format(value)
+        assert 0 <= value <= 32767
+        return value
 
     def ezt570i_offline_download_profile(self,name, value):
         state = {
