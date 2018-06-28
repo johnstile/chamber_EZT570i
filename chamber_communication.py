@@ -646,8 +646,6 @@ class CRCError(Exception):
     pass
 
 
-
-
 if __name__ == '__main__':
     # --------------------
     # Logging setup

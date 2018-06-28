@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """EZT570i Command Register Reference
-Translate between human and modbus register <=> names, and values <=> meaning
-Used in Read Registers Command (0x03) for multi register read.
-Used in Write Register Commnad (0x06) for single register write.
+Translate between packed modbus and register <=> unpacked human readable names, and values
+Not all registers have getters and setters.
 """
 
 import sys
@@ -775,7 +774,7 @@ def condensation_control_input_selection(name, value):
 
 def set_condensation_control_input_selection(value):
     # TODO
-    pass
+    value
 
 
 def condensation_control_temperatore_ramp_rate_limit(name, value):

@@ -10,7 +10,7 @@ Python API to control EZT570i environmental chamber
  modbus_packets.py: Classes represent ModBus Packets
  chamber_communication.py: implement read, write, and profile upload
  chamber_commands.py: translate between packed values (for talking to chamber) <=> unpacked values (for talking to human).  
- chamber_control.py: main entry point into using this system.
+ chamber_control.py: Example program, with functional convenience methods.
  output.txt: output from running chamber_control.py
 ```
 

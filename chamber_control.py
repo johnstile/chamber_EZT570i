@@ -1,20 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """EZT570i Command Register Reference"""
-import binascii
 import logging
-
-import ctypes
-import sys
 import time
-
-import os
-import struct
 from copy import copy
 
 import chamber_commands
 import chamber_communication
-import modbus_packets
 
 class Chamber(object):
     """"""
