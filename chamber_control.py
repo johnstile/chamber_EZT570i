@@ -45,7 +45,7 @@ class Chamber(object):
         'CLOCK_HH_MM': 3,  # r, Clock (Hours, Min)
         'CLOCK_SEC': 4,  # r, Clock (Seconds)
         """
-        value = self.ccomm.read_registers(self.creg.ctrl_registers['CLOCK_YY_MM'], 4)
+        value = self.ccomm.read_registers(chamber_commands.name_to_reg('CLOCK_YY_MM'), 4)
         # Break into 4x 2 byte chunks
         yy_mm, day_doe, hh_mm, sec = memoryview(value).cast('H')
         # split into 1 byte parts
@@ -156,16 +156,16 @@ def main():
     project_file = 'GALAXY.txt'
     chamber.ccomm.load_profile(project_file)
     chamber.start_profile()
-
+    
     # Toggle light
     chamber.light('on')
     chamber.light('off')
     chamber.light('on')
     chamber.light('off')
-
-    time.sleep(5) 
+    
+    time.sleep(5)
     chamber.stop_profile()
-
+    
     # Toggle light
     chamber.light('on')
     chamber.light('off')
@@ -173,7 +173,7 @@ def main():
     chamber.light('off')
 
     # List all the readable registers
-    start_reg = chamber.creg.name_to_reg('OPERATIONAL_MODE')
+    start_reg = chamber_commands.name_to_reg('OPERATIONAL_MODE')
     quantity_of_reg = 200
     values = chamber.ccomm.read_registers(start_reg, quantity_of_reg)
     log.debug("Modbus Response:{}".format(values))
