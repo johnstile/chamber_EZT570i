@@ -423,7 +423,7 @@ def name_to_reg(search_name):
 def get_loop_autotune_status(name, value):
 
     s = state_get_loop_autotune_status.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def set_loop_autotune_status(value):
@@ -438,7 +438,7 @@ def set_loop_autotune_status(value):
 def get_loop_alarm_type(name, value):
 
     s = state_get_loop_alarm_type.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def set_loop_alarm_type(value):
@@ -451,7 +451,7 @@ def set_loop_alarm_type(value):
 
 def get_monitor_input_alarm_type(name, value):
     s = state_get_monitor_input_alarm_type.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def set_monitor_input_alarm_type(value):
@@ -467,7 +467,7 @@ def get_signed_int_tens_decimal(name, value):
      -32768 – 32767 (-3276.8 – 3276.7)
      """
     response = value / 10
-    return name, "degrees:{:.1f}".format(float(response))
+    return name, {'degrees': float(response)}
 
 
 def set_signed_int_tens_decimal(value):
@@ -498,12 +498,12 @@ def get_event_control(name, value):
         'Event 14': state_alarm[bit_array[13]],
         'Event 15': state_alarm[bit_array[14]]
     }
-    return name, "status:{}".format(response)
+    return name, response
 
 
 def get_loop_alarm_output_assignment(name, value):
     s = state_get_loop_alarm_output_assignment.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def set_loop_alarm_output_assignment(value):
@@ -538,7 +538,7 @@ def get_loop_alarm_mode(name, value):
         'audible': bit4[bit_array[4]],
         'profile': bit5[bit_array[5]]
     }
-    return name, "status:{}".format(response)
+    return name, response
 
 
 def set_loop_alarm_mode(value):
@@ -587,7 +587,7 @@ def set_minutes(value):
 
 def operational_mode(name, value):
     s = state_on_off.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def clock_yy_mm(name, value):
@@ -598,7 +598,7 @@ def clock_yy_mm(name, value):
     b_year, b_month = int_to_two_bytes(value & 0xFFFF)
     year = struct.unpack('B', b_year)[0]
     month = struct.unpack('B', b_month)[0]
-    return name, "year: 20{}, month:{}".format(year, month)
+    return name, {'year': int("20{:02d}".format(year)), 'month':month}
 
 
 def clock_day_dow(name, value):
@@ -609,7 +609,7 @@ def clock_day_dow(name, value):
     b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
     dom = struct.unpack('B', b_dom)[0]
     dow = struct.unpack('B', b_dow)[0]
-    return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
+    return name, {'dom':dom, 'dow': dow}
 
 
 def clock_hh_mm(name, value):
@@ -620,19 +620,35 @@ def clock_hh_mm(name, value):
     b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
     hour = struct.unpack('B', b_hour)[0]
     minutes = struct.unpack('B', b_minutes)[0]
-    return name, "Hour:{}, Minute:{}".format(hour, minutes)
+    return name, {'hour':hour, 'minutes':minutes}
 
+def clock_mm_ss(name, value):
+    """
+    high byte: Minutes: 0 to 59
+    low byte: Seconds: 0 to 59
+    """
+    b_minutes, b_seconds = int_to_two_bytes(value & 0xFFFF)
+    minutes = struct.unpack('B', b_minutes)[0]
+    seconds = struct.unpack('B', b_seconds)[0]
+    return name, {'minutes': minutes, 'seconds': seconds}
+
+
+def clock_hours(name, value):
+    """
+    2 bytes: seconds: 0 to 59
+    """
+    return name, {'hours': value}
 
 def clock_sec(name, value):
     """
     2 bytes: seconds: 0 to 59
     """
-    return name, "Seconds:{}".format(value)
+    return name, {'seconds': value}
 
 
 def power_recovery_mode(name, value):
     s = state_power_recovery_mode.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def set_power_recovery_mode(value):
@@ -660,7 +676,7 @@ def set_power_out_time(value):
 
 def defrost_operating_mode(name, value):
     s = state_defrost_operating_mode.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def set_defrost_operating_mode(value):
@@ -694,7 +710,7 @@ def defrost_status(name, value):
         3: 'In Prechill'
     }
     s = state.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def time_remaining_until_next_defrost(name, value):
@@ -703,7 +719,7 @@ def time_remaining_until_next_defrost(name, value):
 
 def product_control(name, value):
     s = state_product_control.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def set_product_control(value):
@@ -732,7 +748,7 @@ def set_product_control_lower_setpoint(value):
 
 def condensation_control(name, value):
     s = state_on_off.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def set_condensation_control(value):
@@ -745,7 +761,7 @@ def set_condensation_control(value):
 
 def condensation_control_monitor_mode(name, value):
     s = state_condensation_control_monitor_mode.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def set_condensation_control_monitor_mode(value):
@@ -795,7 +811,7 @@ def condensation_control_duepoint_actual(name, value):
 
 def chamber_light_control(name, value):
     s = state_on_off.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def set_chamber_light_control(value):
@@ -826,7 +842,7 @@ def set_customer_manual_event_control(value):
 
 def profile_control_status(name, value):
     s = state_profile_control_status.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def set_profile_control_status(value):
@@ -848,8 +864,7 @@ def set_profile_advance_step(value):
             return state_value
     return "NOMATCH"
 
-
-def profile_name_ch_1_2(name, value):
+def profile_name(name, value):
     """
     32 – 126 (high byte)
     32 – 126 (low byte)
@@ -857,51 +872,26 @@ def profile_name_ch_1_2(name, value):
     b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
     hch = struct.unpack('B', b_hch)[0]
     lch = struct.unpack('B', b_lch)[0]
-    return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+    return name, {'chR': str(unichr(hch)), 'chL': str(unichr(lch))}
+
+def profile_name_ch_1_2(name, value):
+    return profile_name(name, value)
 
 
 def profile_name_ch_3_4(name, value):
-    """
-    32 – 126 (high byte)
-    32 – 126 (low byte)
-    """
-    b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-    hch = struct.unpack('B', b_hch)[0]
-    lch = struct.unpack('B', b_lch)[0]
-    return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+    return profile_name(name, value)
 
 
 def profile_name_ch_5_6(name, value):
-    """
-    32 – 126 (high byte)
-    32 – 126 (low byte)
-    """
-    b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-    hch = struct.unpack('B', b_hch)[0]
-    lch = struct.unpack('B', b_lch)[0]
-    return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+    return profile_name(name, value)
 
 
 def profile_name_ch_7_8(name, value):
-    """
-    32 – 126 (high byte)
-    32 – 126 (low byte)
-    """
-    b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-    hch = struct.unpack('B', b_hch)[0]
-    lch = struct.unpack('B', b_lch)[0]
-    return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+    return profile_name(name, value)
 
 
 def profile_name_ch_9_10(name, value):
-    """
-    32 – 126 (high byte)
-    32 – 126 (low byte)
-    """
-    b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
-    hch = struct.unpack('B', b_hch)[0]
-    lch = struct.unpack('B', b_lch)[0]
-    return name, "{} {}".format(str(unichr(hch)), str(unichr(lch)))
+    return profile_name(name, value)
 
 
 def profile_start_date_yy_mm(name, value):
@@ -912,7 +902,7 @@ def profile_start_date_yy_mm(name, value):
     b_year, b_month = int_to_two_bytes(value & 0xFFFF)
     year = struct.unpack('B', b_year)[0]
     month = struct.unpack('B', b_month)[0]
-    return name, "year: 20{}, month:{}".format(year, month)
+    return name, {'year': int("20{:02d}".format(year)), 'month':month}
 
 
 def profile_stop_date_yy_mm(name, value):
@@ -923,8 +913,7 @@ def profile_stop_date_yy_mm(name, value):
     b_year, b_month = int_to_two_bytes(value & 0xFFFF)
     year = struct.unpack('B', b_year)[0]
     month = struct.unpack('B', b_month)[0]
-    return name, "year: 20{}, month:{}".format(year, month)
-
+    return name, {'year': int("20{:02d}".format(year)), 'month': month}
 
 def profile_start_date_day_dow(name, value):
     """
@@ -934,7 +923,7 @@ def profile_start_date_day_dow(name, value):
     b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
     dom = struct.unpack('B', b_dom)[0]
     dow = struct.unpack('B', b_dow)[0]
-    return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
+    return name, {'dom': dom, 'dow':dow}
 
 
 def profile_stop_date_day_dow(name, value):
@@ -945,7 +934,7 @@ def profile_stop_date_day_dow(name, value):
     b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
     dom = struct.unpack('B', b_dom)[0]
     dow = struct.unpack('B', b_dow)[0]
-    return name, "DayOfMonth:{}, DayOfWeek:{}".format(dom, dow)
+    return name, {'dom': dom, 'dow':dow}
 
 
 def profile_start_date_hh_mm(name, value):
@@ -956,7 +945,7 @@ def profile_start_date_hh_mm(name, value):
     b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
     hour = struct.unpack('B', b_hour)[0]
     minutes = struct.unpack('B', b_minutes)[0]
-    return name, "Hour:{}, Minute:{}".format(hour, minutes)
+    return name, {'hour': hour, 'minutes': minutes}
 
 
 def profile_stop_date_hh_mm(name, value):
@@ -967,7 +956,7 @@ def profile_stop_date_hh_mm(name, value):
     b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
     hour = struct.unpack('B', b_hour)[0]
     minutes = struct.unpack('B', b_minutes)[0]
-    return name, "Hour:{}, Minute:{}".format(hour, minutes)
+    return name, {'hour': hour, 'minutes': minutes}
 
 
 def profile_start_step(name, value):
@@ -1004,12 +993,12 @@ def profile_time_left_in_current_step_mm_ss(name, value):
     b_minutes, b_seconds = int_to_two_bytes(value & 0xFFFF)
     minutes = struct.unpack('B', b_minutes)[0]
     seconds = struct.unpack('B', b_seconds)[0]
-    return name, "Minute:{}, Seconds:{}".format(minutes, seconds)
+    return name, {'minutes': minutes, 'seconds': seconds}
 
 
 def profile_wait_for_status(name, value):
     s = state_profile_wait_for_status.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
 
 
 def profile_wait_for_setpoint(name, value):
@@ -1092,7 +1081,7 @@ def ezt570i_alarm_status(name, value):
         '(not assigned)': state_alarm[bit_array[13]],
         'Loop Communications Failure': state_alarm[bit_array[14]],
     }
-    return name, "status:{}".format(response)
+    return name, response
 
 
 def input_alarm_status(name, value):
@@ -1114,7 +1103,7 @@ def input_alarm_status(name, value):
         '(not assigned 1)': state_alarm[bit_array[13]],
         '(not assigned 2)': state_alarm[bit_array[14]]
     }
-    return name, "status:{}".format(response)
+    return name, response
 
 
 def chamber_alarm_status(name, value):
@@ -1136,7 +1125,7 @@ def chamber_alarm_status(name, value):
         'Power Failure': state_alarm[bit_array[13]],
         'Transfer Error': state_alarm[bit_array[14]],
     }
-    return name, "status:{}".format(response)
+    return name, response
 
 
 def refrigeration_alarm_status(name, value):
@@ -1158,7 +1147,7 @@ def refrigeration_alarm_status(name, value):
         'System B Floodback Monitor': state_alarm[bit_array[13]],
         '(not assigned) 4': state_alarm[bit_array[14]],
     }
-    return name, "status:{}".format(response)
+    return name, response
 
 
 def system_status_monitor(name, value):
@@ -1180,7 +1169,7 @@ def system_status_monitor(name, value):
         'Service Transfer Mechanism': state_alarm[bit_array[13]],
         '(not assigned) 4': state_alarm[bit_array[14]],
     }
-    return name, "status:{}".format(response)
+    return name, response
 
 
 def loop_1_setpoint(name, value):
@@ -2093,7 +2082,169 @@ def ezt570i_offline_download_profile(name, value):
         1: 'Offline/Downloading Profile'
     }
     s = state.get(value, "{} Not specified in API".format(value))
-    return name, "Status:{}".format(s)
+    return name, s
+
+# ---------------------------------------------
+# Profile stuff
+# ---------------------------------------------
+
+def get_autostart(value):
+    if value == 0:
+        response = "Off"
+    elif value == 1:
+        response = "Start by Date"
+    elif value == 2:
+        response = "Start by Day"
+    else:
+        response = None
+    return response
+
+def profile_step_guaranteed_soak_wait(name, value):
+    bit_array = bitfield(value)
+    response = {
+        'Guaranteed Soak Loop 1': state_alarm[bit_array[0]],
+        'Guaranteed Soak Loop 2': state_alarm[bit_array[1]],
+        'Guaranteed Soak Loop 3': state_alarm[bit_array[2]],
+        'Guaranteed Soak Loop 4': state_alarm[bit_array[3]],
+        'Guaranteed Soak Loop 5': state_alarm[bit_array[4]],
+        'Digial Input 1 Wait For': state_alarm[bit_array[5]],
+        'Digial Input 2 Wait For': state_alarm[bit_array[6]],
+        'Digial Input 3 Wait For': state_alarm[bit_array[7]],
+        'Digial Input 4 Wait For': state_alarm[bit_array[8]],
+        'Digial Input 5 Wait For': state_alarm[bit_array[9]],
+        'Digial Input 6 Wait For': state_alarm[bit_array[10]],
+        'Digial Input 7 Wait For': state_alarm[bit_array[11]],
+        'Digial Input 8 Wait For': state_alarm[bit_array[12]],
+    }
+    return name, response
+
+
+state_profile_wait_for_loop_event = {
+    0: 'Wait for Disabled (no loop selected)',
+    1: 'Loop 1 Selected',
+    2: 'Loop 2 Selected',
+    4: 'Loop 3 Selected',
+    8: 'Loop 4 Selected',
+    16: 'Loop 5 Selected'
+}
+
+def profile_wait_for_loop_event(name, value):
+    s = {
+        'value':
+        state_profile_wait_for_loop_event.get(value, "{} Not specified in API".format(value))
+    }
+    return name, s
+
+state_profile_wait_for_monitor_event = {
+    0: 'Wait for Disabled (no input selected)',
+    1: 'Monitor Input 1 Selected',
+    2: 'Monitor Input 2 Selected',
+    4: 'Monitor Input 3 Selected',
+    8: 'Monitor Input 4 Selected',
+    16: 'Monitor Input 5 Selected',
+    32: 'Monitor Input 6 Selected',
+    64: 'Monitor Input 7 Selected',
+    128: 'Monitor Input 8 Selected'
+}
+
+def profile_wait_for_monitor_event(name, value):
+    s = {
+         'value':
+         state_profile_wait_for_monitor_event.get(value, "{} Not specified in API".format(value))
+    }
+    return name, s
+
+
+def log_a_dict(header, my_dict):
+    """Uniform printing of dictinaries to log file
+    Pads and indents for eaiser viewing
+    Draws dots from the key to the value
+    sorts alphabetically"""
+    response_buffer = ""
+
+    spacing = 40
+    delimiter = '.'
+    alignment = '<'
+    #response_buffer += "{header}\n".format(header="=" * (spacing + 20))
+
+
+    for k, v in sorted(my_dict.iteritems()):
+        response_buffer += (
+            "\t{key:{delimiter}{alignment}{spacing}} {value}\n"
+        ).format(
+            key=k,
+            delimiter=delimiter,
+            alignment=alignment,
+            spacing=spacing,
+            value=v
+        )
+
+    #response_buffer += "{header}".format(header="=" * (spacing + 20))
+    return response_buffer
+
+#------------------------------------------
+# Profile Regisers
+#------------------------------------------
+
+class ProfileHeader(ctypes.BigEndianStructure):
+    """Used for display purposes
+    """
+    _pack_ = 1  # Do not align on word bountry, interfeers with debug logs
+    _fields_ = [
+        ("autostart", ctypes.c_uint16),
+        ("autostart_time_yy_mm", ctypes.c_uint16),
+        ("autostart_time_day_dow", ctypes.c_uint16),
+        ("autostart_time_hh_mm", ctypes.c_uint16),
+        ("profile_name_ch_1_2", ctypes.c_uint16),
+        ("profile_name_ch_3_4", ctypes.c_uint16),
+        ("profile_name_ch_5_6", ctypes.c_uint16),
+        ("profile_name_ch_7_8", ctypes.c_uint16),
+        ("profile_name_ch_9_10", ctypes.c_uint16),
+        ("total_number_of_steps_in_profile", ctypes.c_uint16),
+        ("guaranteed_soak_band_loop_1", ctypes.c_uint16),
+        ("guaranteed_soak_band_loop_2", ctypes.c_uint16),
+        ("guaranteed_soak_band_loop_3", ctypes.c_uint16),
+        ("guaranteed_soak_band_loop_4", ctypes.c_uint16),
+        ("guaranteed_soak_band_loop_5", ctypes.c_uint16),
+    ]
+
+    def __str__(self):
+        """human readable data"""
+        return (
+            (
+                "200: Auto:{}\n"
+                "201: Auto: {}\n"
+                "202: Auto: {}\n"
+                "203: Auto: {}\n"
+                "204: PROF: {}\n"
+                "205: PROF: {}\n"
+                "206: PROF: {}\n"
+                "207: PROF: {}\n"
+                "208: PROF: {}\n"
+                "209: Steps:{}\n"
+                "210: Loop: {}\n"
+                "211: Loop: {}\n"
+                "212: Loop: {}\n"
+                "213: Loop: {}\n"
+                "214: Loop: {}\n"
+            ).format(
+                get_autostart(self.autostart),
+                clock_yy_mm("", self.autostart_time_yy_mm)[1],
+                clock_day_dow("", self.autostart_time_day_dow)[1],
+                clock_hh_mm("", self.autostart_time_hh_mm)[1],
+                profile_name("Name:", self.profile_name_ch_1_2),
+                profile_name("Name:", self.profile_name_ch_3_4),
+                profile_name("Name:", self.profile_name_ch_5_6),
+                profile_name("Name:", self.profile_name_ch_7_8),
+                profile_name("Name:", self.profile_name_ch_9_10),
+                self.total_number_of_steps_in_profile,
+                get_signed_int_tens_decimal("Soak Loop 1", self.guaranteed_soak_band_loop_1),
+                get_signed_int_tens_decimal("Soak Loop 2", self.guaranteed_soak_band_loop_2),
+                get_signed_int_tens_decimal("Soak Loop 3", self.guaranteed_soak_band_loop_3),
+                get_signed_int_tens_decimal("Soak Loop 4", self.guaranteed_soak_band_loop_4),
+                get_signed_int_tens_decimal("Soak Loop 5", self.guaranteed_soak_band_loop_5)
+            )
+        )
 
 
 # Dictionary map bytes to function
@@ -2114,6 +2265,7 @@ ctrl_profile_headr_registers = {
     'GUARANTEED_SOAK_BAND_LOOP_4': 213,  # w,
     'GUARANTEED_SOAK_BAND_LOOP_5': 214,  # w,
 }
+
 
 
 def get_profile_step_regs(step):
@@ -2144,3 +2296,105 @@ def get_profile_step_regs(step):
         'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_4': 228 + offset,  # w,
         'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_5': 229 + offset,  # w,
     }
+
+
+class ProfileSteps(ctypes.BigEndianStructure):
+    """Used for display purposes
+    """
+    _pack_ = 1  # Do not align on word bountry, interfeers with debug logs
+    _fields_ = [
+        ("time_hours", ctypes.c_int16),
+        ("time_mm_ss", ctypes.c_int16),
+        ("chamber_events", ctypes.c_int16),
+        ("customer_events", ctypes.c_int16),
+        ("guaranteed", ctypes.c_int16),
+        ("wait_for_loop_events", ctypes.c_int16),
+        ("wait_for_monitor_events", ctypes.c_int16),
+        ("wait_for_setpoint", ctypes.c_int16),
+        ("jump_step_number", ctypes.c_int16),
+        ("jump_count", ctypes.c_int16),
+        ("target_setpoint_for_loop_1", ctypes.c_int16),
+        ("target_setpoint_for_loop_2", ctypes.c_int16),
+        ("target_setpoint_for_loop_3", ctypes.c_int16),
+        ("target_setpoint_for_loop_4", ctypes.c_int16),
+        ("target_setpoint_for_loop_5", ctypes.c_int16),
+    ]
+    def __init__(self, reg):
+        self.reg = reg
+
+    def __str__(self):
+        """human readable data"""
+        return (
+            (
+                "{}: time_hours:\n{}"
+                "{}: time_mm_ss:\n{}"
+                "{}: chamber_events:\n{}"
+                "{}: customer_events:\n{}"
+                "{}: guaranteed:\n{}"
+                "{}: wait_for_loop_events:\n{}"
+                "{}: wait_for_monitor_events:\n{}"
+                "{}: wait_for_setpoint:\n{}"
+                "{}: jump_step_number:{}\n"
+                "{}: jump_count:{}\n"
+                "{}: target_setpoint_for_loop_1:\n{}"
+                "{}: target_setpoint_for_loop_2:\n{}"
+                "{}: target_setpoint_for_loop_3:\n{}"
+                "{}: target_setpoint_for_loop_4:\n{}"
+                "{}: target_setpoint_for_loop_5:\n{}"
+            ).format(
+                self.reg, log_a_dict(
+                    "time_hours",
+                    clock_hours("", self.time_hours)[1]
+                ),
+                self.reg + 1, log_a_dict(
+                    "time_mm_ss",
+                    clock_mm_ss("", self.time_mm_ss)[1]
+                ),
+                self.reg + 2, log_a_dict(
+                    "chamber_events",
+                    get_event_control("", self.chamber_events)[1]
+                ),
+                self.reg + 3, log_a_dict(
+                    "customer_events",
+                    get_event_control("", self.customer_events)[1]
+                ),
+                self.reg + 4, log_a_dict(
+                    "soak",
+                    profile_step_guaranteed_soak_wait("", self.guaranteed)[1]
+                ),
+                self.reg + 5, log_a_dict(
+                    "wait_for_event",
+                    profile_wait_for_loop_event("", self.wait_for_loop_events)[1]
+                ),
+                self.reg + 6, log_a_dict(
+                    "waint_for_monitor",
+                    profile_wait_for_monitor_event("", self.wait_for_monitor_events)[1]
+                ),
+                self.reg + 7, log_a_dict(
+                    "wait_for_setpoint",
+                    profile_wait_for_monitor_event("", self.wait_for_setpoint)[1]
+                ),
+                self.reg + 8, self.jump_step_number,
+                self.reg + 9, self.jump_count,
+                self.reg + 10, log_a_dict(
+                    "",
+                    get_signed_int_tens_decimal("", self.target_setpoint_for_loop_1)[1]
+                ),
+                self.reg + 11, log_a_dict(
+                    "",
+                    get_signed_int_tens_decimal("", self.target_setpoint_for_loop_2)[1]
+                ),
+                self.reg + 12, log_a_dict(
+                    "",
+                    get_signed_int_tens_decimal("", self.target_setpoint_for_loop_3)[1]
+                ),
+                self.reg + 13, log_a_dict(
+                    "",
+                    get_signed_int_tens_decimal("", self.target_setpoint_for_loop_4)[1]
+                ),
+                self.reg + 14, log_a_dict(
+                   "",
+                    get_signed_int_tens_decimal("", self.target_setpoint_for_loop_5)[1]
+               ),
+            )
+        )

@@ -34,6 +34,7 @@ import logging  # for log facility
 import time
 
 import modbus_packets
+import chamber_commands
 
 
 def int_or_float(s):
@@ -291,6 +292,76 @@ class ChamberCommunication(object):
             )
         )
         return modbus_response
+
+    def print_profile(self, project_file):
+        self.log.info(
+            (
+                "\n"
+                "# =========================================\n"
+                "# PRINT PROFILE: {}\n"
+                "# ========================================="
+            ).format(
+                project_file
+            )
+        )
+        # Read file into list of profile steps
+        with open(project_file) as fh:
+
+            # Harvest the first line
+            profile_header = self.read_profile_lines(fh, 1)
+            self.log.info("Step:{}".format(profile_header))
+
+            # Load Header into cyptes.Structure
+            profile_header_bytes = struct.pack('!15H', *profile_header[0])
+            profile_header_struct = chamber_commands.ProfileHeader()
+            ctypes.memmove(
+                ctypes.addressof(profile_header_struct),
+                profile_header_bytes,
+                len(profile_header_bytes)
+            )
+            self.log.info("Profile Header:\n{}".format(profile_header_struct))
+
+            # Determine how many steps to read from file
+            steps_tot = profile_header[0][9]
+            self.log.info("Steps in Profile:{}".format(steps_tot))
+
+            # Read steps from file
+            profile_steps = self.read_profile_lines(fh, steps_tot)
+            self.log.info("Steps loaded:{}".format(len(profile_steps)))
+
+            register_start = 200  # First Register Address 0x00c8
+            registers_to_write = 15  # data registers per packet
+
+            for i, step in enumerate(profile_steps):
+                register_start += registers_to_write
+
+                # Load Steps into cyptes.Structure
+                profile_step_bytes = struct.pack('!15h', *step)
+                profile_step_struct = chamber_commands.ProfileSteps(register_start)
+                ctypes.memmove(
+                    ctypes.addressof(profile_step_struct),
+                    profile_step_bytes,
+                    len(profile_step_bytes)
+                )
+                self.log.info(
+                    (
+                        "\n=========================================\n"
+                        "Step:{}\n"
+                        "=========================================\n"
+                        "{}"
+                    ).format(
+                        i+1,
+                        profile_step_struct
+                    )
+                )
+
+
+        # Convert profile header+steps into list of modbus packets
+        modebus_packed_profile = self.profile_to_modbus_packets(
+            profile_header, profile_steps
+        )
+
+
 
     def load_profile(self, project_file):
         """

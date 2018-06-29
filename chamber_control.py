@@ -144,20 +144,25 @@ def main():
     chamber = Chamber(log, comm_type, comm_params)
     chamber.connect()
 
-    # Start the Galaxy profile
+    # File recovered from the chambers compact flash
     project_file = 'GALAXY.txt'
+
+    # Print the content of the profile
+    chamber.ccomm.print_profile(project_file)
+
+    # Start the Galaxy profile
     chamber.ccomm.load_profile(project_file)
     chamber.start_profile()
-    
+
     # Toggle light
     chamber.light('on')
     chamber.light('off')
     chamber.light('on')
     chamber.light('off')
-    
+
     time.sleep(5)
     chamber.stop_profile()
-    
+
     # Toggle light
     chamber.light('on')
     chamber.light('off')
