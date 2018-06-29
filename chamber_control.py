@@ -75,10 +75,27 @@ class Chamber(object):
         self.log.debug("Modbus Response:{}".format(values))
         self.print_read_registers(start_reg, values)
 
-    def stop_profile(self):
+    def stop_chamber(self):
         register, code = chamber_commands.encode_set_value('PROFILE_CONTROL_STATUS', 'stop/all off')
         self.ccomm.write_register(register, code)
         start_reg = chamber_commands.name_to_reg('PROFILE_CONTROL_STATUS')
+        quantity_of_reg = 1
+        values = self.ccomm.read_registers(start_reg, quantity_of_reg)
+        self.log.debug("Modbus Response:{}".format(values))
+        self.print_read_registers(start_reg, values)
+
+    def stop_profile(self):
+        register, code = chamber_commands.encode_set_value('PROFILE_CONTROL_STATUS', 'stop/off')
+        self.ccomm.write_register(register, code)
+        start_reg = chamber_commands.name_to_reg('PROFILE_CONTROL_STATUS')
+        quantity_of_reg = 1
+        values = self.ccomm.read_registers(start_reg, quantity_of_reg)
+        self.log.debug("Modbus Response:{}".format(values))
+        self.print_read_registers(start_reg, values)
+
+        register, code = chamber_commands.encode_set_value('LOOP_1_SETPOINT', 25)
+        self.ccomm.write_register(register, code)
+        start_reg = chamber_commands.name_to_reg('LOOP_1_SETPOINT')
         quantity_of_reg = 1
         values = self.ccomm.read_registers(start_reg, quantity_of_reg)
         self.log.debug("Modbus Response:{}".format(values))
@@ -161,7 +178,10 @@ def main():
     chamber.light('off')
 
     time.sleep(5)
+    # End current profile, leave chamber running at safe temp
     chamber.stop_profile()
+    # Stop current profile, and stop chamber
+    #chamber.stop_chamber()
 
     # Toggle light
     chamber.light('on')
