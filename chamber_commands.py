@@ -598,7 +598,7 @@ def clock_yy_mm(name, value):
     b_year, b_month = int_to_two_bytes(value & 0xFFFF)
     year = struct.unpack('B', b_year)[0]
     month = struct.unpack('B', b_month)[0]
-    return name, {'year': int("20{:02d}".format(year)), 'month':month}
+    return name, {'year': int("20{:02d}".format(year)), 'month': month}
 
 
 def clock_day_dow(name, value):
@@ -609,7 +609,7 @@ def clock_day_dow(name, value):
     b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
     dom = struct.unpack('B', b_dom)[0]
     dow = struct.unpack('B', b_dow)[0]
-    return name, {'dom':dom, 'dow': dow}
+    return name, {'dom': dom, 'dow': dow}
 
 
 def clock_hh_mm(name, value):
@@ -620,7 +620,8 @@ def clock_hh_mm(name, value):
     b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
     hour = struct.unpack('B', b_hour)[0]
     minutes = struct.unpack('B', b_minutes)[0]
-    return name, {'hour':hour, 'minutes':minutes}
+    return name, {'hour': hour, 'minutes': minutes}
+
 
 def clock_mm_ss(name, value):
     """
@@ -638,6 +639,7 @@ def clock_hours(name, value):
     2 bytes: seconds: 0 to 59
     """
     return name, {'hours': value}
+
 
 def clock_sec(name, value):
     """
@@ -864,6 +866,7 @@ def set_profile_advance_step(value):
             return state_value
     return "NOMATCH"
 
+
 def profile_name(name, value):
     """
     32 – 126 (high byte)
@@ -873,6 +876,7 @@ def profile_name(name, value):
     hch = struct.unpack('B', b_hch)[0]
     lch = struct.unpack('B', b_lch)[0]
     return name, {'chR': str(unichr(hch)), 'chL': str(unichr(lch))}
+
 
 def profile_name_ch_1_2(name, value):
     return profile_name(name, value)
@@ -902,7 +906,7 @@ def profile_start_date_yy_mm(name, value):
     b_year, b_month = int_to_two_bytes(value & 0xFFFF)
     year = struct.unpack('B', b_year)[0]
     month = struct.unpack('B', b_month)[0]
-    return name, {'year': int("20{:02d}".format(year)), 'month':month}
+    return name, {'year': int("20{:02d}".format(year)), 'month': month}
 
 
 def profile_stop_date_yy_mm(name, value):
@@ -915,6 +919,7 @@ def profile_stop_date_yy_mm(name, value):
     month = struct.unpack('B', b_month)[0]
     return name, {'year': int("20{:02d}".format(year)), 'month': month}
 
+
 def profile_start_date_day_dow(name, value):
     """
     high byte: Day of Month: 1 to 31
@@ -923,7 +928,7 @@ def profile_start_date_day_dow(name, value):
     b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
     dom = struct.unpack('B', b_dom)[0]
     dow = struct.unpack('B', b_dow)[0]
-    return name, {'dom': dom, 'dow':dow}
+    return name, {'dom': dom, 'dow': dow}
 
 
 def profile_stop_date_day_dow(name, value):
@@ -934,7 +939,7 @@ def profile_stop_date_day_dow(name, value):
     b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
     dom = struct.unpack('B', b_dom)[0]
     dow = struct.unpack('B', b_dow)[0]
-    return name, {'dom': dom, 'dow':dow}
+    return name, {'dom': dom, 'dow': dow}
 
 
 def profile_start_date_hh_mm(name, value):
@@ -2088,6 +2093,7 @@ def ezt570i_offline_download_profile(name, value):
 # Profile stuff
 # ---------------------------------------------
 
+
 def get_autostart(value):
     if value == 0:
         response = "Off"
@@ -2098,6 +2104,7 @@ def get_autostart(value):
     else:
         response = None
     return response
+
 
 def profile_step_guaranteed_soak_wait(name, value):
     bit_array = bitfield(value)
@@ -2128,12 +2135,14 @@ state_profile_wait_for_loop_event = {
     16: 'Loop 5 Selected'
 }
 
+
 def profile_wait_for_loop_event(name, value):
     s = {
         'value':
         state_profile_wait_for_loop_event.get(value, "{} Not specified in API".format(value))
     }
     return name, s
+
 
 state_profile_wait_for_monitor_event = {
     0: 'Wait for Disabled (no input selected)',
@@ -2147,6 +2156,7 @@ state_profile_wait_for_monitor_event = {
     128: 'Monitor Input 8 Selected'
 }
 
+
 def profile_wait_for_monitor_event(name, value):
     s = {
          'value':
@@ -2155,8 +2165,8 @@ def profile_wait_for_monitor_event(name, value):
     return name, s
 
 
-def log_a_dict(header, my_dict):
-    """Uniform printing of dictinaries to log file
+def log_a_dict(my_dict):
+    """Uniform printing of dictionaries to log file
     Pads and indents for eaiser viewing
     Draws dots from the key to the value
     sorts alphabetically"""
@@ -2165,8 +2175,7 @@ def log_a_dict(header, my_dict):
     spacing = 40
     delimiter = '.'
     alignment = '<'
-    #response_buffer += "{header}\n".format(header="=" * (spacing + 20))
-
+    # response_buffer += "{header}\n".format(header="=" * (spacing + 20))
 
     for k, v in sorted(my_dict.iteritems()):
         response_buffer += (
@@ -2179,12 +2188,59 @@ def log_a_dict(header, my_dict):
             value=v
         )
 
-    #response_buffer += "{header}".format(header="=" * (spacing + 20))
+    # response_buffer += "{header}".format(header="=" * (spacing + 20))
     return response_buffer
 
-#------------------------------------------
-# Profile Regisers
-#------------------------------------------
+
+# Profile Registersn
+ctrl_profile_headr_registers = {
+    'AUTOSTART': 200,  # w,
+    'AUTOSTART_TIME_YY_MM': 201,  # w,
+    'AUTOSTART_TIME_DAY_DOW': 202,  # w,
+    'AUTOSTART_TIME_HH_MM': 203,  # w,
+    'PROFILE_NAME_CH_1_2': 204,  # w,
+    'PROFILE_NAME_CH_3_4': 205,  # w,
+    'PROFILE_NAME_CH_5_6': 206,  # w,
+    'PROFILE_NAME_CH_7_8': 207,  # w,
+    'PROFILE_NAME_CH_9_10': 208,  # w,
+    'TOTAL_NUMBER_OF_STEPS_IN_PROFILE': 209,  # w,
+    'GUARANTEED_SOAK_BAND_LOOP_1': 210,  # w,
+    'GUARANTEED_SOAK_BAND_LOOP_2': 211,  # w,
+    'GUARANTEED_SOAK_BAND_LOOP_3': 212,  # w,
+    'GUARANTEED_SOAK_BAND_LOOP_4': 213,  # w,
+    'GUARANTEED_SOAK_BAND_LOOP_5': 214,  # w,
+}
+
+
+def get_profile_step_regs(step):
+    """Send back an ever incrementing Step, stop after 99.
+    Each step consists of 15 registers.
+    Step 1 has registers 215 to 229
+    Step 2 has registers 230 to 244
+    Step 3 has registers 245 to 259
+    ...
+    Step 99 has registers 1685 to 1699
+    """
+    assert 1 <= step <= 99
+    offset = 15 * (step - 1)
+    return {
+        'PROFILE_STEP_TIME_HOURS': 215 + offset,  # w,
+        'PROFILE_STEP_TIME_MM_SS': 216 + offset,  # w,
+        'PROFILE_STEP_CHAMBER_EVENTS': 217 + offset,  # w,
+        'PROFILE_STEP_CUSTOMER_EVENTS': 218 + offset,  # w,
+        'PROFILE_STEP_GUARANTEED': 219 + offset,  # w,
+        'PROFILE_STEP_WAIT_FOR_LOOP_EVENTS': 220 + offset,  # w,
+        'PROFILE_STEP_WAIT_FOR_MONITOR_EVENTS': 221 + offset,  # w,
+        'PROFILE_STEP_WAIT_FOR_SETPOINT': 222 + offset,  # w,
+        'PROFILE_STEP_JUMP_STEP_NUMBER': 223 + offset,  # w,
+        'PROFILE_STEP_JUMP_COUNT': 224 + offset,  # w,
+        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_1': 225 + offset,  # w,
+        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_2': 226 + offset,  # w,
+        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_3': 227 + offset,  # w,
+        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_4': 228 + offset,  # w,
+        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_5': 229 + offset,  # w,
+    }
+
 
 class ProfileHeader(ctypes.BigEndianStructure):
     """Used for display purposes
@@ -2247,57 +2303,6 @@ class ProfileHeader(ctypes.BigEndianStructure):
         )
 
 
-# Dictionary map bytes to function
-ctrl_profile_headr_registers = {
-    'AUTOSTART': 200,  # w,
-    'AUTOSTART_TIME_YY_MM': 201,  # w,
-    'AUTOSTART_TIME_DAY_DOW': 202,  # w,
-    'AUTOSTART_TIME_HH_MM': 203,  # w,
-    'PROFILE_NAME_CH_1_2': 204,  # w,
-    'PROFILE_NAME_CH_3_4': 205,  # w,
-    'PROFILE_NAME_CH_5_6': 206,  # w,
-    'PROFILE_NAME_CH_7_8': 207,  # w,
-    'PROFILE_NAME_CH_9_10': 208,  # w,
-    'TOTAL_NUMBER_OF_STEPS_IN_PROFILE': 209,  # w,
-    'GUARANTEED_SOAK_BAND_LOOP_1': 210,  # w,
-    'GUARANTEED_SOAK_BAND_LOOP_2': 211,  # w,
-    'GUARANTEED_SOAK_BAND_LOOP_3': 212,  # w,
-    'GUARANTEED_SOAK_BAND_LOOP_4': 213,  # w,
-    'GUARANTEED_SOAK_BAND_LOOP_5': 214,  # w,
-}
-
-
-
-def get_profile_step_regs(step):
-    """Send back an ever incrementing Step, stop after 99.
-    Each step consists of 15 registers.
-    Step 1 has registers 215 to 229
-    Step 2 has registers 230 to 244
-    Step 3 has registers 245 to 259
-    ...
-    Step 99 has registers 1685 to 1699
-    """
-    assert 1 <= step <= 99
-    offset = 15 * (step - 1)
-    return {
-        'PROFILE_STEP_TIME_HOURS': 215 + offset,  # w,
-        'PROFILE_STEP_TIME_MM_SS': 216 + offset,  # w,
-        'PROFILE_STEP_CHAMBER_EVENTS': 217 + offset,  # w,
-        'PROFILE_STEP_CUSTOMER_EVENTS': 218 + offset,  # w,
-        'PROFILE_STEP_GUARANTEED': 219 + offset,  # w,
-        'PROFILE_STEP_WAIT_FOR_LOOP_EVENTS': 220 + offset,  # w,
-        'PROFILE_STEP_WAIT_FOR_MONITOR_EVENTS': 221 + offset,  # w,
-        'PROFILE_STEP_WAIT_FOR_SETPOINT': 222 + offset,  # w,
-        'PROFILE_STEP_JUMP_STEP_NUMBER': 223 + offset,  # w,
-        'PROFILE_STEP_JUMP_COUNT': 224 + offset,  # w,
-        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_1': 225 + offset,  # w,
-        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_2': 226 + offset,  # w,
-        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_3': 227 + offset,  # w,
-        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_4': 228 + offset,  # w,
-        'PROFILE_STEP_TARGET_SETPOINT_FOR_LOOP_5': 229 + offset,  # w,
-    }
-
-
 class ProfileSteps(ctypes.BigEndianStructure):
     """Used for display purposes
     """
@@ -2319,7 +2324,9 @@ class ProfileSteps(ctypes.BigEndianStructure):
         ("target_setpoint_for_loop_4", ctypes.c_int16),
         ("target_setpoint_for_loop_5", ctypes.c_int16),
     ]
-    def __init__(self, reg):
+
+    def __init__(self, reg, *args, **kwargs):
+        super(ProfileSteps, self).__init__(*args, **kwargs)
         self.reg = reg
 
     def __str__(self):
@@ -2344,57 +2351,57 @@ class ProfileSteps(ctypes.BigEndianStructure):
             ).format(
                 self.reg, log_a_dict(
                     "time_hours",
-                    clock_hours("", self.time_hours)[1]
+                    clock_hours(self.time_hours)[1]
                 ),
                 self.reg + 1, log_a_dict(
                     "time_mm_ss",
-                    clock_mm_ss("", self.time_mm_ss)[1]
+                    clock_mm_ss(self.time_mm_ss)[1]
                 ),
                 self.reg + 2, log_a_dict(
                     "chamber_events",
-                    get_event_control("", self.chamber_events)[1]
+                    get_event_control(self.chamber_events)[1]
                 ),
                 self.reg + 3, log_a_dict(
                     "customer_events",
-                    get_event_control("", self.customer_events)[1]
+                    get_event_control(self.customer_events)[1]
                 ),
                 self.reg + 4, log_a_dict(
                     "soak",
-                    profile_step_guaranteed_soak_wait("", self.guaranteed)[1]
+                    profile_step_guaranteed_soak_wait(self.guaranteed)[1]
                 ),
                 self.reg + 5, log_a_dict(
                     "wait_for_event",
-                    profile_wait_for_loop_event("", self.wait_for_loop_events)[1]
+                    profile_wait_for_loop_event(self.wait_for_loop_events)[1]
                 ),
                 self.reg + 6, log_a_dict(
                     "waint_for_monitor",
-                    profile_wait_for_monitor_event("", self.wait_for_monitor_events)[1]
+                    profile_wait_for_monitor_event(self.wait_for_monitor_events)[1]
                 ),
                 self.reg + 7, log_a_dict(
                     "wait_for_setpoint",
-                    profile_wait_for_monitor_event("", self.wait_for_setpoint)[1]
+                    profile_wait_for_monitor_event(self.wait_for_setpoint)[1]
                 ),
                 self.reg + 8, self.jump_step_number,
                 self.reg + 9, self.jump_count,
                 self.reg + 10, log_a_dict(
                     "",
-                    get_signed_int_tens_decimal("", self.target_setpoint_for_loop_1)[1]
+                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_1)[1]
                 ),
                 self.reg + 11, log_a_dict(
                     "",
-                    get_signed_int_tens_decimal("", self.target_setpoint_for_loop_2)[1]
+                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_2)[1]
                 ),
                 self.reg + 12, log_a_dict(
                     "",
-                    get_signed_int_tens_decimal("", self.target_setpoint_for_loop_3)[1]
+                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_3)[1]
                 ),
                 self.reg + 13, log_a_dict(
                     "",
-                    get_signed_int_tens_decimal("", self.target_setpoint_for_loop_4)[1]
+                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_4)[1]
                 ),
                 self.reg + 14, log_a_dict(
                    "",
-                    get_signed_int_tens_decimal("", self.target_setpoint_for_loop_5)[1]
+                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_5)[1]
                ),
             )
         )
