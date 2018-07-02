@@ -28,26 +28,6 @@ class Chamber(object):
             response = "on"
         return response
 
-    @property
-    def clock(self):
-        """Read the clock
-        Registers:
-        'CLOCK_YY_MM': 1,  # r, Clock (Year, Month)
-        'CLOCK_DAY_DOE': 2,  # r, Clock (Day, DOE)
-        'CLOCK_HH_MM': 3,  # r, Clock (Hours, Min)
-        'CLOCK_SEC': 4,  # r, Clock (Seconds)
-        """
-        value = self.ccomm.read_registers(chamber_commands.name_to_reg('CLOCK_YY_MM'), 4)
-        # Break into 4x 2 byte chunks
-        yy_mm, day_doe, hh_mm, sec = memoryview(value).cast('H')
-        # split into 1 byte parts
-        year, month = yy_mm
-        day, doe = day_doe
-        hour, minute = hh_mm
-        seconds = sec
-        response = [ year, month, day, doe, hour, minute, hour, minute, seconds]
-        return response
-
     def start_profile(self):
         # ---------------------------------
         # Start the profile
