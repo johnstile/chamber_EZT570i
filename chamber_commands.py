@@ -344,44 +344,45 @@ state_get_monitor_input_alarm_type = {
 }
 
 
-def encode_set_value(name, value):
+def encode_set_value(reg_name, value):
     """
     For setting values, translate human readable to EZT570i protocol.
     :param name: Register name
     :param value: Human understandable value
     :return: 1) EZT570i register, 2) value to write
     """
-    reg = name_to_reg(name)
+    reg = name_to_reg(reg_name)
     if not reg:
         return None, None
 
-    setter = "set_{}".format(name.lower())
+    setter = "set_{}".format(reg_name.lower())
 
     try:
         operation = getattr(thismodule, setter)
     except AttributeError:
-        return name, "Non Writeable Register"
+        return reg_name, "Non Writeable Register"
 
     if not callable(operation):
-        return name, "NO MATCH"
+        return reg_name, "NO MATCH"
 
     return reg, operation(value)
 
 
 def decode_read_value(reg, value):
-    """Run method that matches the register name"""
-    name = reg_value_to_name(reg)
+    """
+    For getting values, run method that matches the register name"""
+    reg_name = reg_value_to_name(reg)
 
-    if not name:
+    if not reg_name:
         return "UNDEFINED", "NO MATCH"
 
     try:
-        operation = getattr(thismodule, name.lower())
+        operation = getattr(thismodule, reg_name.lower())
     except AttributeError:
-        return name, "Non Readable Register"
+        return reg_name, "Non Readable Register"
 
     if not callable(operation):
-        return name, "NO MATCH"
+        return reg_name, "NO MATCH"
 
     return operation(value)
 
