@@ -122,7 +122,7 @@ class ChamberCommunication(object):
         :param value: Value of to write.
         :return:
         """
-        self.log.info(
+        self.log.debug(
             "\n"
             "# =========================================\n"
             "# Write Register\n"
@@ -197,7 +197,7 @@ class ChamberCommunication(object):
         :param register: Starting register
         :param quanity: How many registers to read
         """
-        self.log.info(
+        self.log.debug(
             (
                 "\n# =========================================\n"
                 "# Read Registers: reg:{}, quanity:{}\n"
@@ -369,7 +369,7 @@ class ChamberCommunication(object):
         :param project_file: path to file
         :return:
         """
-        self.log.info(
+        self.log.debug(
             (
                 "\n"
                 "# =========================================\n"
@@ -481,7 +481,7 @@ class ChamberCommunication(object):
         :param profile_steps:
         :return: list of WriteProfileSend
         """
-        self.log.info("Convert list of int to list of modbus packets")
+        self.log.debug("Convert list of int to list of modbus packets")
         modebus_packed_profile = []
 
         register_start = 200  # First Register Address 0x00c8
@@ -598,7 +598,7 @@ class ChamberCommunication(object):
 
     def write_com_serial(self, buffer):
         """Send request over Serial"""
-        self.log.info("Send request")
+        self.log.debug("Send request")
         if not (self.comm and self.comm.is_open):
             self.comm.open()
         self.comm.write(buffer)
@@ -606,7 +606,7 @@ class ChamberCommunication(object):
 
     def write_com_network(self, buffer):
         """Send request over Ethernet"""
-        self.log.info("Send request")
+        self.log.debug("Send request")
         self.comm.sendall(buffer)
         time.sleep(self.comm_wait_time)
 
@@ -617,12 +617,12 @@ class ChamberCommunication(object):
 
     def read_com_serial(self, size_read_response):
         """Read serial port, return stuff"""
-        self.log.info("Read response")
+        self.log.debug("Read response")
         return self.comm.read(size_read_response)
 
     def read_com_network(self, size_read_response):
         """Read network socket, return stuff"""
-        self.log.info("Read response")
+        self.log.debug("Read response")
         chunks = []
         bytes_recd = 0
         while bytes_recd < size_read_response:

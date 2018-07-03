@@ -383,7 +383,7 @@ def decode_read_value(reg, value):
     if not callable(operation):
         return name, "NO MATCH"
 
-    return operation(name, value)
+    return operation(value)
 
 
 def bitfield(raw):
@@ -420,10 +420,10 @@ def name_to_reg(search_name):
     return ctrl_registers.get(search_name)
 
 
-def get_loop_autotune_status(name, value):
+def get_loop_autotune_status(value):
 
     s = state_get_loop_autotune_status.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
 def set_loop_autotune_status(value):
@@ -435,10 +435,10 @@ def set_loop_autotune_status(value):
     return "NOMATCH"
 
 
-def get_loop_alarm_type(name, value):
+def get_loop_alarm_type(value):
 
     s = state_get_loop_alarm_type.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
 def set_loop_alarm_type(value):
@@ -449,9 +449,9 @@ def set_loop_alarm_type(value):
     return "NOMATCH"
 
 
-def get_monitor_input_alarm_type(name, value):
+def get_monitor_input_alarm_type(value):
     s = state_get_monitor_input_alarm_type.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
 def set_monitor_input_alarm_type(value):
@@ -462,12 +462,12 @@ def set_monitor_input_alarm_type(value):
     return "NOMATCH"
 
 
-def get_signed_int_tens_decimal(name, value):
+def get_signed_int_tens_decimal(value):
     """
      -32768 – 32767 (-3276.8 – 3276.7)
      """
     response = value / 10
-    return name, {'degrees': float(response)}
+    return {'degrees': float(response)}
 
 
 def set_signed_int_tens_decimal(value):
@@ -479,7 +479,7 @@ def set_signed_int_tens_decimal(value):
     return response
 
 
-def get_event_control(name, value):
+def get_event_control(value):
     bit_array = bitfield(value)
     response = {
         'Event 1': state_alarm[bit_array[0]],
@@ -498,12 +498,12 @@ def get_event_control(name, value):
         'Event 14': state_alarm[bit_array[13]],
         'Event 15': state_alarm[bit_array[14]]
     }
-    return name, response
+    return response
 
 
-def get_loop_alarm_output_assignment(name, value):
+def get_loop_alarm_output_assignment(value):
     s = state_get_loop_alarm_output_assignment.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
 def set_loop_alarm_output_assignment(value):
@@ -514,7 +514,7 @@ def set_loop_alarm_output_assignment(value):
     return "NOMATCH"
 
 
-def get_loop_alarm_mode(name, value):
+def get_loop_alarm_mode(value):
     bit_array = bitfield(value)
     bit0 = {
         0: 'Alarm Self Clears',
@@ -538,7 +538,7 @@ def get_loop_alarm_mode(name, value):
         'audible': bit4[bit_array[4]],
         'profile': bit5[bit_array[5]]
     }
-    return name, response
+    return response
 
 
 def set_loop_alarm_mode(value):
@@ -553,12 +553,12 @@ def set_loop_alarm_mode(value):
     return 0
 
 
-def get_loop_percent_output(name, value):
+def get_loop_percent_output(value):
     """
     -10000 – 10000 (-100.00 – 100.00)
     """
     response = value / 100
-    return name, "%out:{}".format(response)
+    return "%out:{}".format(response)
 
 
 def set_loop_percent_output(value):
@@ -569,11 +569,11 @@ def set_loop_percent_output(value):
     return response
 
 
-def get_minutes(name, value):
+def get_minutes(value):
     """
         0 - 32767 minutes
     """
-    return name, "minutes:{}".format(value)
+    return "minutes:{}".format(value)
 
 
 def set_minutes(value):
@@ -585,12 +585,12 @@ def set_minutes(value):
 # -------------------------------
 
 
-def operational_mode(name, value):
+def operational_mode(value):
     s = state_on_off.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
-def clock_yy_mm(name, value):
+def clock_yy_mm(value):
     """
     high byte: Year: 0 to 99
     low byte: Month: 1=Jan, ... 12=Dec
@@ -598,10 +598,10 @@ def clock_yy_mm(name, value):
     b_year, b_month = int_to_two_bytes(value & 0xFFFF)
     year = struct.unpack('B', b_year)[0]
     month = struct.unpack('B', b_month)[0]
-    return name, {'year': int("20{:02d}".format(year)), 'month': month}
+    return {'year': int("20{:02d}".format(year)), 'month': month}
 
 
-def clock_day_dow(name, value):
+def clock_day_dow(value):
     """
     high byte: Day of Month: 1 to 31
     low byte: Day  of Week: 0=Sun, ... 6=Sat
@@ -609,10 +609,10 @@ def clock_day_dow(name, value):
     b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
     dom = struct.unpack('B', b_dom)[0]
     dow = struct.unpack('B', b_dow)[0]
-    return name, {'dom': dom, 'dow': dow}
+    return {'dom': dom, 'dow': dow}
 
 
-def clock_hh_mm(name, value):
+def clock_hh_mm(value):
     """
     high byte: Hours: 1 to 23
     low byte: Minutes: 0 to 59
@@ -620,10 +620,10 @@ def clock_hh_mm(name, value):
     b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
     hour = struct.unpack('B', b_hour)[0]
     minutes = struct.unpack('B', b_minutes)[0]
-    return name, {'hour': hour, 'minutes': minutes}
+    return {'hour': hour, 'minutes': minutes}
 
 
-def clock_mm_ss(name, value):
+def clock_mm_ss(value):
     """
     high byte: Minutes: 0 to 59
     low byte: Seconds: 0 to 59
@@ -631,26 +631,26 @@ def clock_mm_ss(name, value):
     b_minutes, b_seconds = int_to_two_bytes(value & 0xFFFF)
     minutes = struct.unpack('B', b_minutes)[0]
     seconds = struct.unpack('B', b_seconds)[0]
-    return name, {'minutes': minutes, 'seconds': seconds}
+    return {'minutes': minutes, 'seconds': seconds}
 
 
-def clock_hours(name, value):
+def clock_hours(value):
     """
     2 bytes: seconds: 0 to 59
     """
-    return name, {'hours': value}
+    return {'hours': value}
 
 
-def clock_sec(name, value):
+def clock_sec(value):
     """
     2 bytes: seconds: 0 to 59
     """
-    return name, {'seconds': value}
+    return {'seconds': value}
 
 
-def power_recovery_mode(name, value):
+def power_recovery_mode(value):
     s = state_power_recovery_mode.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
 def set_power_recovery_mode(value):
@@ -661,11 +661,11 @@ def set_power_recovery_mode(value):
     return "NOMATCH"
 
 
-def power_out_time(name, value):
+def power_out_time(value):
     """
     0 - 32767 seconds
     """
-    return name, "Seconds:{}".format(value)
+    return "Seconds:{}".format(value)
 
 
 def set_power_out_time(value):
@@ -676,9 +676,9 @@ def set_power_out_time(value):
     return value
 
 
-def defrost_operating_mode(name, value):
+def defrost_operating_mode(value):
     s = state_defrost_operating_mode.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
 def set_defrost_operating_mode(value):
@@ -689,39 +689,39 @@ def set_defrost_operating_mode(value):
     return "NOMATCH"
 
 
-def auto_defrost_temperature_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def auto_defrost_temperature_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_auto_defrost_temperature_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def auto_defrost_time_interval(name, value):
-    return get_minutes(name, value)
+def auto_defrost_time_interval(value):
+    return get_minutes(value)
 
 
 def set_auto_defrost_time_interval(value):
     return set_minutes(value)
 
 
-def defrost_status(name, value):
+def defrost_status(value):
     state = {
         0: 'Not in Defrost',
         1: 'In Defrost',
         3: 'In Prechill'
     }
     s = state.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
-def time_remaining_until_next_defrost(name, value):
-    return get_minutes(name, value)
+def time_remaining_until_next_defrost(value):
+    return get_minutes(value)
 
 
-def product_control(name, value):
+def product_control(value):
     s = state_product_control.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
 def set_product_control(value):
@@ -732,25 +732,25 @@ def set_product_control(value):
     return "NOMATCH"
 
 
-def product_control_upper_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def product_control_upper_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_product_control_upper_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def product_control_lower_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def product_control_lower_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_product_control_lower_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def condensation_control(name, value):
+def condensation_control(value):
     s = state_on_off.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
 def set_condensation_control(value):
@@ -761,9 +761,9 @@ def set_condensation_control(value):
     return "NOMATCH"
 
 
-def condensation_control_monitor_mode(name, value):
+def condensation_control_monitor_mode(value):
     s = state_condensation_control_monitor_mode.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
 def set_condensation_control_monitor_mode(value):
@@ -774,7 +774,7 @@ def set_condensation_control_monitor_mode(value):
     return "NOMATCH"
 
 
-def condensation_control_input_selection(name, value):
+def condensation_control_input_selection(value):
     bit_array = bitfield(value)
     response_condensation_control_input_selection = {
         'Product': 0,
@@ -787,7 +787,7 @@ def condensation_control_input_selection(name, value):
         'PV7': bit_array[6],
         'PV8': bit_array[7],
     }
-    return name, "pv:{}".format(response_condensation_control_input_selection)
+    return "pv:{}".format(response_condensation_control_input_selection)
 
 
 def set_condensation_control_input_selection(value):
@@ -795,25 +795,25 @@ def set_condensation_control_input_selection(value):
     value
 
 
-def condensation_control_temperatore_ramp_rate_limit(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def condensation_control_temperatore_ramp_rate_limit(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_condensation_control_temperatore_ramp_rate_limit(value):
     return set_signed_int_tens_decimal(value)
 
 
-def condensation_control_deupoint_limit(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def condensation_control_deupoint_limit(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def condensation_control_duepoint_actual(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def condensation_control_duepoint_actual(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def chamber_light_control(name, value):
+def chamber_light_control(value):
     s = state_on_off.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
 def set_chamber_light_control(value):
@@ -824,8 +824,8 @@ def set_chamber_light_control(value):
     return "NOMATCH"
 
 
-def chamber_manual_event_control(name, value):
-    return get_event_control(name, value)
+def chamber_manual_event_control(value):
+    return get_event_control(value)
 
 
 def set_chamber_manual_event_control(value):
@@ -833,8 +833,8 @@ def set_chamber_manual_event_control(value):
     pass
 
 
-def customer_manual_event_control(name, value):
-    return get_event_control(name, value)
+def customer_manual_event_control(value):
+    return get_event_control(value)
 
 
 def set_customer_manual_event_control(value):
@@ -842,9 +842,9 @@ def set_customer_manual_event_control(value):
     pass
 
 
-def profile_control_status(name, value):
+def profile_control_status(value):
     s = state_profile_control_status.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return {'mode': s}
 
 
 def set_profile_control_status(value):
@@ -867,7 +867,7 @@ def set_profile_advance_step(value):
     return "NOMATCH"
 
 
-def profile_name(name, value):
+def profile_name(value):
     """
     32 – 126 (high byte)
     32 – 126 (low byte)
@@ -875,30 +875,30 @@ def profile_name(name, value):
     b_hch, b_lch = int_to_two_bytes(value & 0xFFFF)
     hch = struct.unpack('B', b_hch)[0]
     lch = struct.unpack('B', b_lch)[0]
-    return name, {'chR': str(unichr(hch)), 'chL': str(unichr(lch))}
+    return {'chR': str(unichr(hch)), 'chL': str(unichr(lch))}
 
 
-def profile_name_ch_1_2(name, value):
-    return profile_name(name, value)
+def profile_name_ch_1_2(value):
+    return profile_name(value)
 
 
-def profile_name_ch_3_4(name, value):
-    return profile_name(name, value)
+def profile_name_ch_3_4(value):
+    return profile_name(value)
 
 
-def profile_name_ch_5_6(name, value):
-    return profile_name(name, value)
+def profile_name_ch_5_6(value):
+    return profile_name(value)
 
 
-def profile_name_ch_7_8(name, value):
-    return profile_name(name, value)
+def profile_name_ch_7_8(value):
+    return profile_name(value)
 
 
-def profile_name_ch_9_10(name, value):
-    return profile_name(name, value)
+def profile_name_ch_9_10(value):
+    return profile_name(value)
 
 
-def profile_start_date_yy_mm(name, value):
+def profile_start_date_yy_mm(value):
     """
     high byte: Year: 0 to 99
     low byte: Month: 1=Jan, ... 12=Dec
@@ -906,10 +906,10 @@ def profile_start_date_yy_mm(name, value):
     b_year, b_month = int_to_two_bytes(value & 0xFFFF)
     year = struct.unpack('B', b_year)[0]
     month = struct.unpack('B', b_month)[0]
-    return name, {'year': int("20{:02d}".format(year)), 'month': month}
+    return {'year': int("20{:02d}".format(year)), 'month': month}
 
 
-def profile_stop_date_yy_mm(name, value):
+def profile_stop_date_yy_mm(value):
     """
     high byte: Year: 0 to 99
     low byte: Month: 1=Jan, ... 12=Dec
@@ -917,10 +917,10 @@ def profile_stop_date_yy_mm(name, value):
     b_year, b_month = int_to_two_bytes(value & 0xFFFF)
     year = struct.unpack('B', b_year)[0]
     month = struct.unpack('B', b_month)[0]
-    return name, {'year': int("20{:02d}".format(year)), 'month': month}
+    return {'year': int("20{:02d}".format(year)), 'month': month}
 
 
-def profile_start_date_day_dow(name, value):
+def profile_start_date_day_dow(value):
     """
     high byte: Day of Month: 1 to 31
     low byte: Day  of Week: 0=Sun, ... 6=Sat
@@ -928,10 +928,10 @@ def profile_start_date_day_dow(name, value):
     b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
     dom = struct.unpack('B', b_dom)[0]
     dow = struct.unpack('B', b_dow)[0]
-    return name, {'dom': dom, 'dow': dow}
+    return {'dom': dom, 'dow': dow}
 
 
-def profile_stop_date_day_dow(name, value):
+def profile_stop_date_day_dow(value):
     """
     high byte: Day of Month: 1 to 31
     low byte: Day  of Week: 0=Sun, ... 6=Sat
@@ -939,10 +939,10 @@ def profile_stop_date_day_dow(name, value):
     b_dom, b_dow = int_to_two_bytes(value & 0xFFFF)
     dom = struct.unpack('B', b_dom)[0]
     dow = struct.unpack('B', b_dow)[0]
-    return name, {'dom': dom, 'dow': dow}
+    return {'dom': dom, 'dow': dow}
 
 
-def profile_start_date_hh_mm(name, value):
+def profile_start_date_hh_mm(value):
     """
     high byte: Hours: 1 to 23
     low byte: Minutes: 0 to 59
@@ -950,10 +950,10 @@ def profile_start_date_hh_mm(name, value):
     b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
     hour = struct.unpack('B', b_hour)[0]
     minutes = struct.unpack('B', b_minutes)[0]
-    return name, {'hour': hour, 'minutes': minutes}
+    return {'hour': hour, 'minutes': minutes}
 
 
-def profile_stop_date_hh_mm(name, value):
+def profile_stop_date_hh_mm(value):
     """
     high byte: Hours: 1 to 23
     low byte: Minutes: 0 to 59
@@ -961,12 +961,12 @@ def profile_stop_date_hh_mm(name, value):
     b_hour, b_minutes = int_to_two_bytes(value & 0xFFFF)
     hour = struct.unpack('B', b_hour)[0]
     minutes = struct.unpack('B', b_minutes)[0]
-    return name, {'hour': hour, 'minutes': minutes}
+    return {'hour': hour, 'minutes': minutes}
 
 
-def profile_start_step(name, value):
+def profile_start_step(value):
     """0 - 99"""
-    return name, "step:{}".format(value)
+    return {'step':value}
 
 
 def set_profile_start_step(value):
@@ -975,22 +975,22 @@ def set_profile_start_step(value):
     return value
 
 
-def profile_current_step(name, value):
+def profile_current_step(value):
     """0 - 99"""
-    return name, "step:{}".format(value)
+    return {'step':value}
 
 
-def profile_last_step(name, value):
+def profile_last_step(value):
     """0 - 99"""
-    return name, "step:{}".format(value)
+    return {'step':value}
 
 
-def profile_time_left_in_current_step_hhh(name, value):
+def profile_time_left_in_current_step_hhh(value):
     """1 – 999 Hours"""
-    return name, "hours:{}".format(value)
+    return {'hours':value}
 
 
-def profile_time_left_in_current_step_mm_ss(name, value):
+def profile_time_left_in_current_step_mm_ss(value):
     """
      high byte: Minutes: 0 to 59
      low byte: Seconds: 0 to 59
@@ -998,61 +998,61 @@ def profile_time_left_in_current_step_mm_ss(name, value):
     b_minutes, b_seconds = int_to_two_bytes(value & 0xFFFF)
     minutes = struct.unpack('B', b_minutes)[0]
     seconds = struct.unpack('B', b_seconds)[0]
-    return name, {'minutes': minutes, 'seconds': seconds}
+    return {'minutes': minutes, 'seconds': seconds}
 
 
-def profile_wait_for_status(name, value):
+def profile_wait_for_status(value):
     s = state_profile_wait_for_status.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 
-def profile_wait_for_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def profile_wait_for_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def profile_current_jump_step(name, value):
+def profile_current_jump_step(value):
     """0 - 99"""
-    return name, "step:{}".format(value)
+    return {'step':value}
 
 
-def profile_jumps_remaining_in_current_step(name, value):
+def profile_jumps_remaining_in_current_step(value):
     """0 - 99"""
-    return name, "jumps:{}".format(value)
+    return {'jumps':value}
 
 
-def profile_loop_1_target_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def profile_loop_1_target_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def profile_loop_2_target_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def profile_loop_2_target_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def profile_loop_3_target_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def profile_loop_3_target_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def profile_loop_4_target_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def profile_loop_4_target_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def profile_loop_5_target_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def profile_loop_5_target_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def profile_last_jump_from_step(name, value):
+def profile_last_jump_from_step(value):
     """0 - 99"""
-    return name, "step:{}".format(value)
+    return {'step':value}
 
 
-def profile_last_jump_to_step(name, value):
+def profile_last_jump_to_step(value):
     """0 - 99"""
-    return name, "step:{}".format(value)
+    return {'step':value}
 
 
-def profile_total_jumps_made(name, value):
+def profile_total_jumps_made(value):
     """0 – 32767"""
-    return name, "jumps:{}".format(value)
+    return {'jumps':value}
 
 
 def set_alarm_acknowledge(value):
@@ -1067,7 +1067,7 @@ def set_alarm_acknowledge(value):
     return "NOMATCH"
 
 
-def ezt570i_alarm_status(name, value):
+def ezt570i_alarm_status(value):
     bit_array = bitfield(value)
     response = {
         'Input1 Sensor Break': state_alarm[bit_array[0]],
@@ -1086,10 +1086,10 @@ def ezt570i_alarm_status(name, value):
         '(not assigned)': state_alarm[bit_array[13]],
         'Loop Communications Failure': state_alarm[bit_array[14]],
     }
-    return name, response
+    return response
 
 
-def input_alarm_status(name, value):
+def input_alarm_status(value):
     bit_array = bitfield(value)
     response = {
         'Input1 Alarm': state_alarm[bit_array[0]],
@@ -1108,10 +1108,10 @@ def input_alarm_status(name, value):
         '(not assigned 1)': state_alarm[bit_array[13]],
         '(not assigned 2)': state_alarm[bit_array[14]]
     }
-    return name, response
+    return response
 
 
-def chamber_alarm_status(name, value):
+def chamber_alarm_status(value):
     bit_array = bitfield(value)
     response = {
         'Heater High Limit (Plenum A)': state_alarm[bit_array[0]],
@@ -1130,10 +1130,10 @@ def chamber_alarm_status(name, value):
         'Power Failure': state_alarm[bit_array[13]],
         'Transfer Error': state_alarm[bit_array[14]],
     }
-    return name, response
+    return response
 
 
-def refrigeration_alarm_status(name, value):
+def refrigeration_alarm_status(value):
     bit_array = bitfield(value)
     response = {
         'System 1(A) High/Low Pressure': state_alarm[bit_array[0]],
@@ -1152,10 +1152,10 @@ def refrigeration_alarm_status(name, value):
         'System B Floodback Monitor': state_alarm[bit_array[13]],
         '(not assigned) 4': state_alarm[bit_array[14]],
     }
-    return name, response
+    return response
 
 
-def system_status_monitor(name, value):
+def system_status_monitor(value):
     bit_array = bitfield(value)
     response = {
         'Humidity Water Reservoir Low': state_alarm[bit_array[0]],
@@ -1174,899 +1174,899 @@ def system_status_monitor(name, value):
         'Service Transfer Mechanism': state_alarm[bit_array[13]],
         '(not assigned) 4': state_alarm[bit_array[14]],
     }
-    return name, response
+    return response
 
 
-def loop_1_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_1_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_1_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_2_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_2_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_2_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_3_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_3_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_3_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_4_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_4_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_4_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_5_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_5_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_5_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_1_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_1_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_1_process_value(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_2_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_2_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_2_process_value(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_3_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_3_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_3_process_value(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_4_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_4_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_4_process_value(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_5_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_5_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_5_process_value(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_1_percent_output(name, value):
-    return get_loop_percent_output(name, value)
+def loop_1_percent_output(value):
+    return get_loop_percent_output(value)
 
 
 def set_loop_1_percent_output(value):
     return set_loop_percent_output(value)
 
 
-def loop_2_percent_output(name, value):
-    return get_loop_percent_output(name, value)
+def loop_2_percent_output(value):
+    return get_loop_percent_output(value)
 
 
 def set_loop_2_percent_output(value):
     return set_loop_percent_output(value)
 
 
-def loop_3_percent_output(name, value):
-    return get_loop_percent_output(name, value)
+def loop_3_percent_output(value):
+    return get_loop_percent_output(value)
 
 
 def set_loop_3_percent_output(value):
     return set_loop_percent_output(value)
 
 
-def loop_4_percent_output(name, value):
-    return get_loop_percent_output(name, value)
+def loop_4_percent_output(value):
+    return get_loop_percent_output(value)
 
 
 def set_loop_4_percent_output(value):
     return set_loop_percent_output(value)
 
 
-def loop_5_percent_output(name, value):
-    return get_loop_percent_output(name, value)
+def loop_5_percent_output(value):
+    return get_loop_percent_output(value)
 
 
 def set_loop_5_percent_output(value):
     return set_loop_percent_output(value)
 
 
-def loop_1_autotune_status(name, value):
-    return get_loop_autotune_status(name, value)
+def loop_1_autotune_status(value):
+    return get_loop_autotune_status(value)
 
 
 def set_loop_1_autotune_status(value):
     return set_loop_autotune_status(value)
 
 
-def loop_2_autotune_status(name, value):
-    return get_loop_autotune_status(name, value)
+def loop_2_autotune_status(value):
+    return get_loop_autotune_status(value)
 
 
 def set_loop_2_autotune_status(value):
     return set_loop_autotune_status(value)
 
 
-def loop_3_autotune_status(name, value):
-    return get_loop_autotune_status(name, value)
+def loop_3_autotune_status(value):
+    return get_loop_autotune_status(value)
 
 
 def set_loop_3_autotune_status(value):
     return set_loop_autotune_status(value)
 
 
-def loop_4_autotune_status(name, value):
-    return get_loop_autotune_status(name, value)
+def loop_4_autotune_status(value):
+    return get_loop_autotune_status(value)
 
 
 def set_loop_4_autotune_status(value):
     return set_loop_autotune_status(value)
 
 
-def loop_5_autotune_status(name, value):
-    return get_loop_autotune_status(name, value)
+def loop_5_autotune_status(value):
+    return get_loop_autotune_status(value)
 
 
 def set_loop_5_autotune_status(value):
     return set_loop_autotune_status(value)
 
 
-def loop_1_upper_setpoint_limit(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_1_upper_setpoint_limit(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_1_upper_setpoint_limit(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_2_upper_setpoint_limit(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_2_upper_setpoint_limit(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_2_upper_setpoint_limit(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_3_upper_setpoint_limit(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_3_upper_setpoint_limit(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_3_upper_setpoint_limit(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_4_upper_setpoint_limit(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_4_upper_setpoint_limit(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_4_upper_setpoint_limit(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_5_upper_setpoint_limit(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_5_upper_setpoint_limit(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_5_upper_setpoint_limit(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_1_lower_setpoint_limit(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_1_lower_setpoint_limit(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_1_lower_setpoint_limit(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_2_lower_setpoint_limit(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_2_lower_setpoint_limit(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_2_lower_setpoint_limit(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_3_lower_setpoint_limit(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_3_lower_setpoint_limit(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_3_lower_setpoint_limit(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_4_lower_setpoint_limit(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_4_lower_setpoint_limit(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_4_lower_setpoint_limit(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_5_lower_setpoint_limit(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_5_lower_setpoint_limit(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_5_lower_setpoint_limit(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_1_alarm_type(name, value):
-    return get_loop_alarm_type(name, value)
+def loop_1_alarm_type(value):
+    return get_loop_alarm_type(value)
 
 
 def set_loop_1_alarm_type(value):
     return set_loop_alarm_type(value)
 
 
-def loop_2_alarm_type(name, value):
-    return get_loop_alarm_type(name, value)
+def loop_2_alarm_type(value):
+    return get_loop_alarm_type(value)
 
 
 def set_loop_2_alarm_type(value):
     return set_loop_alarm_type(value)
 
 
-def loop_3_alarm_type(name, value):
-    return get_loop_alarm_type(name, value)
+def loop_3_alarm_type(value):
+    return get_loop_alarm_type(value)
 
 
 def set_loop_3_alarm_type(value):
     return set_loop_alarm_type(value)
 
 
-def loop_4_alarm_type(name, value):
-    return get_loop_alarm_type(name, value)
+def loop_4_alarm_type(value):
+    return get_loop_alarm_type(value)
 
 
 def set_loop_4_alarm_type(value):
     return set_loop_alarm_type(value)
 
 
-def loop_5_alarm_type(name, value):
-    return get_loop_alarm_type(name, value)
+def loop_5_alarm_type(value):
+    return get_loop_alarm_type(value)
 
 
 def set_loop_5_alarm_type(value):
     return set_loop_alarm_type(value)
 
 
-def loop_1_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def loop_1_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_loop_1_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def loop_2_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def loop_2_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_loop_2_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def loop_3_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def loop_3_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_loop_3_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def loop_4_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def loop_4_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_loop_4_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def loop_5_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def loop_5_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_loop_5_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def loop_1_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def loop_1_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_loop_1_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def loop_2_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def loop_2_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_loop_2_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def loop_3_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def loop_3_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_loop_3_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def loop_4_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def loop_4_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_loop_4_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def loop_5_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def loop_5_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_loop_5_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def loop_1_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_1_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_1_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_2_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_2_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_2_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_3_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_3_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_3_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_4_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_4_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_4_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_5_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_5_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_5_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_1_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_1_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_1_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_2_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_2_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_2_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_3_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_3_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_3_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_4_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_4_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_4_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_5_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_5_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_5_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_1_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_1_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_1_alarm_hysteresis(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_2_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_2_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_2_alarm_hysteresis(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_3_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_3_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_3_alarm_hysteresis(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_4_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_4_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_4_alarm_hysteresis(value):
     return set_signed_int_tens_decimal(value)
 
 
-def loop_5_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def loop_5_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_loop_5_alarm_hysteresis(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_1_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_1_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def monitor_input_2_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_2_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def monitor_input_3_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_3_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def monitor_input_4_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_4_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def monitor_input_5_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_5_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def monitor_input_6_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_6_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def monitor_input_7_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_7_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def monitor_input_8_process_value(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_8_process_value(value):
+    return get_signed_int_tens_decimal(value)
 
 
-def monitor_input_1_alarm_type(name, value):
-    return get_monitor_input_alarm_type(name, value)
+def monitor_input_1_alarm_type(value):
+    return get_monitor_input_alarm_type(value)
 
 
 def set_monitor_input_1_alarm_type(value):
     return set_monitor_input_alarm_type(value)
 
 
-def monitor_input_2_alarm_type(name, value):
-    return get_monitor_input_alarm_type(name, value)
+def monitor_input_2_alarm_type(value):
+    return get_monitor_input_alarm_type(value)
 
 
 def set_monitor_input_2_alarm_type(value):
     return set_monitor_input_alarm_type(value)
 
 
-def monitor_input_3_alarm_type(name, value):
-    return get_monitor_input_alarm_type(name, value)
+def monitor_input_3_alarm_type(value):
+    return get_monitor_input_alarm_type(value)
 
 
 def set_monitor_input_3_alarm_type(value):
     return set_monitor_input_alarm_type(value)
 
 
-def monitor_input_4_alarm_type(name, value):
-    return get_monitor_input_alarm_type(name, value)
+def monitor_input_4_alarm_type(value):
+    return get_monitor_input_alarm_type(value)
 
 
 def set_monitor_input_4_alarm_type(value):
     return set_monitor_input_alarm_type(value)
 
 
-def monitor_input_5_alarm_type(name, value):
-    return get_monitor_input_alarm_type(name, value)
+def monitor_input_5_alarm_type(value):
+    return get_monitor_input_alarm_type(value)
 
 
 def set_monitor_input_5_alarm_type(value):
     return set_monitor_input_alarm_type(value)
 
 
-def monitor_input_6_alarm_type(name, value):
-    return get_monitor_input_alarm_type(name, value)
+def monitor_input_6_alarm_type(value):
+    return get_monitor_input_alarm_type(value)
 
 
 def set_monitor_input_6_alarm_type(value):
     return set_monitor_input_alarm_type(value)
 
 
-def monitor_input_7_alarm_type(name, value):
-    return get_monitor_input_alarm_type(name, value)
+def monitor_input_7_alarm_type(value):
+    return get_monitor_input_alarm_type(value)
 
 
 def set_monitor_input_7_alarm_type(value):
     return set_monitor_input_alarm_type(value)
 
 
-def monitor_input_8_alarm_type(name, value):
-    return get_monitor_input_alarm_type(name, value)
+def monitor_input_8_alarm_type(value):
+    return get_monitor_input_alarm_type(value)
 
 
 def set_monitor_input_8_alarm_type(value):
     return set_monitor_input_alarm_type(value)
 
 
-def monitor_input_1_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def monitor_input_1_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_monitor_input_1_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def monitor_input_2_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def monitor_input_2_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_monitor_input_2_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def monitor_input_3_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def monitor_input_3_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_monitor_input_3_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def monitor_input_4_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def monitor_input_4_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_monitor_input_4_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def monitor_input_5_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def monitor_input_5_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_monitor_input_5_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def monitor_input_6_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def monitor_input_6_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_monitor_input_6_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def monitor_input_7_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def monitor_input_7_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_monitor_input_7_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def monitor_input_8_alarm_mode(name, value):
-    return get_loop_alarm_mode(name, value)
+def monitor_input_8_alarm_mode(value):
+    return get_loop_alarm_mode(value)
 
 
 def set_monitor_input_8_alarm_mode(value):
     return set_loop_alarm_mode(value)
 
 
-def monitor_input_1_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def monitor_input_1_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_monitor_input_1_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def monitor_input_2_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def monitor_input_2_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_monitor_input_2_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def monitor_input_3_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def monitor_input_3_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_monitor_input_3_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def monitor_input_4_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def monitor_input_4_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_monitor_input_4_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def monitor_input_5_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def monitor_input_5_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_monitor_input_5_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def monitor_input_6_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def monitor_input_6_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_monitor_input_6_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def monitor_input_7_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def monitor_input_7_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_monitor_input_7_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def monitor_input_8_alarm_output_assignment(name, value):
-    return get_loop_alarm_output_assignment(name, value)
+def monitor_input_8_alarm_output_assignment(value):
+    return get_loop_alarm_output_assignment(value)
 
 
 def set_monitor_input_8_alarm_output_assignment(value):
     return set_loop_alarm_output_assignment(value)
 
 
-def monitor_input_1_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_1_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_1_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_2_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_2_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_2_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_3_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_3_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_3_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_4_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_4_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_4_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_5_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_5_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_5_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_6_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_6_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_6_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_7_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_7_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_7_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_8_high_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_8_high_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_8_high_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_1_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_1_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_1_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_2_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_2_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_2_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_3_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_3_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_3_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_4_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_4_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_4_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_5_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_5_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_5_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_6_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_6_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_6_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_7_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_7_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_7_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_8_low_alarm_setpoint(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_8_low_alarm_setpoint(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_8_low_alarm_setpoint(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_1_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_1_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_1_alarm_hysteresis(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_2_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_2_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_2_alarm_hysteresis(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_3_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_3_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_3_alarm_hysteresis(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_4_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_4_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_4_alarm_hysteresis(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_5_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_5_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_5_alarm_hysteresis(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_6_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_6_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_6_alarm_hysteresis(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_7_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_7_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_7_alarm_hysteresis(value):
     return set_signed_int_tens_decimal(value)
 
 
-def monitor_input_8_alarm_hysteresis(name, value):
-    return get_signed_int_tens_decimal(name, value)
+def monitor_input_8_alarm_hysteresis(value):
+    return get_signed_int_tens_decimal(value)
 
 
 def set_monitor_input_8_alarm_hysteresis(value):
@@ -2081,13 +2081,13 @@ def set_profile_step_time_adjustment(value):
     return value
 
 
-def ezt570i_offline_download_profile(name, value):
+def ezt570i_offline_download_profile(value):
     state = {
         0: 'Online',
         1: 'Offline/Downloading Profile'
     }
     s = state.get(value, "{} Not specified in API".format(value))
-    return name, s
+    return s
 
 # ---------------------------------------------
 # Profile stuff
@@ -2106,7 +2106,7 @@ def get_autostart(value):
     return response
 
 
-def profile_step_guaranteed_soak_wait(name, value):
+def profile_step_guaranteed_soak_wait(value):
     bit_array = bitfield(value)
     response = {
         'Guaranteed Soak Loop 1': state_alarm[bit_array[0]],
@@ -2123,7 +2123,7 @@ def profile_step_guaranteed_soak_wait(name, value):
         'Digial Input 7 Wait For': state_alarm[bit_array[11]],
         'Digial Input 8 Wait For': state_alarm[bit_array[12]],
     }
-    return name, response
+    return response
 
 
 state_profile_wait_for_loop_event = {
@@ -2136,12 +2136,12 @@ state_profile_wait_for_loop_event = {
 }
 
 
-def profile_wait_for_loop_event(name, value):
+def profile_wait_for_loop_event(value):
     s = {
         'value':
         state_profile_wait_for_loop_event.get(value, "{} Not specified in API".format(value))
     }
-    return name, s
+    return s
 
 
 state_profile_wait_for_monitor_event = {
@@ -2157,12 +2157,12 @@ state_profile_wait_for_monitor_event = {
 }
 
 
-def profile_wait_for_monitor_event(name, value):
+def profile_wait_for_monitor_event(value):
     s = {
          'value':
          state_profile_wait_for_monitor_event.get(value, "{} Not specified in API".format(value))
     }
-    return name, s
+    return s
 
 
 def log_a_dict(my_dict):
@@ -2285,20 +2285,20 @@ class ProfileHeader(ctypes.BigEndianStructure):
                 "214: Loop: {}\n"
             ).format(
                 get_autostart(self.autostart),
-                clock_yy_mm("", self.autostart_time_yy_mm)[1],
-                clock_day_dow("", self.autostart_time_day_dow)[1],
-                clock_hh_mm("", self.autostart_time_hh_mm)[1],
-                profile_name("Name:", self.profile_name_ch_1_2),
-                profile_name("Name:", self.profile_name_ch_3_4),
-                profile_name("Name:", self.profile_name_ch_5_6),
-                profile_name("Name:", self.profile_name_ch_7_8),
-                profile_name("Name:", self.profile_name_ch_9_10),
+                clock_yy_mm(self.autostart_time_yy_mm),
+                clock_day_dow(self.autostart_time_day_dow),
+                clock_hh_mm(self.autostart_time_hh_mm),
+                profile_name(self.profile_name_ch_1_2),
+                profile_name(self.profile_name_ch_3_4),
+                profile_name(self.profile_name_ch_5_6),
+                profile_name(self.profile_name_ch_7_8),
+                profile_name(self.profile_name_ch_9_10),
                 self.total_number_of_steps_in_profile,
-                get_signed_int_tens_decimal("Soak Loop 1", self.guaranteed_soak_band_loop_1),
-                get_signed_int_tens_decimal("Soak Loop 2", self.guaranteed_soak_band_loop_2),
-                get_signed_int_tens_decimal("Soak Loop 3", self.guaranteed_soak_band_loop_3),
-                get_signed_int_tens_decimal("Soak Loop 4", self.guaranteed_soak_band_loop_4),
-                get_signed_int_tens_decimal("Soak Loop 5", self.guaranteed_soak_band_loop_5)
+                get_signed_int_tens_decimal(self.guaranteed_soak_band_loop_1),
+                get_signed_int_tens_decimal(self.guaranteed_soak_band_loop_2),
+                get_signed_int_tens_decimal(self.guaranteed_soak_band_loop_3),
+                get_signed_int_tens_decimal(self.guaranteed_soak_band_loop_4),
+                get_signed_int_tens_decimal(self.guaranteed_soak_band_loop_5)
             )
         )
 
@@ -2350,58 +2350,45 @@ class ProfileSteps(ctypes.BigEndianStructure):
                 "{}: target_setpoint_for_loop_5:\n{}"
             ).format(
                 self.reg, log_a_dict(
-                    "time_hours",
-                    clock_hours(self.time_hours)[1]
+                    clock_hours(self.time_hours)
                 ),
                 self.reg + 1, log_a_dict(
-                    "time_mm_ss",
-                    clock_mm_ss(self.time_mm_ss)[1]
+                    clock_mm_ss(self.time_mm_ss)
                 ),
                 self.reg + 2, log_a_dict(
-                    "chamber_events",
-                    get_event_control(self.chamber_events)[1]
+                    get_event_control(self.chamber_events)
                 ),
                 self.reg + 3, log_a_dict(
-                    "customer_events",
-                    get_event_control(self.customer_events)[1]
+                    get_event_control(self.customer_events)
                 ),
                 self.reg + 4, log_a_dict(
-                    "soak",
-                    profile_step_guaranteed_soak_wait(self.guaranteed)[1]
+                    profile_step_guaranteed_soak_wait(self.guaranteed)
                 ),
                 self.reg + 5, log_a_dict(
-                    "wait_for_event",
-                    profile_wait_for_loop_event(self.wait_for_loop_events)[1]
+                    profile_wait_for_loop_event(self.wait_for_loop_events)
                 ),
                 self.reg + 6, log_a_dict(
-                    "waint_for_monitor",
-                    profile_wait_for_monitor_event(self.wait_for_monitor_events)[1]
+                    profile_wait_for_monitor_event(self.wait_for_monitor_events)
                 ),
                 self.reg + 7, log_a_dict(
-                    "wait_for_setpoint",
-                    profile_wait_for_monitor_event(self.wait_for_setpoint)[1]
+                    profile_wait_for_monitor_event(self.wait_for_setpoint)
                 ),
                 self.reg + 8, self.jump_step_number,
                 self.reg + 9, self.jump_count,
                 self.reg + 10, log_a_dict(
-                    "",
-                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_1)[1]
+                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_1)
                 ),
                 self.reg + 11, log_a_dict(
-                    "",
-                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_2)[1]
+                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_2)
                 ),
                 self.reg + 12, log_a_dict(
-                    "",
-                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_3)[1]
+                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_3)
                 ),
                 self.reg + 13, log_a_dict(
-                    "",
-                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_4)[1]
+                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_4)
                 ),
                 self.reg + 14, log_a_dict(
-                   "",
-                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_5)[1]
+                    get_signed_int_tens_decimal(self.target_setpoint_for_loop_5)
                ),
             )
         )

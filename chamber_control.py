@@ -17,17 +17,6 @@ class Chamber(object):
     def connect(self):
         self.ccomm.connect()
 
-    @property
-    def operational_mode(self, value):
-        """Read Operation Mode"""
-        response = None
-        assert 0 <= value <= 1
-        if value == 0:
-            response = "off"
-        elif value == 1:
-            response = "on"
-        return response
-
     def start_profile(self):
         # ---------------------------------
         # Start the profile
@@ -90,8 +79,8 @@ class Chamber(object):
         for value in values.data[:]:
             if value is None:
                 self.log.info("value is none")
-
-            reg_name, value_human = chamber_commands.decode_read_value(reg, value)
+            reg_name = chamber_commands.reg_value_to_name(reg)
+            value_human = chamber_commands.decode_read_value(reg, value)
             self.log.info(
                 (
                     "register:{:04x}, reg_name:{:<50}, value:{:04x}, value_human:{}"
@@ -110,12 +99,37 @@ class Chamber(object):
         :param state: on|off
         :return:
         """
+        self.log.info("Light {}".format(state))
         register, code = chamber_commands.encode_set_value('CHAMBER_LIGHT_CONTROL', state)
         self.ccomm.write_register(register, code)
         start_reg = chamber_commands.name_to_reg('CHAMBER_LIGHT_CONTROL')
         values = self.ccomm.read_registers(start_reg, 1)
         self.log.debug("Modbus Response:{}".format(values))
-        self.print_read_registers(start_reg, values)
+        #self.print_read_registers(start_reg, values)
+
+    def read_temperature(self):
+        """
+        Read chamber temperature
+        :return: integer value of temp
+        """
+        start_reg = chamber_commands.name_to_reg('LOOP_1_PROCESS_VALUE')
+        values = self.ccomm.read_registers(start_reg, 1)
+        self.log.debug("Modbus Response:{}".format(values))
+        value_human = chamber_commands.decode_read_value(start_reg, values.data[0])
+        self.log.debug(
+            "LOOP_1_PROCESS_VALUE:{}".format(value_human)
+        )
+        return value_human['degrees']
+
+    @property
+    def operational_mode(self):
+        """Read Operation Mode"""
+        start_reg = chamber_commands.name_to_reg('PROFILE_CONTROL_STATUS')
+        values = self.ccomm.read_registers(start_reg, 1)
+        self.log.debug("Modbus Response:{}".format(values))
+        value_human = chamber_commands.decode_read_value(start_reg, values.data[0])
+        return value_human
+
 
 def main():
     """Example of using this class
@@ -147,9 +161,9 @@ def main():
     # Print the content of the profile
     chamber.ccomm.print_profile(project_file)
 
-    # Start the Galaxy profile
-    chamber.ccomm.load_profile(project_file)
-    chamber.start_profile()
+    # # Start the Galaxy profile
+    # chamber.ccomm.load_profile(project_file)
+    # chamber.start_profile()
 
     # Toggle light
     chamber.light('on')
@@ -158,16 +172,30 @@ def main():
     chamber.light('off')
 
     time.sleep(5)
-    # End current profile, leave chamber running at safe temp
-    chamber.stop_profile()
-    # Stop current profile, and stop chamber
-    #chamber.stop_chamber()
 
+    # # End current profile, leave chamber running at safe temp
+    # chamber.stop_profile()
+    # # Stop current profile, and stop chamber
+    # #chamber.stop_chamber()
+    #
     # Toggle light
     chamber.light('on')
     chamber.light('off')
     chamber.light('on')
     chamber.light('off')
+
+    # Show current mode
+    log.info("Chamber Mode:{}".format(chamber.operational_mode))
+
+    # Monitor chamber temp
+    start_temp = chamber.read_temperature()
+    monitor_time = 10
+    end_time = time.time() + monitor_time
+    while time.time() <= end_time:
+        end_temp = chamber.read_temperature()
+        log.info("Chamber Temp: now:{}".format(end_temp))
+        time.sleep(1)
+    log.info("Chamber Temp: start:{}, monitor_time:{} seconds, end:{}".format(start_temp, monitor_time, end_temp))
 
     # List all the readable registers
     start_reg = chamber_commands.name_to_reg('OPERATIONAL_MODE')
