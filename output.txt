@@ -2,28 +2,25 @@ INFO	:
 # =========================================
 # PRINT PROFILE: GALAXY.txt
 # =========================================
-INFO	: Read the profile file, converting to list of int
 INFO	: Step:[[0, 1, 256, 0, 16711, 16716, 22872, 8224, 8224, 10, 0, 0, 0, 0, 0]]
 INFO	: Profile Header:
 200: Auto:Off
 201: Auto: {'month': 1, 'year': 2000}
 202: Auto: {'dow': 0, 'dom': 1}
 203: Auto: {'minutes': 0, 'hour': 0}
-204: PROF: ('Name:', {'chR': 'A', 'chL': 'G'})
-205: PROF: ('Name:', {'chR': 'A', 'chL': 'L'})
-206: PROF: ('Name:', {'chR': 'Y', 'chL': 'X'})
-207: PROF: ('Name:', {'chR': ' ', 'chL': ' '})
-208: PROF: ('Name:', {'chR': ' ', 'chL': ' '})
+204: PROF: {'chR': 'A', 'chL': 'G'}
+205: PROF: {'chR': 'A', 'chL': 'L'}
+206: PROF: {'chR': 'Y', 'chL': 'X'}
+207: PROF: {'chR': ' ', 'chL': ' '}
+208: PROF: {'chR': ' ', 'chL': ' '}
 209: Steps:10
-210: Loop: ('Soak Loop 1', {'degrees': 0.0})
-211: Loop: ('Soak Loop 2', {'degrees': 0.0})
-212: Loop: ('Soak Loop 3', {'degrees': 0.0})
-213: Loop: ('Soak Loop 4', {'degrees': 0.0})
-214: Loop: ('Soak Loop 5', {'degrees': 0.0})
+210: Loop: {'degrees': 0.0}
+211: Loop: {'degrees': 0.0}
+212: Loop: {'degrees': 0.0}
+213: Loop: {'degrees': 0.0}
+214: Loop: {'degrees': 0.0}
 
 INFO	: Steps in Profile:10
-INFO	: Read the profile file, converting to list of int
-INFO	: Steps loaded:10
 INFO	: 
 =========================================
 Step:1
@@ -764,240 +761,94 @@ Step:10
 364: target_setpoint_for_loop_5:
 	degrees................................. 0.0
 
-INFO	: Convert list of int to list of modbus packets
-INFO	: 
-# =========================================
-# WRITE PROFILE: GALAXY.txt
-# =========================================
-INFO	: Read the profile file, converting to list of int
-INFO	: Profile Header:[[0, 1, 256, 0, 16711, 16716, 22872, 8224, 8224, 10, 0, 0, 0, 0, 0]]
+INFO	: Load and start profile:GALAXY.txt
+INFO	: EZT570I_OFFLINE_DOWNLOAD_PROFILE:Online
 INFO	: Steps in Profile:10
-INFO	: Read the profile file, converting to list of int
-INFO	: Steps loaded:10
-INFO	: Convert list of int to list of modbus packets
-INFO	: Write profile to Modbus
+INFO	: Load Profile
 INFO	: --------------Line:0 --------------
-INFO	: Send request
-INFO	: Read response
 INFO	: --------------Line:1 --------------
-INFO	: Send request
-INFO	: Read response
 INFO	: --------------Line:2 --------------
-INFO	: Send request
-INFO	: Read response
 INFO	: --------------Line:3 --------------
-INFO	: Send request
-INFO	: Read response
 INFO	: --------------Line:4 --------------
-INFO	: Send request
-INFO	: Read response
 INFO	: --------------Line:5 --------------
-INFO	: Send request
-INFO	: Read response
 INFO	: --------------Line:6 --------------
-INFO	: Send request
-INFO	: Read response
 INFO	: --------------Line:7 --------------
-INFO	: Send request
-INFO	: Read response
 INFO	: --------------Line:8 --------------
-INFO	: Send request
-INFO	: Read response
 INFO	: --------------Line:9 --------------
-INFO	: Send request
-INFO	: Read response
 INFO	: --------------Line:10 --------------
-INFO	: Send request
-INFO	: Read response
 INFO	: Profile upload complete
-INFO	: 
-# =========================================
-# Read Registers: reg:180, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:00b4, reg_name:EZT570I_OFFLINE_DOWNLOAD_PROFILE                  , value:0001, value_human:Offline/Downloading Profile
-INFO	: 
-# =========================================
-# Write Register
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: 
-# =========================================
-# Read Registers: reg:37, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:0025, reg_name:PROFILE_START_STEP                                , value:0001, value_human:step:1
-INFO	: 
-# =========================================
-# Write Register
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: 
-# =========================================
-# Read Registers: reg:24, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:0018, reg_name:PROFILE_CONTROL_STATUS                            , value:0004, value_human:run/resume
-INFO	: 
-# =========================================
-# Write Register
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: 
-# =========================================
-# Read Registers: reg:21, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0001, value_human:on
-INFO	: 
-# =========================================
-# Write Register
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: 
-# =========================================
-# Read Registers: reg:21, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0000, value_human:off
-INFO	: 
-# =========================================
-# Write Register
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: 
-# =========================================
-# Read Registers: reg:21, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0001, value_human:on
-INFO	: 
-# =========================================
-# Write Register
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: 
-# =========================================
-# Read Registers: reg:21, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0000, value_human:off
-INFO	: 
-# =========================================
-# Write Register
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: 
-# =========================================
-# Read Registers: reg:24, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:0018, reg_name:PROFILE_CONTROL_STATUS                            , value:0000, value_human:stop/off
-INFO	: 
-# =========================================
-# Write Register
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: 
-# =========================================
-# Read Registers: reg:60, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:003c, reg_name:LOOP_1_SETPOINT                                   , value:00fa, value_human:{'degrees': 25.0}
-INFO	: 
-# =========================================
-# Write Register
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: 
-# =========================================
-# Read Registers: reg:21, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0001, value_human:on
-INFO	: 
-# =========================================
-# Write Register
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: 
-# =========================================
-# Read Registers: reg:21, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0000, value_human:off
-INFO	: 
-# =========================================
-# Write Register
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: 
-# =========================================
-# Read Registers: reg:21, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0001, value_human:on
-INFO	: 
-# =========================================
-# Write Register
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: 
-# =========================================
-# Read Registers: reg:21, quanity:1
-# =========================================
-INFO	: Send request
-INFO	: Read response
-INFO	: quantity:1
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0001, value_human:on
-INFO	: 
-# =========================================
-# Read Registers: reg:0, quanity:200
-# =========================================
-INFO	: Send request
-INFO	: Read response
+INFO	: EZT570I_OFFLINE_DOWNLOAD_PROFILE:Offline/Downloading Profile
+INFO	: Waiting For Chamber Ready
+INFO	: EZT570I_OFFLINE_DOWNLOAD_PROFILE:Offline/Downloading Profile
+INFO	: Waiting For Chamber Ready
+INFO	: EZT570I_OFFLINE_DOWNLOAD_PROFILE:Online
+INFO	: Start Profile
+INFO	: Light on
+INFO	: Chamber light:on
+INFO	: Light off
+INFO	: Chamber light:off
+INFO	: Monitor chamber temp for 10 seconds
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Chamber Temp:21.0
+INFO	: Light on
+INFO	: Chamber light:on
+INFO	: Light off
+INFO	: Chamber light:off
+INFO	: Stop current profile, and stop chamber
+INFO	: List all the readable registers
 INFO	: quantity:200
 INFO	: register:0000, reg_name:OPERATIONAL_MODE                                  , value:0001, value_human:on
-INFO	: register:0001, reg_name:CLOCK_YY_MM                                       , value:1206, value_human:{'month': 6, 'year': 2018}
-INFO	: register:0002, reg_name:CLOCK_DAY_DOW                                     , value:1d05, value_human:{'dow': 5, 'dom': 29}
-INFO	: register:0003, reg_name:CLOCK_HH_MM                                       , value:0e32, value_human:{'minutes': 50, 'hour': 14}
-INFO	: register:0004, reg_name:CLOCK_SEC                                         , value:0001, value_human:{'seconds': 1}
+INFO	: register:0001, reg_name:CLOCK_YY_MM                                       , value:1207, value_human:{'month': 7, 'year': 2018}
+INFO	: register:0002, reg_name:CLOCK_DAY_DOW                                     , value:0302, value_human:{'dow': 2, 'dom': 3}
+INFO	: register:0003, reg_name:CLOCK_HH_MM                                       , value:0f09, value_human:{'minutes': 9, 'hour': 15}
+INFO	: register:0004, reg_name:CLOCK_SEC                                         , value:0031, value_human:{'seconds': 49}
 INFO	: register:0005, reg_name:POWER_RECOVERY_MODE                               , value:0008, value_human:resume
 INFO	: register:0006, reg_name:POWER_OUT_TIME                                    , value:003c, value_human:Seconds:60
 INFO	: register:0007, reg_name:DEFROST_OPERATING_MODE                            , value:0000, value_human:disabled
@@ -1013,49 +864,49 @@ INFO	: register:0010, reg_name:CONDENSATION_CONTROL_MONITOR_MODE                
 INFO	: register:0011, reg_name:CONDENSATION_CONTROL_INPUT_SELECTION              , value:0000, value_human:pv:{'PV1': 0, 'Product': 0, 'PV2': 0, 'PV5': 0, 'PV4': 0, 'PV7': 0, 'PV6': 0, 'PV8': 0, 'PV3': 0}
 INFO	: register:0012, reg_name:CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT  , value:000a, value_human:{'degrees': 1.0}
 INFO	: register:0013, reg_name:CONDENSATION_CONTROL_DEUPOINT_LIMIT               , value:0000, value_human:{'degrees': 0.0}
-INFO	: register:0014, reg_name:CONDENSATION_CONTROL_DUEPOINT_ACTUAL              , value:005e, value_human:{'degrees': 9.0}
-INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0001, value_human:on
+INFO	: register:0014, reg_name:CONDENSATION_CONTROL_DUEPOINT_ACTUAL              , value:006e, value_human:{'degrees': 11.0}
+INFO	: register:0015, reg_name:CHAMBER_LIGHT_CONTROL                             , value:0000, value_human:off
 INFO	: register:0016, reg_name:CHAMBER_MANUAL_EVENT_CONTROL                      , value:0001, value_human:{'Event 13': 'normal', 'Event 12': 'normal', 'Event 11': 'normal', 'Event 10': 'normal', 'Event 15': 'normal', 'Event 14': 'normal', 'Event2': 'normal', 'Event 9': 'normal', 'Event 8': 'normal', 'Event 7': 'normal', 'Event 6': 'normal', 'Event 5': 'normal', 'Event 4': 'normal', 'Event 3': 'normal', 'Event 1': 'Alarm'}
 INFO	: register:0017, reg_name:CUSTOMER_MANUAL_EVENT_CONTROL                     , value:0000, value_human:{'Event 13': 'normal', 'Event 12': 'normal', 'Event 11': 'normal', 'Event 10': 'normal', 'Event 15': 'normal', 'Event 14': 'normal', 'Event2': 'normal', 'Event 9': 'normal', 'Event 8': 'normal', 'Event 7': 'normal', 'Event 6': 'normal', 'Event 5': 'normal', 'Event 4': 'normal', 'Event 3': 'normal', 'Event 1': 'normal'}
-INFO	: register:0018, reg_name:PROFILE_CONTROL_STATUS                            , value:0000, value_human:stop/off
-INFO	: register:0019, reg_name:PROFILE_ADVANCE_STEP                              , value:0000, value_human:Non Readable Register
+INFO	: register:0018, reg_name:PROFILE_CONTROL_STATUS                            , value:0001, value_human:{'mode': 'stop/all off'}
+INFO	: register:0019, reg_name:PROFILE_ADVANCE_STEP                              , value:0000, value_human:('PROFILE_ADVANCE_STEP', 'Non Readable Register')
 INFO	: register:001a, reg_name:PROFILE_NAME_CH_1_2                               , value:4147, value_human:{'chR': 'A', 'chL': 'G'}
 INFO	: register:001b, reg_name:PROFILE_NAME_CH_3_4                               , value:414c, value_human:{'chR': 'A', 'chL': 'L'}
 INFO	: register:001c, reg_name:PROFILE_NAME_CH_5_6                               , value:5958, value_human:{'chR': 'Y', 'chL': 'X'}
 INFO	: register:001d, reg_name:PROFILE_NAME_CH_7_8                               , value:2020, value_human:{'chR': ' ', 'chL': ' '}
 INFO	: register:001e, reg_name:PROFILE_NAME_CH_9_10                              , value:2020, value_human:{'chR': ' ', 'chL': ' '}
-INFO	: register:001f, reg_name:PROFILE_START_DATE_YY_MM                          , value:0000, value_human:{'month': 0, 'year': 2000}
-INFO	: register:0020, reg_name:PROFILE_START_DATE_DAY_DOW                        , value:0000, value_human:{'dow': 0, 'dom': 0}
-INFO	: register:0021, reg_name:PROFILE_START_DATE_HH_MM                          , value:0000, value_human:{'minutes': 0, 'hour': 0}
-INFO	: register:0022, reg_name:PROFILE_STOP_DATE_YY_MM                           , value:0000, value_human:{'month': 0, 'year': 2000}
-INFO	: register:0023, reg_name:PROFILE_STOP_DATE_DAY_DOW                         , value:0000, value_human:{'dow': 0, 'dom': 0}
-INFO	: register:0024, reg_name:PROFILE_STOP_DATE_HH_MM                           , value:0000, value_human:{'minutes': 0, 'hour': 0}
-INFO	: register:0025, reg_name:PROFILE_START_STEP                                , value:0000, value_human:step:0
-INFO	: register:0026, reg_name:PROFILE_CURRENT_STEP                              , value:0000, value_human:step:0
-INFO	: register:0027, reg_name:PROFILE_LAST_STEP                                 , value:000a, value_human:step:10
-INFO	: register:0028, reg_name:PROFILE_TIME_LEFT_IN_CURRENT_STEP_HHH             , value:0000, value_human:hours:0
-INFO	: register:0029, reg_name:PROFILE_TIME_LEFT_IN_CURRENT_STEP_MM_SS           , value:0000, value_human:{'seconds': 0, 'minutes': 0}
+INFO	: register:001f, reg_name:PROFILE_START_DATE_YY_MM                          , value:1207, value_human:{'month': 7, 'year': 2018}
+INFO	: register:0020, reg_name:PROFILE_START_DATE_DAY_DOW                        , value:0302, value_human:{'dow': 2, 'dom': 3}
+INFO	: register:0021, reg_name:PROFILE_START_DATE_HH_MM                          , value:0f09, value_human:{'minutes': 9, 'hour': 15}
+INFO	: register:0022, reg_name:PROFILE_STOP_DATE_YY_MM                           , value:1207, value_human:{'month': 7, 'year': 2018}
+INFO	: register:0023, reg_name:PROFILE_STOP_DATE_DAY_DOW                         , value:0403, value_human:{'dow': 3, 'dom': 4}
+INFO	: register:0024, reg_name:PROFILE_STOP_DATE_HH_MM                           , value:0522, value_human:{'minutes': 34, 'hour': 5}
+INFO	: register:0025, reg_name:PROFILE_START_STEP                                , value:0001, value_human:{'step': 1}
+INFO	: register:0026, reg_name:PROFILE_CURRENT_STEP                              , value:0001, value_human:{'step': 1}
+INFO	: register:0027, reg_name:PROFILE_LAST_STEP                                 , value:000a, value_human:{'step': 10}
+INFO	: register:0028, reg_name:PROFILE_TIME_LEFT_IN_CURRENT_STEP_HHH             , value:0000, value_human:{'hours': 0}
+INFO	: register:0029, reg_name:PROFILE_TIME_LEFT_IN_CURRENT_STEP_MM_SS           , value:042f, value_human:{'seconds': 47, 'minutes': 4}
 INFO	: register:002a, reg_name:PROFILE_WAIT_FOR_STATUS                           , value:0000, value_human:Not Waiting
 INFO	: register:002b, reg_name:PROFILE_WAIT_FOR_SETPOINT                         , value:0000, value_human:{'degrees': 0.0}
-INFO	: register:002c, reg_name:PROFILE_CURRENT_JUMP_STEP                         , value:0000, value_human:step:0
-INFO	: register:002d, reg_name:PROFILE_JUMPS_REMAINING_IN_CURRENT_STEP           , value:0000, value_human:jumps:0
-INFO	: register:002e, reg_name:PROFILE_LOOP_1_TARGET_SETPOINT                    , value:0000, value_human:{'degrees': 0.0}
+INFO	: register:002c, reg_name:PROFILE_CURRENT_JUMP_STEP                         , value:0001, value_human:{'step': 1}
+INFO	: register:002d, reg_name:PROFILE_JUMPS_REMAINING_IN_CURRENT_STEP           , value:0000, value_human:{'jumps': 0}
+INFO	: register:002e, reg_name:PROFILE_LOOP_1_TARGET_SETPOINT                    , value:-032, value_human:{'degrees': -5.0}
 INFO	: register:002f, reg_name:PROFILE_LOOP_2_TARGET_SETPOINT                    , value:0000, value_human:{'degrees': 0.0}
 INFO	: register:0030, reg_name:PROFILE_LOOP_3_TARGET_SETPOINT                    , value:0000, value_human:{'degrees': 0.0}
 INFO	: register:0031, reg_name:PROFILE_LOOP_4_TARGET_SETPOINT                    , value:0000, value_human:{'degrees': 0.0}
 INFO	: register:0032, reg_name:PROFILE_LOOP_5_TARGET_SETPOINT                    , value:0000, value_human:{'degrees': 0.0}
-INFO	: register:0033, reg_name:PROFILE_LAST_JUMP_FROM_STEP                       , value:0000, value_human:step:0
-INFO	: register:0034, reg_name:PROFILE_LAST_JUMP_TO_STEP                         , value:0000, value_human:step:0
-INFO	: register:0035, reg_name:PROFILE_TOTAL_JUMPS_MADE                          , value:0000, value_human:jumps:0
-INFO	: register:0036, reg_name:ALARM_ACKNOWLEDGE                                 , value:0000, value_human:Non Readable Register
+INFO	: register:0033, reg_name:PROFILE_LAST_JUMP_FROM_STEP                       , value:0000, value_human:{'step': 0}
+INFO	: register:0034, reg_name:PROFILE_LAST_JUMP_TO_STEP                         , value:0000, value_human:{'step': 0}
+INFO	: register:0035, reg_name:PROFILE_TOTAL_JUMPS_MADE                          , value:0000, value_human:{'jumps': 0}
+INFO	: register:0036, reg_name:ALARM_ACKNOWLEDGE                                 , value:0000, value_human:('ALARM_ACKNOWLEDGE', 'Non Readable Register')
 INFO	: register:0037, reg_name:EZT570I_ALARM_STATUS                              , value:0000, value_human:{'Input1 Sensor Break': 'normal', 'Input8 Sensor Break': 'normal', 'Input12 Sensor Break': 'normal', 'Loop Communications Failure': 'normal', 'Input5 Sensor Break': 'normal', '(not assigned)': 'normal', 'Input7 Sensor Break': 'normal', 'Input2 Sensor Break': 'normal', 'Input4 Sensor Break': 'normal', 'Input10 Sensor Break': 'normal', 'Input9 Sensor Break': 'normal', 'Input3 Sensor Break': 'normal', 'Input11 Sensor Break': 'normal', 'Input6 Sensor Break': 'normal', 'Input13 Sensor Break': 'normal'}
 INFO	: register:0038, reg_name:INPUT_ALARM_STATUS                                , value:0000, value_human:{'Input9 Alarm': 'normal', 'Input4 Alarm': 'normal', 'Input1 Alarm': 'normal', 'Input12 Alarm': 'normal', 'Input7 Alarm': 'normal', 'Input5 Alarm': 'normal', 'Input8 Alarm': 'normal', 'Input10 Alarm': 'normal', 'Input13 Alarm': 'normal', '(not assigned 2)': 'normal', 'Input6 Alarm': 'normal', 'Input3 Alarm': 'normal', '(not assigned 1)': 'normal', 'Input2 Alarm': 'normal', 'Input11 Alarm': 'normal'}
 INFO	: register:0039, reg_name:CHAMBER_ALARM_STATUS                              , value:0000, value_human:{'Fluid System High Limit (Plenum B Heater High Limit)': 'normal', 'External Product Safety': 'normal', 'Motor Overload (Plenum A)': 'normal', 'Power Failure': 'normal', 'Emergency Stop': 'normal', '(System B Boiler Low Water)': 'normal', 'Transfer Error': 'normal', '(not assigned)': 'normal', 'Boiler Over-Temp (Plenum A)': 'normal', 'Fluid System High Pressure (Plenum B Motor Overload)': 'normal', 'Dehumidifier System Fault (System B Boiler Over-Temp)': 'normal', 'Boiler Low Water (Plenum A)': 'normal', 'Door Open': 'normal', 'Heater High Limit (Plenum A)': 'normal', 'Fluid System Low Flow': 'normal'}
 INFO	: register:003a, reg_name:REFRIGERATION_ALARM_STATUS                        , value:0000, value_human:{'System 2(B) High Discharge Temperature': 'normal', 'System 2(B) Low Oil Pressure': 'normal', 'System 1(A) Compressor Protection Module': 'normal', 'Pumpdown Disabled': 'normal', 'System 1(A) High Discharge Temperature': 'normal', 'System 1(A) High/Low Pressure': 'normal', 'System 1(A) Low Oil Pressure': 'normal', 'System 2(B) Compressor Protection Module': 'normal', 'System 1(A) Floodback Monitor': 'normal', 'System 2(B) High/Low Pressure': 'normal', 'System B Floodback Monitor': 'normal', '(not assigned) 2': 'normal', '(not assigned) 3': 'normal', '(not assigned) 1': 'normal', '(not assigned) 4': 'normal'}
 INFO	: register:003b, reg_name:SYSTEM_STATUS_MONITOR                             , value:0000, value_human:{'Service Air Circulators': 'normal', 'Service Heating/Cooling System': 'normal', 'Humidity High Dewpoint Limit': 'normal', 'Service Transfer Mechanism': 'normal', 'Service Humidity System': 'normal', 'Humidity Disabled (temperature out-of-range)': 'normal', 'Humidity Water Reservoir Low': 'normal', 'Service Altitude System': 'normal', 'Service Purge System': 'normal', 'Door Open': 'normal', '(not assigned) 2': 'normal', '(not assigned) 3': 'normal', '(not assigned) 1': 'normal', '(not assigned) 4': 'normal', 'Humidity Low Dewpoint Limit': 'normal'}
-INFO	: register:003c, reg_name:LOOP_1_SETPOINT                                   , value:00fa, value_human:{'degrees': 25.0}
-INFO	: register:003d, reg_name:LOOP_1_PROCESS_VALUE                              , value:0072, value_human:{'degrees': 11.0}
-INFO	: register:003e, reg_name:LOOP_1_PERCENT_OUTPUT                             , value:0b10, value_human:%out:28
+INFO	: register:003c, reg_name:LOOP_1_SETPOINT                                   , value:-032, value_human:{'degrees': -5.0}
+INFO	: register:003d, reg_name:LOOP_1_PROCESS_VALUE                              , value:00d6, value_human:{'degrees': 21.0}
+INFO	: register:003e, reg_name:LOOP_1_PERCENT_OUTPUT                             , value:-2710, value_human:%out:-100
 INFO	: register:003f, reg_name:LOOP_1_AUTOTUNE_STATUS                            , value:0000, value_human:autotune off
 INFO	: register:0040, reg_name:LOOP_1_UPPER_SETPOINT_LIMIT                       , value:0258, value_human:{'degrees': 60.0}
 INFO	: register:0041, reg_name:LOOP_1_LOWER_SETPOINT_LIMIT                       , value:-0c8, value_human:{'degrees': -20.0}
@@ -1066,7 +917,7 @@ INFO	: register:0045, reg_name:LOOP_1_HIGH_ALARM_SETPOINT                       
 INFO	: register:0046, reg_name:LOOP_1_LOW_ALARM_SETPOINT                         , value:-226, value_human:{'degrees': -55.0}
 INFO	: register:0047, reg_name:LOOP_1_ALARM_HYSTERESIS                           , value:000a, value_human:{'degrees': 1.0}
 INFO	: register:0048, reg_name:LOOP_2_SETPOINT                                   , value:0000, value_human:{'degrees': 0.0}
-INFO	: register:0049, reg_name:LOOP_2_PROCESS_VALUE                              , value:0373, value_human:{'degrees': 88.0}
+INFO	: register:0049, reg_name:LOOP_2_PROCESS_VALUE                              , value:0207, value_human:{'degrees': 51.0}
 INFO	: register:004a, reg_name:LOOP_2_PERCENT_OUTPUT                             , value:0000, value_human:%out:0
 INFO	: register:004b, reg_name:LOOP_2_AUTOTUNE_STATUS                            , value:0000, value_human:autotune off
 INFO	: register:004c, reg_name:LOOP_2_UPPER_SETPOINT_LIMIT                       , value:03e8, value_human:{'degrees': 100.0}
@@ -1078,7 +929,7 @@ INFO	: register:0051, reg_name:LOOP_2_HIGH_ALARM_SETPOINT                       
 INFO	: register:0052, reg_name:LOOP_2_LOW_ALARM_SETPOINT                         , value:0000, value_human:{'degrees': 0.0}
 INFO	: register:0053, reg_name:LOOP_2_ALARM_HYSTERESIS                           , value:000a, value_human:{'degrees': 1.0}
 INFO	: register:0054, reg_name:LOOP_3_SETPOINT                                   , value:-032, value_human:{'degrees': -5.0}
-INFO	: register:0055, reg_name:LOOP_3_PROCESS_VALUE                              , value:0074, value_human:{'degrees': 11.0}
+INFO	: register:0055, reg_name:LOOP_3_PROCESS_VALUE                              , value:00e2, value_human:{'degrees': 22.0}
 INFO	: register:0056, reg_name:LOOP_3_PERCENT_OUTPUT                             , value:0000, value_human:%out:0
 INFO	: register:0057, reg_name:LOOP_3_AUTOTUNE_STATUS                            , value:0000, value_human:autotune off
 INFO	: register:0058, reg_name:LOOP_3_UPPER_SETPOINT_LIMIT                       , value:076c, value_human:{'degrees': 190.0}
@@ -1169,27 +1020,27 @@ INFO	: register:00ac, reg_name:MONITOR_INPUT_8_ALARM_OUTPUT_ASSIGNMENT          
 INFO	: register:00ad, reg_name:MONITOR_INPUT_8_HIGH_ALARM_SETPOINT               , value:7ff8, value_human:{'degrees': 3276.0}
 INFO	: register:00ae, reg_name:MONITOR_INPUT_8_LOW_ALARM_SETPOINT                , value:-7ff8, value_human:{'degrees': -3276.0}
 INFO	: register:00af, reg_name:MONITOR_INPUT_8_ALARM_HYSTERESIS                  , value:000a, value_human:{'degrees': 1.0}
-INFO	: register:00b0, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00b1, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00b2, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00b3, reg_name:PROFILE_STEP_TIME_ADJUSTMENT                      , value:0000, value_human:Non Readable Register
+INFO	: register:00b0, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00b1, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00b2, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00b3, reg_name:PROFILE_STEP_TIME_ADJUSTMENT                      , value:0000, value_human:('PROFILE_STEP_TIME_ADJUSTMENT', 'Non Readable Register')
 INFO	: register:00b4, reg_name:EZT570I_OFFLINE_DOWNLOAD_PROFILE                  , value:0000, value_human:Online
-INFO	: register:00b5, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00b6, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00b7, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00b8, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00b9, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00ba, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00bb, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00bc, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00bd, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00be, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00bf, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00c0, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00c1, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00c2, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00c3, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00c4, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00c5, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00c6, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
-INFO	: register:00c7, reg_name:UNDEFINED                                         , value:0000, value_human:NO MATCH
+INFO	: register:00b5, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00b6, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00b7, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00b8, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00b9, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00ba, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00bb, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00bc, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00bd, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00be, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00bf, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00c0, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00c1, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00c2, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00c3, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00c4, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00c5, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00c6, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')
+INFO	: register:00c7, reg_name:None                                              , value:0000, value_human:('UNDEFINED', 'NO MATCH')

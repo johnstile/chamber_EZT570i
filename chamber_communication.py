@@ -327,7 +327,7 @@ class ChamberCommunication(object):
 
             # Read steps from file
             profile_steps = self.read_profile_lines(fh, steps_tot)
-            self.log.info("Steps loaded:{}".format(len(profile_steps)))
+            self.log.debug("Steps loaded:{}".format(len(profile_steps)))
 
             register_start = 200  # First Register Address 0x00c8
             registers_to_write = 15  # data registers per packet
@@ -385,7 +385,7 @@ class ChamberCommunication(object):
 
             # Harvest the first line
             profile_header = self.read_profile_lines(fh, 1)
-            self.log.info("Profile Header:{}".format(profile_header))
+            self.log.debug("Profile Header:{}".format(profile_header))
 
             # Determine how many steps to read from file
             steps_tot = profile_header[0][9]
@@ -393,7 +393,7 @@ class ChamberCommunication(object):
 
             # Read steps from file
             profile_steps = self.read_profile_lines(fh, steps_tot)
-            self.log.info("Steps loaded:{}".format(len(profile_steps)))
+            self.log.debug("Steps loaded:{}".format(len(profile_steps)))
             # TODO: print each step in the profile
 
         # Convert profile header+steps into list of modbus packets
@@ -414,7 +414,7 @@ class ChamberCommunication(object):
         :param modebus_packed_profile:
         :return:
         """
-        self.log.info("Write profile to Modbus")
+        self.log.info("Load Profile")
 
         for i, packet in enumerate(modebus_packed_profile):
             self.log.info("--------------Line:{} --------------".format(i))
@@ -457,7 +457,7 @@ class ChamberCommunication(object):
         :param lines:
         :return:
         """
-        self.log.info("Read the profile file, converting to list of int")
+        self.log.debug("Read the profile file, converting to list of int")
         data_all_lines = []
         for i in xrange(lines):
             # Convert comma separated text to array of int, with 15 elements

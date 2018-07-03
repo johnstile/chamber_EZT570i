@@ -71,23 +71,36 @@ class Chamber(object):
         self.ccomm.print_profile(project_file)
 
     def start_profile(self, project_file):
+        download_state = self.get_register('EZT570I_OFFLINE_DOWNLOAD_PROFILE')
+        self.log.info("EZT570I_OFFLINE_DOWNLOAD_PROFILE:{}".format(download_state))
+        
         # Read the file and load into chamber
         self.ccomm.load_profile(project_file)
-       
-        # is the system ready to start?  0 = Yes
-        download_state = self.get_register('EZT570I_OFFLINE_DOWNLOAD_PROFILE')
-        if not download_state:
-            self.set_register('PROFILE_START_STEP', 1)
-            self.set_register('PROFILE_CONTROL_STATUS', 'run/resume')
-
-    def stop_chamber(self):
-        """Stop profile and turn off pump"""
-        self.set_register('PROFILE_CONTROL_STATUS', 'stop/all off')
+        
+        retry = 10 
+        while retry: 
+            retry -= 1 
+            time.sleep(1)
+            # is the system ready to start?  0 = Yes
+            download_state = self.get_register('EZT570I_OFFLINE_DOWNLOAD_PROFILE')
+            self.log.info("EZT570I_OFFLINE_DOWNLOAD_PROFILE:{}".format(download_state))
+            if download_state == "Online":
+                self.log.info("Start Profile")
+                self.set_register('PROFILE_START_STEP', 1)
+                self.set_register('PROFILE_CONTROL_STATUS', 'run/resume')
+                retry = 0
+                continue
+            else:
+                self.log.info("Waiting For Chamber Ready")
 
     def stop_profile(self):
         """Stop profile and set safe temp"""
         self.set_register('PROFILE_CONTROL_STATUS', 'stop/off')
         self.temperature = 25
+
+    def stop_chamber(self):
+        """Stop profile and turn off pump"""
+        self.set_register('PROFILE_CONTROL_STATUS', 'stop/all off')
 
     @property
     def light(self):
@@ -100,6 +113,15 @@ class Chamber(object):
         """
         self.log.info("Light {}".format(state))
         self.set_register('CHAMBER_LIGHT_CONTROL', state)
+
+    def toggle_light(self, toggles):
+        for i in range(toggles):
+            if i%2:
+                self.light = 'off'
+            else:
+                self.light = 'on'
+            self.log.info("Chamber light:{}".format(self.light))
+        time.sleep(0.5)
 
     @property
     def temperature(self):
@@ -150,43 +172,25 @@ def main():
     # Print the content of the profile
     chamber.print_profile(project_file)
     
-    # Start the Galaxy profile
+    log.info("Load and start profile:{}".format(project_file))
     chamber.start_profile(project_file)
+    chamber.toggle_light(2)
 
-    # Toggle light
-    for i in range(4):
-        if i%2:
-            chamber.light = 'off'
-        else:
-            chamber.light = 'on'
-        log.info("Chamber light:{}".format(chamber.light))
-
-    time.sleep(5)
-
-    # End current profile, leave chamber running at safe temp
-    chamber.stop_profile()
-    # Stop current profile, and stop chamber
-    #chamber.stop_chamber()
-
-    # Toggle light
-    for i in range(4):
-        if i%2:
-            chamber.light = 'off'
-        else:
-            chamber.light = 'on'
-        log.info("Chamber light:{}".format(chamber.light))
-
-
-    # Show current mode
-    log.info("Chamber Mode:{}".format(chamber.profile_control_status))
-
-    # Monitor chamber temp
     monitor_time = 10
+    log.info("Monitor chamber temp for {} seconds".format(monitor_time))
     end_time = time.time() + monitor_time
     while time.time() <= end_time:
         log.info("Chamber Temp:{}".format(chamber.temperature))
 
-    # List all the readable registers
+    chamber.toggle_light(2)
+
+    # NOTE:You can do only one of these 
+    # log.info("End current profile, leave chamber running at safe temp")
+    # chamber.stop_profile()
+    log.info("Stop current profile, and stop chamber")
+    chamber.stop_chamber()
+
+    log.info("List all the readable registers")
     chamber.print_all_registers()
 
 
