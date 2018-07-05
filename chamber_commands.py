@@ -9,7 +9,7 @@ import sys
 import struct
 import ctypes
 
-thismodule = sys.modules[__name__]
+this_module = sys.modules[__name__]
 
 # Dictionary map registers to function
 ctrl_registers = {
@@ -31,7 +31,7 @@ ctrl_registers = {
     'CONDENSATION_CONTROL': 15,  # r/w,
     'CONDENSATION_CONTROL_MONITOR_MODE': 16,  # r/w,
     'CONDENSATION_CONTROL_INPUT_SELECTION': 17,  # r/w,
-    'CONDENSATION_CONTROL_TEMPERATORE_RAMP_RATE_LIMIT': 18,  # r/w,
+    'CONDENSATION_CONTROL_TEMPERATURE_RAMP_RATE_LIMIT': 18,  # r/w,
     'CONDENSATION_CONTROL_DEUPOINT_LIMIT': 19,  # r,
     'CONDENSATION_CONTROL_DUEPOINT_ACTUAL': 20,  # r,
     'CHAMBER_LIGHT_CONTROL': 21,  # r/w,
@@ -257,7 +257,7 @@ state_get_loop_autotune_status = {
 
 state_get_loop_alarm_type = {
     0: 'Alarm Off',
-    3: 'Porcess High',
+    3: 'Process High',
     5: 'Process Low',
     7: 'Process Both',
     24: 'Deviation High',
@@ -358,7 +358,7 @@ def encode_set_value(reg_name, value):
     setter = "set_{}".format(reg_name.lower())
 
     try:
-        operation = getattr(thismodule, setter)
+        operation = getattr(this_module, setter)
     except AttributeError:
         return reg_name, "Non Writeable Register"
 
@@ -377,7 +377,7 @@ def decode_read_value(reg, value):
         return "UNDEFINED", "NO MATCH"
 
     try:
-        operation = getattr(thismodule, reg_name.lower())
+        operation = getattr(this_module, reg_name.lower())
     except AttributeError:
         return reg_name, "Non Readable Register"
 
@@ -433,7 +433,7 @@ def set_loop_autotune_status(value):
     for mode_state, mode_name in state_get_loop_autotune_status.iteritems():
         if mode_name == value:
             return mode_state
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def get_loop_alarm_type(value):
@@ -447,7 +447,7 @@ def set_loop_alarm_type(value):
     for mode_state, mode_name in state_get_loop_alarm_type.iteritems():
         if mode_name == value:
             return mode_state
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def get_monitor_input_alarm_type(value):
@@ -460,7 +460,7 @@ def set_monitor_input_alarm_type(value):
     for mode_state, mode_name in state_get_monitor_input_alarm_type.iteritems():
         if mode_name == value:
             return mode_state
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def get_signed_int_tens_decimal(value):
@@ -512,7 +512,7 @@ def set_loop_alarm_output_assignment(value):
     for mode_state, mode_name in state_get_loop_alarm_output_assignment.iteritems():
         if mode_name == value:
             return mode_state
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def get_loop_alarm_mode(value):
@@ -659,7 +659,7 @@ def set_power_recovery_mode(value):
     for mode_state, mode_name in state_power_recovery_mode.iteritems():
         if mode_name == value:
             return mode_state
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def power_out_time(value):
@@ -687,7 +687,7 @@ def set_defrost_operating_mode(value):
     for mode_state, mode_name in state_defrost_operating_mode.iteritems():
         if mode_name == value:
             return mode_state
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def auto_defrost_temperature_setpoint(value):
@@ -730,7 +730,7 @@ def set_product_control(value):
     for mode_state, mode_name in state_product_control.iteritems():
         if mode_name == value:
             return mode_state
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def product_control_upper_setpoint(value):
@@ -759,7 +759,7 @@ def set_condensation_control(value):
     for mode_state, mode_name in state_on_off.iteritems():
         if mode_name == value:
             return mode_state
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def condensation_control_monitor_mode(value):
@@ -772,7 +772,7 @@ def set_condensation_control_monitor_mode(value):
     for mode_state, mode_name in state_condensation_control_monitor_mode.iteritems():
         if mode_name == value:
             return mode_state
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def condensation_control_input_selection(value):
@@ -796,11 +796,11 @@ def set_condensation_control_input_selection(value):
     value
 
 
-def condensation_control_temperatore_ramp_rate_limit(value):
+def condensation_control_temperature_ramp_rate_limit(value):
     return get_signed_int_tens_decimal(value)
 
 
-def set_condensation_control_temperatore_ramp_rate_limit(value):
+def set_condensation_control_temperature_ramp_rate_limit(value):
     return set_signed_int_tens_decimal(value)
 
 
@@ -822,7 +822,7 @@ def set_chamber_light_control(value):
     for state_value, state_name in state_on_off.iteritems():
         if state_name == value:
             return state_value
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def chamber_manual_event_control(value):
@@ -853,7 +853,7 @@ def set_profile_control_status(value):
     for state_value, state_name in state_profile_control_status.iteritems():
         if state_name == value:
             return state_value
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def set_profile_advance_step(value):
@@ -865,7 +865,7 @@ def set_profile_advance_step(value):
     for state_value, state_name in state.iteritems():
         if state_name == value:
             return state_value
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def profile_name(value):
@@ -1065,7 +1065,7 @@ def set_alarm_acknowledge(value):
     for state_value, state_name in state.iteritems():
         if state_name == value:
             return state_value
-    return "NOMATCH"
+    return "NO MATCH"
 
 
 def ezt570i_alarm_status(value):
@@ -2115,14 +2115,14 @@ def profile_step_guaranteed_soak_wait(value):
         'Guaranteed Soak Loop 3': state_alarm[bit_array[2]],
         'Guaranteed Soak Loop 4': state_alarm[bit_array[3]],
         'Guaranteed Soak Loop 5': state_alarm[bit_array[4]],
-        'Digial Input 1 Wait For': state_alarm[bit_array[5]],
-        'Digial Input 2 Wait For': state_alarm[bit_array[6]],
-        'Digial Input 3 Wait For': state_alarm[bit_array[7]],
-        'Digial Input 4 Wait For': state_alarm[bit_array[8]],
-        'Digial Input 5 Wait For': state_alarm[bit_array[9]],
-        'Digial Input 6 Wait For': state_alarm[bit_array[10]],
-        'Digial Input 7 Wait For': state_alarm[bit_array[11]],
-        'Digial Input 8 Wait For': state_alarm[bit_array[12]],
+        'Digital Input 1 Wait For': state_alarm[bit_array[5]],
+        'Digital Input 2 Wait For': state_alarm[bit_array[6]],
+        'Digital Input 3 Wait For': state_alarm[bit_array[7]],
+        'Digital Input 4 Wait For': state_alarm[bit_array[8]],
+        'Digital Input 5 Wait For': state_alarm[bit_array[9]],
+        'Digital Input 6 Wait For': state_alarm[bit_array[10]],
+        'Digital Input 7 Wait For': state_alarm[bit_array[11]],
+        'Digital Input 8 Wait For': state_alarm[bit_array[12]],
     }
     return response
 
@@ -2168,7 +2168,7 @@ def profile_wait_for_monitor_event(value):
 
 def log_a_dict(my_dict):
     """Uniform printing of dictionaries to log file
-    Pads and indents for eaiser viewing
+    Pads and indents for easier viewing
     Draws dots from the key to the value
     sorts alphabetically"""
     response_buffer = ""
@@ -2193,8 +2193,8 @@ def log_a_dict(my_dict):
     return response_buffer
 
 
-# Profile Registersn
-ctrl_profile_headr_registers = {
+# Profile Registers
+ctrl_profile_header_registers = {
     'AUTOSTART': 200,  # w,
     'AUTOSTART_TIME_YY_MM': 201,  # w,
     'AUTOSTART_TIME_DAY_DOW': 202,  # w,
@@ -2246,7 +2246,7 @@ def get_profile_step_regs(step):
 class ProfileHeader(ctypes.BigEndianStructure):
     """Used for display purposes
     """
-    _pack_ = 1  # Do not align on word bountry, interfeers with debug logs
+    _pack_ = 1  # Do not align on word boundary, interferes with debug logs
     _fields_ = [
         ("autostart", ctypes.c_uint16),
         ("autostart_time_yy_mm", ctypes.c_uint16),
@@ -2307,7 +2307,7 @@ class ProfileHeader(ctypes.BigEndianStructure):
 class ProfileSteps(ctypes.BigEndianStructure):
     """Used for display purposes
     """
-    _pack_ = 1  # Do not align on word bountry, interfeers with debug logs
+    _pack_ = 1  # Do not align on word boundary, interferes with debug logs
     _fields_ = [
         ("time_hours", ctypes.c_int16),
         ("time_mm_ss", ctypes.c_int16),

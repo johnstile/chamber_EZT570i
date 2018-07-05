@@ -7,7 +7,7 @@ import ctypes  # to access binary packed data in calibration file
 
 
 def write_profile_factory(register_count):
-    """Use factory to return propertyly sized structure
+    """Use factory to return properly sized structure
      which depends on the register_count parameter"""
 
     class WriteProfileSend(ctypes.BigEndianStructure):
@@ -35,12 +35,12 @@ def write_profile_factory(register_count):
         crc high byte ____________________________________________________|
 
         """
-        _pack_ = 1  # Do not align on word bountry, interfeers with debug logs
+        _pack_ = 1  # Do not align on word boundary, interferes with debug logs
         _fields_ = [
             ("address",  ctypes.c_uint8),   # Address
             ("command",  ctypes.c_uint8),   # Command
             ("reg",      ctypes.c_uint16),  # Register
-            ("quantity", ctypes.c_uint16),  # Quanity of registers (15)
+            ("quantity", ctypes.c_uint16),  # Quantity of registers (15)
             ("dsize",    ctypes.c_uint8),   # Data size in bytes (30)
             ("data",     ctypes.c_int16 * register_count),  # Dynamic
             ("crc",      ctypes.c_uint16),  # 16bit crc
@@ -74,7 +74,7 @@ def write_profile_factory(register_count):
 
         def __str__(self):
             """human readable data"""
-            data_hexstring = binascii.hexlify(self.data)
+            data_hex_string = binascii.hexlify(self.data)
 
             return (
                 (
@@ -92,7 +92,7 @@ def write_profile_factory(register_count):
                     self.reg,
                     self.quantity,
                     self.dsize,
-                    data_hexstring,
+                    data_hex_string,
                     self.crc
                 )
             )
@@ -114,7 +114,7 @@ class WriteProfileResponse(ctypes.Structure):
         crc high byte _____________________________|
 
     """
-    _pack_ = 1  # Do not align on word bountry, interfeers with debug logs
+    _pack_ = 1  # Do not align on word boundary, interferes with debug logs
     _fields_ = [
         ("address",  ctypes.c_uint8),  # Address
         ("command",  ctypes.c_uint8),  # Command
@@ -179,14 +179,14 @@ class WriteRegister(ctypes.BigEndianStructure):
     crc low byte_________________________|  |
     crc high byte __________________________|
 
-    Example 1: Write register 60 (temperature set point) of address 01 to 20 derees.
+    Example 1: Write register 60 (temperature set point) of address 01 to 20 degrees.
     Sent: 01  06   00 3C   00 C8   48 50
 
     NOTE: might want to test with light, as it won't effect running test.
     --> r/w 21 (0x0015), Chamber Light Control, 0 = Light Off, 1=Light On
     Sent: 01  06   00 15   00 01  <crc>
     """
-    _pack_ = 1  # Do not align on word bountry, interfeers with debug logs
+    _pack_ = 1  # Do not align on word boundary, interferes with debug logs
     _fields_ = [
         ("address", ctypes.c_uint8),  # Address
         ("command", ctypes.c_uint8),  # Command
@@ -249,7 +249,7 @@ class ReadRegistersSend(ctypes.BigEndianStructure):
     Example 1: Read register 61 (chamber temperature) of controller at address 1.
     Sent:     01  03  00 3D 00 01  15 C6
     """
-    _pack_ = 1  # Do not align on word bountry, interfeers with debug logs
+    _pack_ = 1  # Do not align on word boundary, interferes with debug logs
     _fields_ = [
         ("address",  ctypes.c_uint8),   # Address
         ("command",  ctypes.c_uint8),   # Command
@@ -297,8 +297,8 @@ class ReadRegistersSend(ctypes.BigEndianStructure):
 
 
 def read_response_factory(quantity):
-    """Use factory to return propertyly sized structure
-     which depends on the byte_count paramater"""
+    """Use factory to return properly sized structure
+     which depends on the byte_count parameter"""
 
     class ReadRegisterReceive(ctypes.BigEndianStructure):
         """Read Register Receive Packet:
@@ -317,7 +317,7 @@ def read_response_factory(quantity):
         Example 1: Read register 61 (chamber temperature) of controller at address 1.
         Received: 01  03  02 00 EC     B9 C9
         """
-        _pack_ = 1  # Do not align on word bountry, interfeers with debug logs
+        _pack_ = 1  # Do not align on word boundary, interferes with debug logs
         _fields_ = [
             ("address",  ctypes.c_uint8),  # Address
             ("command",  ctypes.c_uint8),  # Command
@@ -351,10 +351,10 @@ def read_response_factory(quantity):
         def __str__(self):
             """human readable data"""
             #TODO: NEED BETTER WAY TO HANDLE DYNAMIC NATURE OF THIS
-            #data_hexstring = ''.join('{}'.format(b) for b in self.data)
-            #data_celcius = int(data_hexstring)/10.0
-            #data_hexstring = ''.join('{}'.format(b) for b in self.data)
-            data_hexstring = binascii.hexlify(self.data)
+            #data_hex_string = ''.join('{}'.format(b) for b in self.data)
+            #data_celcius = int(data_hex_string)/10.0
+            #data_hex_string = ''.join('{}'.format(b) for b in self.data)
+            data_hex_string = binascii.hexlify(self.data)
 
             return (
                 (
@@ -368,7 +368,7 @@ def read_response_factory(quantity):
                     self.address,
                     self.command,
                     self.number,
-                    data_hexstring,
+                    data_hex_string,
                     self.crc
                 )
             )

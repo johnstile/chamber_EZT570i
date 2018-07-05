@@ -7,11 +7,13 @@ from copy import copy
 import chamber_commands
 import chamber_communication
 
+
 class Chamber(object):
     """EZT570i Chamber functional interface"""
-    def __init__(self, log, comm_type, comm_params):
+
+    def __init__(self, log, comm_params):
         self.log = log
-        self.ccomm = chamber_communication.ChamberCommunication(comm_type, comm_params, log)
+        self.ccomm = chamber_communication.ChamberCommunication(comm_params, log)
 
     def connect(self):
         self.ccomm.connect()
@@ -73,13 +75,13 @@ class Chamber(object):
     def start_profile(self, project_file):
         download_state = self.get_register('EZT570I_OFFLINE_DOWNLOAD_PROFILE')
         self.log.info("EZT570I_OFFLINE_DOWNLOAD_PROFILE:{}".format(download_state))
-        
+
         # Read the file and load into chamber
         self.ccomm.load_profile(project_file)
-        
-        retry = 10 
-        while retry: 
-            retry -= 1 
+
+        retry = 10
+        while retry:
+            retry -= 1
             time.sleep(1)
             # is the system ready to start?  0 = Yes
             download_state = self.get_register('EZT570I_OFFLINE_DOWNLOAD_PROFILE')
@@ -116,7 +118,7 @@ class Chamber(object):
 
     def toggle_light(self, toggles):
         for i in range(toggles):
-            if i%2:
+            if i % 2:
                 self.light = 'off'
             else:
                 self.light = 'on'
@@ -125,8 +127,8 @@ class Chamber(object):
 
     @property
     def temperature(self):
-        dict = self.get_register('LOOP_1_PROCESS_VALUE')
-        return dict['degrees']
+        temp = self.get_register('LOOP_1_PROCESS_VALUE')
+        return temp['degrees']
 
     @temperature.setter
     def temperature(self, value):
@@ -134,8 +136,8 @@ class Chamber(object):
 
     @property
     def profile_control_status(self):
-        dict = self.get_register('PROFILE_CONTROL_STATUS')
-        return dict['mode']
+        status = self.get_register('PROFILE_CONTROL_STATUS')
+        return status['mode']
 
     @profile_control_status.setter
     def profile_control_status(self, state):
@@ -157,13 +159,13 @@ def main():
     log.debug("Initialized Logger")
 
     # Connect to the chamber
-    comm_type="network"
     comm_params = {
-        'net_port' : 50000,
-        'net_addr' : '192.168.0.36',
-        'net_timeout' : 20
+        'comm_type': "network",
+        'net_port': 50000,
+        'net_addr': '192.168.0.36',
+        'net_timeout': 20
     }
-    chamber = Chamber(log, comm_type, comm_params)
+    chamber = Chamber(log, comm_params)
     chamber.connect()
 
     # File recovered from the chambers compact flash
@@ -171,7 +173,7 @@ def main():
 
     # Print the content of the profile
     chamber.print_profile(project_file)
-    
+
     log.info("Load and start profile:{}".format(project_file))
     chamber.start_profile(project_file)
     chamber.toggle_light(2)
@@ -181,7 +183,6 @@ def main():
     end_time = time.time() + monitor_time
     while time.time() <= end_time:
         log.info("Chamber Temp:{}".format(chamber.temperature))
-
     chamber.toggle_light(2)
 
     # NOTE:You can do only one of these 

@@ -19,7 +19,7 @@ The Touch Screen on the front of the chamber is connected to a Windows CE comput
 The Windows CE computer saves the Profiles to compact flash.
 The Windows CE computer does not offer a network share to access the files.
 One must manually get the files from the computer.
-We store the files on a nework file share:
+We store the files on a network file share:
 \\fa.ms.msli.com\users\Engineering\Saturn\workspace\CSZ_CHAMBERS
 """
 
@@ -54,11 +54,15 @@ def int_or_float(s):
 class ChamberCommunication(object):
     """Communication with EZT570i"""
 
-    def __init__(self, comm_type='dummy', comm_params=None, log=None, chamber_number=1):
+    def __init__(self, comm_params=None, log=None, chamber_number=1):
         self.log = log
         self.comm = None
         self.crc = None
-        self.comm_type = comm_type
+        self.comm_params = comm_params
+        if 'comm_type' in self.comm_params:
+            self.comm_type = self.comm_params['comm_type']
+        else:
+            self.comm_type = 'dummy'
         if not comm_params:
             self.comm_params = {}
         else:
@@ -191,20 +195,20 @@ class ChamberCommunication(object):
             )
         )
 
-    def read_registers(self, register, quanity):
+    def read_registers(self, register, quantity):
         """
         Read the value of a series of registers
         :param register: Starting register
-        :param quanity: How many registers to read
+        :param quantity: How many registers to read
         """
         self.log.debug(
             (
                 "\n# =========================================\n"
-                "# Read Registers: reg:{}, quanity:{}\n"
+                "# Read Registers: reg:{}, quantity:{}\n"
                 "# ========================================="
             ).format(
                 register,
-                quanity
+                quantity
             )
         )
 
@@ -218,7 +222,7 @@ class ChamberCommunication(object):
             self.chamber_number,
             self.command['read_regs'],
             register,
-            quanity
+            quantity
         )
         self.log.debug(
             (
@@ -231,8 +235,8 @@ class ChamberCommunication(object):
         # Add CRC
         modbus_msg_as_bytes = self.crc.add_crc(packed_header)
 
-        data_hexstring = binascii.hexlify(modbus_msg_as_bytes)
-        self.log.debug("{:<20}:message + crc".format(data_hexstring))
+        data_hex_string = binascii.hexlify(modbus_msg_as_bytes)
+        self.log.debug("{:<20}:message + crc".format(data_hex_string))
 
         # load structure
         modbus_read_request = modbus_packets.ReadRegistersSend()
@@ -253,7 +257,7 @@ class ChamberCommunication(object):
         self.comm_func[self.comm_type]['write'](modbus_read_request)
 
         # Create response Structure sized for expected data
-        modbus_read_response = modbus_packets.read_response_factory(quanity)
+        modbus_read_response = modbus_packets.read_response_factory(quantity)
 
         # Read modbus response
         modbus_response = self.read_response(modbus_read_response)
@@ -273,8 +277,8 @@ class ChamberCommunication(object):
             self.crc.validate_crc(modbus_response_msg_as_bytes)
 
         # Convert string to bytes to string of hex
-        modebus_response_msg_as_hex = binascii.hexlify(modbus_response_msg_as_bytes)
-        self.log.debug("{:<20} : response msg".format(modebus_response_msg_as_hex))
+        modbus_response_msg_as_hex = binascii.hexlify(modbus_response_msg_as_bytes)
+        self.log.debug("{:<20} : response msg".format(modbus_response_msg_as_hex))
 
         # Populate the structure
         ctypes.memmove(
@@ -355,13 +359,10 @@ class ChamberCommunication(object):
                     )
                 )
 
-
         # Convert profile header+steps into list of modbus packets
-        modebus_packed_profile = self.profile_to_modbus_packets(
+        modbus_packed_profile = self.profile_to_modbus_packets(
             profile_header, profile_steps
         )
-
-
 
     def load_profile(self, project_file):
         """
@@ -397,26 +398,26 @@ class ChamberCommunication(object):
             # TODO: print each step in the profile
 
         # Convert profile header+steps into list of modbus packets
-        modebus_packed_profile = self.profile_to_modbus_packets(
+        modbus_packed_profile = self.profile_to_modbus_packets(
             profile_header, profile_steps
         )
 
         self.log.debug("Profile Packets")
-        for i in modebus_packed_profile:
+        for i in modbus_packed_profile:
             self.log.debug("Packet:{}".format(i))
 
         # Send over the wire
-        self.write_profile_to_modbus(modebus_packed_profile)
+        self.write_profile_to_modbus(modbus_packed_profile)
 
-    def write_profile_to_modbus(self, modebus_packed_profile):
+    def write_profile_to_modbus(self, modbus_packed_profile):
         """
         Write profile packets to modbus
-        :param modebus_packed_profile:
+        :param modbus_packed_profile:
         :return:
         """
         self.log.info("Load Profile")
 
-        for i, packet in enumerate(modebus_packed_profile):
+        for i, packet in enumerate(modbus_packed_profile):
             self.log.info("--------------Line:{} --------------".format(i))
             self.log.debug(
                 'WriteProfileSend:{}'.format(packet)
@@ -482,7 +483,7 @@ class ChamberCommunication(object):
         :return: list of WriteProfileSend
         """
         self.log.debug("Convert list of int to list of modbus packets")
-        modebus_packed_profile = []
+        modbus_packed_profile = []
 
         register_start = 200  # First Register Address 0x00c8
         registers_to_write = 15  # data registers per packet
@@ -551,9 +552,9 @@ class ChamberCommunication(object):
             # --------------------------------------
             # Append to list of packed data
             # --------------------------------------
-            modebus_packed_profile.append(modbus_profile_request)
+            modbus_packed_profile.append(modbus_profile_request)
 
-        return modebus_packed_profile
+        return modbus_packed_profile
 
     def create_com_network(self):
         """Network Setup"""
@@ -584,7 +585,7 @@ class ChamberCommunication(object):
 
     def create_com_dummy(self):
         """Dummy Setup"""
-        self.log.debug("Creating dummy communicaiton object")
+        self.log.debug("Creating dummy communication object")
         self.comm = ""
 
     def disconnect_com_network(self):
@@ -732,7 +733,8 @@ if __name__ == '__main__':
     import chamber_commands
     light_control = chamber_commands.ctrl_registers['CHAMBER_LIGHT_CONTROL']
 
-    chamber = ChamberCommunication(comm_type='dummy', log=log)
+    comm_params = {'comm_type': 'dummy'}
+    chamber = ChamberCommunication(comm_params, log=log)
     chamber.connect()
 
     # Chamber "Profile" file
@@ -741,11 +743,7 @@ if __name__ == '__main__':
     chamber.load_profile(project_file)
 
     state = {
-        'Off' : 0,
-        'On' : 1
+        'Off': 0,
+        'On': 1
     }
-    chamber.read_registers(light_control)
-    chamber.write_register(light_control, state['On'])
-    chamber.read_registers(light_control)
-    chamber.write_register(light_control, state['Off'])
-    chamber.read_registers(light_control)
+    chamber.toggle_light(2)
