@@ -108,9 +108,13 @@ class ChamberCommunication(object):
 
     def connect(self):
         if self.comm_type == 'network':
+            self.log.info("Network communicaiton with chamber")
             assert self.comm_params['net_port'] and self.comm_params['net_addr'] and self.comm_params['net_timeout']
         elif self.comm_type == 'serial':
+            self.log.info("Serial communicaiton with chamber")
             assert self.comm_params['serial_port']
+        else:
+            self.log.info("Dummy communicaiton with chamber")
 
         # Get communication
         self.comm_func[self.comm_type]['connect']()

@@ -73,6 +73,8 @@ class Chamber(object):
         self.ccomm.print_profile(project_file)
 
     def start_profile(self, project_file):
+        self.toggle_light(2)
+
         download_state = self.get_register('EZT570I_OFFLINE_DOWNLOAD_PROFILE')
         self.log.info("EZT570I_OFFLINE_DOWNLOAD_PROFILE:{}".format(download_state))
 
@@ -94,6 +96,8 @@ class Chamber(object):
                 continue
             else:
                 self.log.info("Waiting For Chamber Ready")
+
+        self.toggle_light(2)
 
     def stop_profile(self):
         """Stop profile and set safe temp"""
