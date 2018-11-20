@@ -6,7 +6,7 @@ Module for talking to the ESZ Cincinnati Sub-Zero (EZT-570i) chamber over Modbus
 The chamber speaks ModBus protocol over RS323 and RS485
 Over RS232 can control 1 chamber, 
 Over RS485 can control 31 chambers
-Over ethernet, use ethernet-to-serial adapter (by gridconnect.com GC-FB-430)
+Over ethernet, use ethernet-to-serial adapter (by gridconnect.com GC-BF-430)
 
 The chamber rs232 requires specific serial port settings:
  baud:9600
@@ -32,9 +32,9 @@ import itertools
 import serial  # for rs232 communication
 import logging  # for log facility
 import time
+import retrying
 
 import modbus_packets
-import chamber_commands
 
 
 def int_or_float(s):
@@ -50,6 +50,9 @@ def int_or_float(s):
         # protocol requires multiply by 10 and cast to int
         return int(float(s) * 10)
 
+def retry_if_crc_error(exception):
+    """Return True if we should retry (in this case when it's a CRC error), False otherwise"""
+    return isinstance(exception, CRCError)
 
 class ChamberCommunication(object):
     """Communication with EZT570i"""
@@ -399,7 +402,6 @@ class ChamberCommunication(object):
             # Read steps from file
             profile_steps = self.read_profile_lines(fh, steps_tot)
             self.log.debug("Steps loaded:{}".format(len(profile_steps)))
-            # TODO: print each step in the profile
 
         # Convert profile header+steps into list of modbus packets
         modbus_packed_profile = self.profile_to_modbus_packets(
@@ -423,37 +425,50 @@ class ChamberCommunication(object):
 
         for i, packet in enumerate(modbus_packed_profile):
             self.log.info("--------------Line:{} --------------".format(i))
-            self.log.debug(
-                'WriteProfileSend:{}'.format(packet)
-            )
-            # --------------------------------------
-            # Send request
-            # --------------------------------------
-            self.comm_func[self.comm_type]['write'](packet)
+            #---------------------------------------
+            # Write lines, and retry if a problem
+            #---------------------------------------
+            self.write_profile_lines(packet)
 
-            # --------------------------------------
-            # Mandatory wait between each write
-            # --------------------------------------
-            time.sleep(self.comm_wait_time)
-
-            # --------------------------------------
-            # Read response
-            # --------------------------------------
-
-            # Create response Structure sized for expected data
-            modbus_write_profile_response = modbus_packets.WriteProfileResponse()
-
-            modbus_response = self.read_response(modbus_write_profile_response)
-
-            # Print structure
-            self.log.debug(
-                (
-                    "WriteProfileResponse:{}"
-                ).format(
-                    modbus_response
-                )
-            )
         self.log.info("Profile upload complete")
+
+    @retrying.retry(
+        stop_max_delay=40000,
+        wait_fixed=200,
+        stop_max_attempt_number=200,
+        retry_on_exception=retry_if_crc_error
+    )
+    def write_profile_lines(self, packet):
+        self.log.debug(
+            'WriteProfileSend:{}'.format(packet)
+        )
+        # --------------------------------------
+        # Send request
+        # --------------------------------------
+        self.comm_func[self.comm_type]['write'](packet)
+
+        # --------------------------------------
+        # Mandatory wait between each write
+        # --------------------------------------
+        time.sleep(self.comm_wait_time)
+
+        # --------------------------------------
+        # Read response
+        # --------------------------------------
+
+        # Create response Structure sized for expected data
+        modbus_write_profile_response = modbus_packets.WriteProfileResponse()
+
+        modbus_response = self.read_response(modbus_write_profile_response)
+
+        # Print structure
+        self.log.debug(
+            (
+                "WriteProfileResponse:{}"
+            ).format(
+                modbus_response
+            )
+        )
 
     def read_profile_lines(self, fh, lines):
         """
