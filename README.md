@@ -1,17 +1,43 @@
 # chamber_EZT570i
-Python API to control EZT570i environmental chamber
+```.
+Python API to control the environmental chamber by Cincinnati Sub-Zero (CSZ) EZT-570i
+The environmental chamber has a RS-232 serial port on the back of the unit.
+This assumes a Serial To Ethernet Adapter is attached to the RS-232 port
+
+This can load and start a profile, and read and write individual registers
+```
+
+## Hardware:
+```.
+Environmental Chamber:
+  Cincinnati Sub-Zero (CSZ) MCB Climate chambers EZT-570i 
+
+Serial To Ethernet Adapter: 
+  www.gridconnect.com
+  Part Number: GC-BF-430
+  https://www.gridconnect.com/products/industrial-serial-rs232-ethernet-rs485-converter-bf-430
+  Listed price on that page: $62.50
+  SETTING: Parity=Even, Baud Rate=9600, Keep connection alive
+```
+
+## Quick Start:
+```.
+For demo edit chamber_control.py
+Set: comm_params with the IP of the Serial To Ethernet Adapter
+Run. 
+```
 
 
 # File summery:
 ```
  EZT570i User Communication Reference Manual revA.pdf:
-   Communication Reference
+   Defines the API for Communication
 
  GALAXY.txt:
-   Newer profile with 17 items per line
+   Newer profile from a newer chamber (with 17 items per line)
 
  GALILEO.txt:
-   Older profile with 15 items per line
+   Older profile from a older chamber (with 15 items per line)
 
  chamber_control.py:
    Most programs would create an instance of the top level class Chamber, found in this file.

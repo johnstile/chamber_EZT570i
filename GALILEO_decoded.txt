@@ -1,0 +1,763 @@
+INFO	: 
+# =========================================
+# PRINT PROFILE: GALILEO.txt
+# =========================================
+INFO	: Step:[[0, 0, 0, 0, 16711, 18764, 17740, 8271, 8224, 10, 0, 0, 0, 0, 0]]
+INFO	: Profile Header:
+200: Auto:Off
+201: Auto: {'month': 0, 'year': 2000}
+202: Auto: {'dow': 0, 'dom': 0}
+203: Auto: {'minutes': 0, 'hour': 0}
+204: PROF: {'chR': 'A', 'chL': 'G'}
+205: PROF: {'chR': 'I', 'chL': 'L'}
+206: PROF: {'chR': 'E', 'chL': 'L'}
+207: PROF: {'chR': ' ', 'chL': 'O'}
+208: PROF: {'chR': ' ', 'chL': ' '}
+209: Steps:10
+210: Loop: {'degrees': 0.0}
+211: Loop: {'degrees': 0.0}
+212: Loop: {'degrees': 0.0}
+213: Loop: {'degrees': 0.0}
+214: Loop: {'degrees': 0.0}
+
+INFO	: Steps in Profile:10
+INFO	: 
+=========================================
+Step:1
+=========================================
+215: time_hours:
+	hours................................... 0
+216: time_mm_ss:
+	minutes................................. 0
+	seconds................................. 3
+217: chamber_events:
+	Event 1................................. Alarm
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+218: customer_events:
+	Event 1................................. normal
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+219: guaranteed:
+	Digital Input 1 Wait For................ normal
+	Digital Input 2 Wait For................ normal
+	Digital Input 3 Wait For................ normal
+	Digital Input 4 Wait For................ normal
+	Digital Input 5 Wait For................ normal
+	Digital Input 6 Wait For................ normal
+	Digital Input 7 Wait For................ normal
+	Digital Input 8 Wait For................ normal
+	Guaranteed Soak Loop 1.................. normal
+	Guaranteed Soak Loop 2.................. normal
+	Guaranteed Soak Loop 3.................. normal
+	Guaranteed Soak Loop 4.................. normal
+	Guaranteed Soak Loop 5.................. normal
+220: wait_for_loop_events:
+	value................................... Wait for Disabled (no loop selected)
+221: wait_for_monitor_events:
+	value................................... Wait for Disabled (no input selected)
+222: wait_for_setpoint:
+	value................................... 320 Not specified in API
+223: jump_step_number:1
+224: jump_count:0
+225: target_setpoint_for_loop_1:
+	degrees................................. 0.0
+226: target_setpoint_for_loop_2:
+	degrees................................. 1.0
+227: target_setpoint_for_loop_3:
+	degrees................................. 0.0
+228: target_setpoint_for_loop_4:
+	degrees................................. 0.0
+229: target_setpoint_for_loop_5:
+	degrees................................. 0.0
+
+INFO	: 
+=========================================
+Step:2
+=========================================
+230: time_hours:
+	hours................................... 0
+231: time_mm_ss:
+	minutes................................. 30
+	seconds................................. 0
+232: chamber_events:
+	Event 1................................. Alarm
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+233: customer_events:
+	Event 1................................. normal
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+234: guaranteed:
+	Digital Input 1 Wait For................ normal
+	Digital Input 2 Wait For................ normal
+	Digital Input 3 Wait For................ normal
+	Digital Input 4 Wait For................ normal
+	Digital Input 5 Wait For................ normal
+	Digital Input 6 Wait For................ normal
+	Digital Input 7 Wait For................ normal
+	Digital Input 8 Wait For................ normal
+	Guaranteed Soak Loop 1.................. normal
+	Guaranteed Soak Loop 2.................. normal
+	Guaranteed Soak Loop 3.................. normal
+	Guaranteed Soak Loop 4.................. normal
+	Guaranteed Soak Loop 5.................. normal
+235: wait_for_loop_events:
+	value................................... Wait for Disabled (no loop selected)
+236: wait_for_monitor_events:
+	value................................... Wait for Disabled (no input selected)
+237: wait_for_setpoint:
+	value................................... 320 Not specified in API
+238: jump_step_number:1
+239: jump_count:0
+240: target_setpoint_for_loop_1:
+	degrees................................. 0.0
+241: target_setpoint_for_loop_2:
+	degrees................................. 1.0
+242: target_setpoint_for_loop_3:
+	degrees................................. 0.0
+243: target_setpoint_for_loop_4:
+	degrees................................. 0.0
+244: target_setpoint_for_loop_5:
+	degrees................................. 0.0
+
+INFO	: 
+=========================================
+Step:3
+=========================================
+245: time_hours:
+	hours................................... 0
+246: time_mm_ss:
+	minutes................................. 3
+	seconds................................. 0
+247: chamber_events:
+	Event 1................................. Alarm
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+248: customer_events:
+	Event 1................................. normal
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+249: guaranteed:
+	Digital Input 1 Wait For................ normal
+	Digital Input 2 Wait For................ normal
+	Digital Input 3 Wait For................ normal
+	Digital Input 4 Wait For................ normal
+	Digital Input 5 Wait For................ normal
+	Digital Input 6 Wait For................ normal
+	Digital Input 7 Wait For................ normal
+	Digital Input 8 Wait For................ normal
+	Guaranteed Soak Loop 1.................. normal
+	Guaranteed Soak Loop 2.................. normal
+	Guaranteed Soak Loop 3.................. normal
+	Guaranteed Soak Loop 4.................. normal
+	Guaranteed Soak Loop 5.................. normal
+250: wait_for_loop_events:
+	value................................... Wait for Disabled (no loop selected)
+251: wait_for_monitor_events:
+	value................................... Wait for Disabled (no input selected)
+252: wait_for_setpoint:
+	value................................... 320 Not specified in API
+253: jump_step_number:1
+254: jump_count:0
+255: target_setpoint_for_loop_1:
+	degrees................................. 5.0
+256: target_setpoint_for_loop_2:
+	degrees................................. 1.0
+257: target_setpoint_for_loop_3:
+	degrees................................. 0.0
+258: target_setpoint_for_loop_4:
+	degrees................................. 0.0
+259: target_setpoint_for_loop_5:
+	degrees................................. 0.0
+
+INFO	: 
+=========================================
+Step:4
+=========================================
+260: time_hours:
+	hours................................... 0
+261: time_mm_ss:
+	minutes................................. 30
+	seconds................................. 0
+262: chamber_events:
+	Event 1................................. Alarm
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+263: customer_events:
+	Event 1................................. normal
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+264: guaranteed:
+	Digital Input 1 Wait For................ normal
+	Digital Input 2 Wait For................ normal
+	Digital Input 3 Wait For................ normal
+	Digital Input 4 Wait For................ normal
+	Digital Input 5 Wait For................ normal
+	Digital Input 6 Wait For................ normal
+	Digital Input 7 Wait For................ normal
+	Digital Input 8 Wait For................ normal
+	Guaranteed Soak Loop 1.................. normal
+	Guaranteed Soak Loop 2.................. normal
+	Guaranteed Soak Loop 3.................. normal
+	Guaranteed Soak Loop 4.................. normal
+	Guaranteed Soak Loop 5.................. normal
+265: wait_for_loop_events:
+	value................................... Wait for Disabled (no loop selected)
+266: wait_for_monitor_events:
+	value................................... Wait for Disabled (no input selected)
+267: wait_for_setpoint:
+	value................................... 50 Not specified in API
+268: jump_step_number:1
+269: jump_count:0
+270: target_setpoint_for_loop_1:
+	degrees................................. 5.0
+271: target_setpoint_for_loop_2:
+	degrees................................. 1.0
+272: target_setpoint_for_loop_3:
+	degrees................................. 0.0
+273: target_setpoint_for_loop_4:
+	degrees................................. 0.0
+274: target_setpoint_for_loop_5:
+	degrees................................. 0.0
+
+INFO	: 
+=========================================
+Step:5
+=========================================
+275: time_hours:
+	hours................................... 0
+276: time_mm_ss:
+	minutes................................. 0
+	seconds................................. 3
+277: chamber_events:
+	Event 1................................. Alarm
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+278: customer_events:
+	Event 1................................. normal
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+279: guaranteed:
+	Digital Input 1 Wait For................ normal
+	Digital Input 2 Wait For................ normal
+	Digital Input 3 Wait For................ normal
+	Digital Input 4 Wait For................ normal
+	Digital Input 5 Wait For................ normal
+	Digital Input 6 Wait For................ normal
+	Digital Input 7 Wait For................ normal
+	Digital Input 8 Wait For................ normal
+	Guaranteed Soak Loop 1.................. normal
+	Guaranteed Soak Loop 2.................. normal
+	Guaranteed Soak Loop 3.................. normal
+	Guaranteed Soak Loop 4.................. normal
+	Guaranteed Soak Loop 5.................. normal
+280: wait_for_loop_events:
+	value................................... Wait for Disabled (no loop selected)
+281: wait_for_monitor_events:
+	value................................... Wait for Disabled (no input selected)
+282: wait_for_setpoint:
+	value................................... 320 Not specified in API
+283: jump_step_number:1
+284: jump_count:0
+285: target_setpoint_for_loop_1:
+	degrees................................. 0.0
+286: target_setpoint_for_loop_2:
+	degrees................................. 1.0
+287: target_setpoint_for_loop_3:
+	degrees................................. 0.0
+288: target_setpoint_for_loop_4:
+	degrees................................. 0.0
+289: target_setpoint_for_loop_5:
+	degrees................................. 0.0
+
+INFO	: 
+=========================================
+Step:6
+=========================================
+290: time_hours:
+	hours................................... 0
+291: time_mm_ss:
+	minutes................................. 30
+	seconds................................. 0
+292: chamber_events:
+	Event 1................................. Alarm
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+293: customer_events:
+	Event 1................................. normal
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+294: guaranteed:
+	Digital Input 1 Wait For................ normal
+	Digital Input 2 Wait For................ normal
+	Digital Input 3 Wait For................ normal
+	Digital Input 4 Wait For................ normal
+	Digital Input 5 Wait For................ normal
+	Digital Input 6 Wait For................ normal
+	Digital Input 7 Wait For................ normal
+	Digital Input 8 Wait For................ normal
+	Guaranteed Soak Loop 1.................. normal
+	Guaranteed Soak Loop 2.................. normal
+	Guaranteed Soak Loop 3.................. normal
+	Guaranteed Soak Loop 4.................. normal
+	Guaranteed Soak Loop 5.................. normal
+295: wait_for_loop_events:
+	value................................... Wait for Disabled (no loop selected)
+296: wait_for_monitor_events:
+	value................................... Wait for Disabled (no input selected)
+297: wait_for_setpoint:
+	value................................... 320 Not specified in API
+298: jump_step_number:1
+299: jump_count:0
+300: target_setpoint_for_loop_1:
+	degrees................................. 0.0
+301: target_setpoint_for_loop_2:
+	degrees................................. 1.0
+302: target_setpoint_for_loop_3:
+	degrees................................. 0.0
+303: target_setpoint_for_loop_4:
+	degrees................................. 0.0
+304: target_setpoint_for_loop_5:
+	degrees................................. 0.0
+
+INFO	: 
+=========================================
+Step:7
+=========================================
+305: time_hours:
+	hours................................... 0
+306: time_mm_ss:
+	minutes................................. 3
+	seconds................................. 0
+307: chamber_events:
+	Event 1................................. Alarm
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+308: customer_events:
+	Event 1................................. normal
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+309: guaranteed:
+	Digital Input 1 Wait For................ normal
+	Digital Input 2 Wait For................ normal
+	Digital Input 3 Wait For................ normal
+	Digital Input 4 Wait For................ normal
+	Digital Input 5 Wait For................ normal
+	Digital Input 6 Wait For................ normal
+	Digital Input 7 Wait For................ normal
+	Digital Input 8 Wait For................ normal
+	Guaranteed Soak Loop 1.................. normal
+	Guaranteed Soak Loop 2.................. normal
+	Guaranteed Soak Loop 3.................. normal
+	Guaranteed Soak Loop 4.................. normal
+	Guaranteed Soak Loop 5.................. normal
+310: wait_for_loop_events:
+	value................................... Wait for Disabled (no loop selected)
+311: wait_for_monitor_events:
+	value................................... Wait for Disabled (no input selected)
+312: wait_for_setpoint:
+	value................................... 320 Not specified in API
+313: jump_step_number:1
+314: jump_count:0
+315: target_setpoint_for_loop_1:
+	degrees................................. 5.0
+316: target_setpoint_for_loop_2:
+	degrees................................. 1.0
+317: target_setpoint_for_loop_3:
+	degrees................................. 0.0
+318: target_setpoint_for_loop_4:
+	degrees................................. 0.0
+319: target_setpoint_for_loop_5:
+	degrees................................. 0.0
+
+INFO	: 
+=========================================
+Step:8
+=========================================
+320: time_hours:
+	hours................................... 0
+321: time_mm_ss:
+	minutes................................. 30
+	seconds................................. 0
+322: chamber_events:
+	Event 1................................. Alarm
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+323: customer_events:
+	Event 1................................. normal
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+324: guaranteed:
+	Digital Input 1 Wait For................ normal
+	Digital Input 2 Wait For................ normal
+	Digital Input 3 Wait For................ normal
+	Digital Input 4 Wait For................ normal
+	Digital Input 5 Wait For................ normal
+	Digital Input 6 Wait For................ normal
+	Digital Input 7 Wait For................ normal
+	Digital Input 8 Wait For................ normal
+	Guaranteed Soak Loop 1.................. normal
+	Guaranteed Soak Loop 2.................. normal
+	Guaranteed Soak Loop 3.................. normal
+	Guaranteed Soak Loop 4.................. normal
+	Guaranteed Soak Loop 5.................. normal
+325: wait_for_loop_events:
+	value................................... Wait for Disabled (no loop selected)
+326: wait_for_monitor_events:
+	value................................... Wait for Disabled (no input selected)
+327: wait_for_setpoint:
+	value................................... 320 Not specified in API
+328: jump_step_number:1
+329: jump_count:0
+330: target_setpoint_for_loop_1:
+	degrees................................. 5.0
+331: target_setpoint_for_loop_2:
+	degrees................................. 1.0
+332: target_setpoint_for_loop_3:
+	degrees................................. 0.0
+333: target_setpoint_for_loop_4:
+	degrees................................. 0.0
+334: target_setpoint_for_loop_5:
+	degrees................................. 0.0
+
+INFO	: 
+=========================================
+Step:9
+=========================================
+335: time_hours:
+	hours................................... 0
+336: time_mm_ss:
+	minutes................................. 0
+	seconds................................. 1
+337: chamber_events:
+	Event 1................................. Alarm
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+338: customer_events:
+	Event 1................................. normal
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+339: guaranteed:
+	Digital Input 1 Wait For................ normal
+	Digital Input 2 Wait For................ normal
+	Digital Input 3 Wait For................ normal
+	Digital Input 4 Wait For................ normal
+	Digital Input 5 Wait For................ normal
+	Digital Input 6 Wait For................ normal
+	Digital Input 7 Wait For................ normal
+	Digital Input 8 Wait For................ normal
+	Guaranteed Soak Loop 1.................. normal
+	Guaranteed Soak Loop 2.................. normal
+	Guaranteed Soak Loop 3.................. normal
+	Guaranteed Soak Loop 4.................. normal
+	Guaranteed Soak Loop 5.................. normal
+340: wait_for_loop_events:
+	value................................... Wait for Disabled (no loop selected)
+341: wait_for_monitor_events:
+	value................................... Wait for Disabled (no input selected)
+342: wait_for_setpoint:
+	value................................... 320 Not specified in API
+343: jump_step_number:1
+344: jump_count:0
+345: target_setpoint_for_loop_1:
+	degrees................................. 2.0
+346: target_setpoint_for_loop_2:
+	degrees................................. 0.0
+347: target_setpoint_for_loop_3:
+	degrees................................. 0.0
+348: target_setpoint_for_loop_4:
+	degrees................................. 0.0
+349: target_setpoint_for_loop_5:
+	degrees................................. 0.0
+
+INFO	: 
+=========================================
+Step:10
+=========================================
+350: time_hours:
+	hours................................... 2
+351: time_mm_ss:
+	minutes................................. 0
+	seconds................................. 0
+352: chamber_events:
+	Event 1................................. Alarm
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+353: customer_events:
+	Event 1................................. normal
+	Event 10................................ normal
+	Event 11................................ normal
+	Event 12................................ normal
+	Event 13................................ normal
+	Event 14................................ normal
+	Event 15................................ normal
+	Event 3................................. normal
+	Event 4................................. normal
+	Event 5................................. normal
+	Event 6................................. normal
+	Event 7................................. normal
+	Event 8................................. normal
+	Event 9................................. normal
+	Event2.................................. normal
+354: guaranteed:
+	Digital Input 1 Wait For................ normal
+	Digital Input 2 Wait For................ normal
+	Digital Input 3 Wait For................ normal
+	Digital Input 4 Wait For................ normal
+	Digital Input 5 Wait For................ normal
+	Digital Input 6 Wait For................ normal
+	Digital Input 7 Wait For................ normal
+	Digital Input 8 Wait For................ normal
+	Guaranteed Soak Loop 1.................. normal
+	Guaranteed Soak Loop 2.................. normal
+	Guaranteed Soak Loop 3.................. normal
+	Guaranteed Soak Loop 4.................. normal
+	Guaranteed Soak Loop 5.................. normal
+355: wait_for_loop_events:
+	value................................... Wait for Disabled (no loop selected)
+356: wait_for_monitor_events:
+	value................................... Wait for Disabled (no input selected)
+357: wait_for_setpoint:
+	value................................... 320 Not specified in API
+358: jump_step_number:1
+359: jump_count:0
+360: target_setpoint_for_loop_1:
+	degrees................................. 2.0
+361: target_setpoint_for_loop_2:
+	degrees................................. 0.0
+362: target_setpoint_for_loop_3:
+	degrees................................. 0.0
+363: target_setpoint_for_loop_4:
+	degrees................................. 0.0
+364: target_setpoint_for_loop_5:
+	degrees................................. 0.0
+

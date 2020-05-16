@@ -35,7 +35,7 @@ import time
 import retrying
 
 import modbus_packets
-
+import chamber_commands
 
 def int_or_float(s):
     """

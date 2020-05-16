@@ -147,6 +147,64 @@ class Chamber(object):
     def profile_control_status(self, state):
         self.set_register('PROFILE_CONTROL_STATUS', state)
 
+    @property
+    def profile_current_step(self):
+        temp = self.get_register('PROFILE_CURRENT_STEP')
+        return temp['step']
+
+    @property
+    def alarms(self):
+        """Return decoded alarms for these 5 registers
+            EZT570I_ALARM_STATUS
+            INPUT_ALARM_STATUS
+            CHAMBER_ALARM_STATUS
+            REFRIGERATION_ALARM_STATUS
+            SYSTEM_STATUS_MONITOR
+        """
+        #alarm_names [
+        #   'EZT570I_ALARM_STATUS'
+        #   'INPUT_ALARM_STATUS'
+        #   'CHAMBER_ALARM_STATUS'
+        #   'REFRIGERATION_ALARM_STATUS'
+        #   'SYSTEM_STATUS_MONITOR'
+        #]      
+        #start_reg = chamber_commands.name_to_reg('EZT570I_ALARM_STATUS')
+        #values = self.ccomm.read_registers(start_reg, 5)
+        #self.log.debug("Modbus Response:{}".format(values))
+
+        alarms_read = {}
+        alarms_read['ezt570i']  = self.get_register('EZT570I_ALARM_STATUS')
+        alarms_read['input']  = self.get_register('INPUT_ALARM_STATUS')
+        alarms_read['chamber']  = self.get_register('CHAMBER_ALARM_STATUS')
+        alarms_read['refrig']  = self.get_register('REFRIGERATION_ALARM_STATUS')
+        alarms_read['system']  = self.get_register('SYSTEM_STATUS_MONITOR')
+         
+        self.log.debug("alarms:{}".format(alarms_read))
+        return alarms_read
+
+    def log_a_dict(self, header, my_dict):
+        """Uniform printing of dictinaries to log file
+        Pads and indents for eaiser viewing
+        Draws dots from the key to the value
+        sorts alphabetically"""
+        spacing = 40
+        delimiter = '.'
+        alignment = '<'
+        self.log.info("{header}".format(header="=" * (spacing + 20)))
+        self.log.info(header)
+        for k, v in sorted(my_dict.iteritems()):
+            self.log.info(
+                (
+                    "{key:{delimiter}{alignment}{spacing}} {value}"
+                ).format(
+                    key=k,
+                    delimiter=delimiter,
+                    alignment=alignment,
+                    spacing=spacing,
+                    value=v
+                )
+            )
+        return("{header}".format(header="=" * (spacing + 20)))
 
 def main():
     """Example of using this class
@@ -174,6 +232,7 @@ def main():
 
     # File recovered from the chambers compact flash
     project_file = 'GALAXY.txt'
+    #project_file = 'GALILEO.txt'
 
     # Print the content of the profile
     chamber.print_profile(project_file)
@@ -197,6 +256,13 @@ def main():
 
     log.info("List all the readable registers")
     chamber.print_all_registers()
+
+    # Print all alarm registers
+    for k,v in chamber.alarms.iteritems():
+        log.info(chamber.log_a_dict(k, v))
+    
+    #log.info("Profile Current Step:{}".format(chamber.profile_current_step))
+
 
 
 if __name__ == '__main__':
