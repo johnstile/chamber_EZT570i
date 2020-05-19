@@ -1,6 +1,7 @@
 # chamber_EZT570i
+[Cincinnati Sub-Zero (CSZ) EZT-570i](https://www.cszindustrial.com/Products.aspx) 
 ```.
-Python API to control the environmental chamber by [Cincinnati Sub-Zero (CSZ) EZT-570i](https://www.cszindustrial.com/Products.aspx) 
+Python API to control the environmental chamber by Cincinnati Sub-Zero (CSZ) EZT-570i
 The environmental chamber has a RS-232 serial port on the back of the unit.
 This assumes a Serial To Ethernet Adapter is attached to the RS-232 port
 
