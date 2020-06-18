@@ -1,4 +1,4 @@
-# chamber_EZT570i
+# Control chamber EZT570i over Modbus Protocol
 [Cincinnati Sub-Zero (CSZ) EZT-570i](https://www.cszindustrial.com/Products.aspx) 
 ```.
 Python API to control the environmental chamber by Cincinnati Sub-Zero (CSZ) EZT-570i
