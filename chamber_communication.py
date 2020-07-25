@@ -18,9 +18,10 @@ The chamber rs232 requires specific serial port settings:
 The Touch Screen on the front of the chamber is connected to a Windows CE computer.
 The Windows CE computer saves the Profiles to compact flash.
 The Windows CE computer does not offer a network share to access the files.
-One must manually get the files from the computer.
-We store the files on a network file share:
-\\fa.ms.msli.com\users\Engineering\Saturn\workspace\CSZ_CHAMBERS
+One must manually eject the CF and read the files.
+
+By John Stile At Meyer Sound Laboratories Inc.
+this is distributed under a MIT license, see LICENSE
 """
 
 import binascii  # for human readable access to bit packed data

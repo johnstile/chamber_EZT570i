@@ -3,6 +3,9 @@
 """EZT570i Command Register Reference
 Translate between packed modbus and register <=> unpacked human readable names, and values
 Not all registers have getters and setters.
+
+By John Stile At Meyer Sound Laboratories Inc.
+this is distributed under a MIT license, see LICENSE
 """
 
 import sys

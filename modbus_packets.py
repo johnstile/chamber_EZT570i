@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""EZT570i Modbus packets"""
+"""EZT570i Modbus packets
+By John Stile At Meyer Sound Laboratories Inc.
+this is distributed under a MIT license, see LICENSE
+"""
 
 import binascii  # for human readable access to bit packed data
 import ctypes  # to access binary packed data in calibration file

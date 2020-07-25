@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+This is what your program will instantiate to talk to the chamber 
+
+By John Stile At Meyer Sound Laboratories Inc.
+this is distributed under a MIT license, see LICENSE
+"""
+
 
 import logging
 import time
